@@ -1,6 +1,5 @@
 package com.hhp227.yu_minigroup;
 
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,11 +14,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         textView = findViewById(R.id.tv_test);
 
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        textView.setOnClickListener(v -> {
                 Toast.makeText(getApplicationContext(), "테스트", Toast.LENGTH_LONG).show();
             }
-        });
+        );
     }
 }
