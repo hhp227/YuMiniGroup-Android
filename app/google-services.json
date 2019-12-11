@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "874554905951",
+    "firebase_url": "https://yuminigroup.firebaseio.com",
+    "project_id": "yuminigroup",
+    "storage_bucket": "yuminigroup.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:874554905951:android:68665360d624da85e6d2ea",
+        "android_client_info": {
+          "package_name": "com.hhp227.yu_minigroup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "874554905951-p4rhef3arpo6rvi0p578usqr3ejcvqah.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hhp227.yu_minigroup",
+            "certificate_hash": "a75de5788ec806a02fd1235906cc475836ab1106"
+          }
+        },
+        {
+          "client_id": "874554905951-jck2njtf3rv70i8qoqpmslh2vchh4601.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZh3JPhCD9Z285WEPMlQaQczR5dJ2bWc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "874554905951-jck2njtf3rv70i8qoqpmslh2vchh4601.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
