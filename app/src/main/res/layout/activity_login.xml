@@ -30,6 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:hint="ID"
+                android:inputType="number"
                 android:singleLine="true">
             <requestFocus/>
 
@@ -91,7 +92,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/image_view"
             android:layout_centerHorizontal="true"
-            android:text="영남대 eClass소셜네트워크"
+            android:text="영남대 LMS소셜네트워크"
             android:textSize="15dp"
             android:textStyle="italic"/>
 

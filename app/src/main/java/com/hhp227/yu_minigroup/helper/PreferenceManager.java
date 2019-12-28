@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import com.hhp227.yu_minigroup.dto.User;
 
+import java.util.Set;
+
 public class PreferenceManager {
     private static final String TAG = "세션메니져";
 
@@ -14,6 +16,7 @@ public class PreferenceManager {
     private static final String KEY_USER_ID = "usr_id";
     private static final String KEY_USER_PASSWORD = "usr_pwd";
     private static final String KEY_COOKIE = "cookie";
+    private static final String KEY_SSO_TOKEN = "ssotoken";
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private Context context;
@@ -43,6 +46,15 @@ public class PreferenceManager {
             return user;
         }
         return null;
+    }
+
+    public void storeToken(String token) {
+        editor.putString(KEY_SSO_TOKEN, token);
+        editor.commit();
+    }
+
+    public String getToken() {
+        return sharedPreferences.getString(KEY_SSO_TOKEN, null);
     }
 
     public void storeCookie(String cookie) {
