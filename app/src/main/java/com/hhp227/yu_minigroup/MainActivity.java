@@ -1,6 +1,10 @@
 package com.hhp227.yu_minigroup;
 
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.core.view.GravityCompat;
@@ -16,7 +20,6 @@ import com.hhp227.yu_minigroup.helper.PreferenceManager;
 public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private PreferenceManager preferenceManager;
-    private TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +38,17 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.nav_menu2:
                     fragment = new UnivNoticeFragment();
                     break;
+                case R.id.nav_menu3:
+                    android.content.ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    clipboard.setText(getIntent().getStringExtra("cookie"));
+                    //Toast.makeText(getApplicationContext(), "클립보드에 복사되었습니다!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), getIntent().getStringExtra("response"), Toast.LENGTH_LONG).show();
+                    break;
+                case R.id.nav_menu4:
+                    preferenceManager.clear();
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                    finish();
             }
             if (fragment != null) {
                 FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -44,21 +58,7 @@ public class MainActivity extends AppCompatActivity {
             drawerLayout.closeDrawer(GravityCompat.START);
             return true;
         });
-        //textView = findViewById(R.id.tv_test);
         preferenceManager = AppController.getInstance().getPreferenceManager();
-        //textView.setText(getIntent().getStringExtra("response") + " | 테스트");
-        /*textView.setOnClickListener(v -> {
-            preferenceManager.clear();
-            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        });
-        textView.setOnLongClickListener(v -> {
-            android.content.ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            clipboard.setText(textView.getText());
-            Toast.makeText(getApplicationContext(), "클립보드에 복사되었습니다!", Toast.LENGTH_SHORT).show();
-            return true;
-        });*/
     }
 
     @Override

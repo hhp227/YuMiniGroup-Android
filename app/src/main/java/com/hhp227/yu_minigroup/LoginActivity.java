@@ -1,6 +1,7 @@
 package com.hhp227.yu_minigroup;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -69,11 +70,7 @@ public class LoginActivity extends AppCompatActivity {
                             loginSSOyuPortal(id, password);
                         } else
                             Toast.makeText(getApplicationContext(), "로그인 실패", Toast.LENGTH_LONG).show();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (SAXException e) {
-                        e.printStackTrace();
-                    } catch (ParserConfigurationException e) {
+                    } catch (IOException | SAXException | ParserConfigurationException e) {
                         e.printStackTrace();
                     }
                     progressBar.setVisibility(View.GONE);
@@ -169,6 +166,7 @@ public class LoginActivity extends AppCompatActivity {
             // 화면이동
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.putExtra("response", response);
+            intent.putExtra("cookie", cookie);
             startActivity(intent);
             finish();
         }, error -> {
@@ -177,6 +175,7 @@ public class LoginActivity extends AppCompatActivity {
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                Log.e("테스트", response.allHeaders.toString());
                 return super.parseNetworkResponse(response);
             }
 
@@ -186,6 +185,8 @@ public class LoginActivity extends AppCompatActivity {
                 headers.put("Cookie", cookie);
                 return headers;
             }
+
+
         };
         AppController.getInstance().addToRequestQueue(stringRequest, tagStringReq);
     }
