@@ -166,6 +166,7 @@ public class LoginActivity extends AppCompatActivity {
             // 화면이동
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.putExtra("response", response);
+            // 리퀘스트 헤더에 SESSION_IMAX값이 있음
             intent.putExtra("cookie", cookie);
             startActivity(intent);
             finish();
