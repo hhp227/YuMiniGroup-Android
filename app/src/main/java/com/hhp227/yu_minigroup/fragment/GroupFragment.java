@@ -14,8 +14,8 @@ import com.hhp227.yu_minigroup.R;
 
 public class GroupFragment extends Fragment {
     private AppCompatActivity activity;
-    private Toolbar toolbar;
     private DrawerLayout drawerLayout;
+    private Toolbar toolbar;
 
     public GroupFragment() {
     }

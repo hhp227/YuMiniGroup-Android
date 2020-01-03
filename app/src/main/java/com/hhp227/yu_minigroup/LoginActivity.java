@@ -14,6 +14,7 @@ import com.android.volley.toolbox.*;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.User;
+import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -34,6 +35,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "로그인화면";
     private Button login;
     private EditText inputId, inputPassword;
+    private PreferenceManager preferenceManager;
     private ProgressBar progressBar;
 
     @Override
@@ -44,9 +46,10 @@ public class LoginActivity extends AppCompatActivity {
         inputId = findViewById(R.id.et_id);
         inputPassword = findViewById(R.id.et_password);
         progressBar = findViewById(R.id.pb_login);
+        preferenceManager = AppController.getInstance().getPreferenceManager();
 
         // 사용자가 이미 로그인되어있는지 아닌지 확인
-        if (AppController.getInstance().getPreferenceManager().getUser() != null) {
+        if (preferenceManager.getUser() != null) {
             startActivity(new Intent(this, SplashActivity.class));
             finish();
         }
@@ -65,15 +68,15 @@ public class LoginActivity extends AppCompatActivity {
                         Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new ByteArrayInputStream(response.getBytes("utf-8"))));
                         String code = getTextNodeValue(((Element) document.getElementsByTagName("neo").item(0)).getElementsByTagName("code").item(0));
                         if (code.equals("00")) {
-                            //Toast.makeText(LoginActivity.this, "로그인 성공", Toast.LENGTH_LONG).show();
-
-                            loginSSOyuPortal(id, password);
-                        } else
+                            Toast.makeText(LoginActivity.this, "로그인 성공", Toast.LENGTH_LONG).show();
+                            loginLMS(id, password, null, null);
+                        } else {
                             Toast.makeText(getApplicationContext(), "로그인 실패", Toast.LENGTH_LONG).show();
+                            progressBar.setVisibility(View.GONE);
+                        }
                     } catch (IOException | SAXException | ParserConfigurationException e) {
                         e.printStackTrace();
                     }
-                    progressBar.setVisibility(View.GONE);
                 }, error -> {
                     VolleyLog.e(TAG, "로그인 에러 : " + error.getMessage());
                     Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
@@ -111,14 +114,11 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void loginSSOyuPortal(String id, String password) {
+    private void loginSSOyuPortal(String id, String password, String cookie) {
         String tagStringReq = "req_login_SSO";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, "https://portal.yu.ac.kr/sso/login_process.jsp", response -> {
             VolleyLog.d(TAG, "로그인 응답 : " + response);
-            User user = new User(id, password);
-
-            AppController.getInstance().getPreferenceManager().storeUser(user);
-            progressBar.setVisibility(View.GONE);
+            preferenceManager.storeCookie(cookie);
         }, error -> {
             VolleyLog.e(TAG, "로그인 에러 : " + error.getMessage());
             Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
@@ -128,9 +128,8 @@ public class LoginActivity extends AppCompatActivity {
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
                 List<Header> headers = response.allHeaders;
                 for (Header header : headers)
-                    if (header.getName().equals("Set-Cookie") && header.getValue().contains("ssotoken")) {
-                        loginLMS(id, password, header.getValue());
-                    }
+                    if (header.getName().equals("Set-Cookie") && header.getValue().contains("ssotoken"))
+                        loginLMS(id, password, header.getValue(), cookie);
                 return super.parseNetworkResponse(response);
             }
 
@@ -144,7 +143,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put("cReturn_Url", "http://lms.yu.ac.kr/ilos/lo/login_sso.acl");
+                params.put("cReturn_Url", EndPoint.LOGIN_LMS);
                 params.put("type", "lms"); // 필수
                 params.put("p", "20112030550005B055003090F570256534A010F47070C4556045E18020750110"); // 필수
                 params.put("login_gb", "0"); // 필수
@@ -156,50 +155,51 @@ public class LoginActivity extends AppCompatActivity {
         AppController.getInstance().addToRequestQueue(stringRequest, tagStringReq);
     }
 
-    private void loginLMS(String id, String password, String cookie) {
+    private void loginLMS(String id, String password, String ssoToken, String lmsToken) {
         String tagStringReq = "req_login_LMS";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, "http://lms.yu.ac.kr/ilos/m/lo/login_sso.acl", response -> {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.LOGIN_LMS, response -> {
             VolleyLog.d(TAG, "로그인 응답 : " + response);
-            User user = new User(id, password);
+            if (ssoToken != null) {
+                User user = new User(id, password);
 
-            AppController.getInstance().getPreferenceManager().storeUser(user);
-            // 화면이동
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            intent.putExtra("response", response);
-            // 리퀘스트 헤더에 SESSION_IMAX값이 있음
-            intent.putExtra("cookie", cookie);
-            startActivity(intent);
-            finish();
+                preferenceManager.storeUser(user);
+                // 화면이동
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                intent.putExtra("response", lmsToken + "; " + ssoToken);
+                startActivity(intent);
+                finish();
+                progressBar.setVisibility(View.GONE);
+            }
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
-            //Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+            progressBar.setVisibility(View.GONE);
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
                 Log.e("테스트", response.allHeaders.toString());
+                for (Header header : response.allHeaders)
+                    if (header.getName().equals("Set-Cookie") && header.getValue().contains("SESSION_IMAX"))
+                        loginSSOyuPortal(id, password, header.getValue());
                 return super.parseNetworkResponse(response);
             }
 
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
-                headers.put("Cookie", cookie);
+                // 리퀘스트 헤더에 SESSION_IMAX값이 있음
+                headers.put("Cookie", lmsToken != null ? lmsToken + "; " + ssoToken : null);
                 return headers;
             }
-
-
         };
         AppController.getInstance().addToRequestQueue(stringRequest, tagStringReq);
     }
 
-    private final String getTextNodeValue(Node node) {
-        if (node != null && node.hasChildNodes()) {
-            for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
-                if (child.getNodeType() == 3) {
+    private String getTextNodeValue(Node node) {
+        if (node != null && node.hasChildNodes())
+            for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
+                if (child.getNodeType() == 3)
                     return child.getNodeValue();
-                }
-            }
-        }
         return "";
     }
 
