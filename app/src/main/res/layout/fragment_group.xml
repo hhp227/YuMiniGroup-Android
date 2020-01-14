@@ -85,10 +85,33 @@
 
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_group"
-            android:layout_below="@id/ll_group_button"
+    <LinearLayout
+            android:id="@+id/ll_div_line"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="1px"
+            android:layout_below="@id/ll_group_button"
+            android:orientation="vertical"
+            android:background="@android:color/darker_gray"/>
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/ll_div_line">
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/srl_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="7dp"
+                    android:paddingRight="7dp"/>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    </RelativeLayout>
 
 </RelativeLayout>

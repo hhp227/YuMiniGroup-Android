@@ -3,7 +3,6 @@ package com.hhp227.yu_minigroup;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
