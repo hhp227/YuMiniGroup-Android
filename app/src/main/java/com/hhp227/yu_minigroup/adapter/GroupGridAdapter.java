@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 
@@ -32,6 +34,7 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.View
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         GroupItem groupItem = mGroupItemValues.get(position);
+        Glide.with(mContext).load(groupItem.getImage()).transition(new DrawableTransitionOptions().crossFade(150)).into(holder.groupImage);
         holder.groupName.setText(groupItem.getName());
         holder.more.setOnClickListener(v -> {
             PopupMenu popupMenu = new PopupMenu(mContext, v);
@@ -64,7 +67,8 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.View
 
         public ViewHolder(View itemView) {
             super(itemView);
-            groupName = itemView.findViewById(R.id.title);
+            groupImage = itemView.findViewById(R.id.iv_group_image);
+            groupName = itemView.findViewById(R.id.tv_title);
             more = itemView.findViewById(R.id.iv_more);
         }
     }

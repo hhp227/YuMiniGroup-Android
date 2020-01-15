@@ -15,48 +15,47 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="5dp"
             android:elevation="3dp"
-            card_view:cardCornerRadius="3dp">
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            card_view:cardCornerRadius="4dp">
 
         <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
             <ImageView
-                    android:id="@+id/thumbnail"
+                    android:id="@+id/iv_group_image"
                     android:layout_width="match_parent"
-                    android:layout_height="160dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
+                    android:layout_height="100dp"
+                    android:src="@drawable/ic_launcher_background"
                     android:scaleType="fitXY"/>
 
-            <TextView
-                    android:id="@+id/title"
+            <RelativeLayout
+                    android:layout_below="@id/iv_group_image"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/thumbnail"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:paddingTop="10dp"
-                    android:textColor="#4c4c4c"
-                    android:text="제목"
-                    android:textSize="15dp"/>
+                    android:layout_height="65dp"
+                    android:layout_marginBottom="0dp">
 
-            <TextView
-                    android:id="@+id/count"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/title"
-                    android:paddingBottom="5dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:textSize="12dp"/>
+                <TextView
+                        android:id="@+id/tv_title"
+                        android:textSize="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingTop="10dp"
+                        android:textColor="#4c4c4c"
+                        android:text="제목"/>
+
+            </RelativeLayout>
 
             <ImageView
                     android:id="@+id/iv_more"
                     android:layout_width="16dp"
                     android:layout_height="24dp"
                     android:layout_alignParentRight="true"
-                    android:layout_below="@id/thumbnail"
+                    android:layout_below="@id/iv_group_image"
                     android:layout_marginTop="10dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_more_vert_gray_24dp"/>

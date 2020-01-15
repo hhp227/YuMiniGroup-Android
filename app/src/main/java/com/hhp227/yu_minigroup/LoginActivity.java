@@ -168,7 +168,6 @@ public class LoginActivity extends AppCompatActivity {
                 preferenceManager.storeUser(user);
                 // 화면이동
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                intent.putExtra("response", lmsToken + "; " + ssoToken);
                 startActivity(intent);
                 finish();
                 progressBar.setVisibility(View.GONE);

@@ -38,10 +38,6 @@ public class MainActivity extends AppCompatActivity {
                     fragment = new UnivNoticeFragment();
                     break;
                 case R.id.nav_menu3:
-                    android.content.ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    clipboard.setText(getIntent().getStringExtra("response"));
-                    //Toast.makeText(getApplicationContext(), "클립보드에 복사되었습니다!", Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getApplicationContext(), getIntent().getStringExtra("response"), Toast.LENGTH_LONG).show();
                     break;
                 case R.id.nav_menu4:
                     preferenceManager.clear();
