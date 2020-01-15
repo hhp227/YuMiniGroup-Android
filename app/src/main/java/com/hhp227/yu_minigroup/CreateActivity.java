@@ -95,7 +95,6 @@ public class CreateActivity extends AppCompatActivity {
 
                 } else {
                     groupTitle.setError(title.isEmpty() ? "그룹명을 입력하세요." : null);
-                    groupDescription.setError(description.isEmpty() ? "그룹설명을 입력하세요." : null);
                 }
         }
         return super.onOptionsItemSelected(item);

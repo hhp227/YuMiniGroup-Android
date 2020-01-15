@@ -1,11 +1,13 @@
 package com.hhp227.yu_minigroup.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -40,6 +42,7 @@ import java.util.Map;
 public class GroupFragment extends Fragment {
     public static final int CREATE_CODE = 10;
     public static final int REGISTER_CODE = 20;
+    public static final int UPDATE_GROUP = 30;
     private static final String TAG = GroupFragment.class.getSimpleName();
     private AppCompatActivity mActivity;
     private DrawerLayout drawerLayout;
@@ -68,7 +71,16 @@ public class GroupFragment extends Fragment {
         swipeRefreshLayout = rootView.findViewById(R.id.srl_group);
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
-        mGroupGridAdapter = new GroupGridAdapter(getContext(), mGroupItemKeys, mGroupItemValues);
+        mGroupGridAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues, (v, position) -> {
+            GroupItem groupItem = mGroupItemValues.get(position);
+            Intent intent = new Intent(getContext(), GroupActivity.class);
+            intent.putExtra("admin", groupItem.isAdmin());
+            intent.putExtra("grp_id", groupItem.getId());
+            intent.putExtra("grp_nm", groupItem.getName());
+            intent.putExtra("position", position);
+            intent.putExtra("key", mGroupGridAdapter.getKey(position));
+            startActivityForResult(intent, UPDATE_GROUP);
+        });
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mProgressBar = rootView.findViewById(R.id.pb_group);
         mRelativeLayout = rootView.findViewById(R.id.rl_group);
@@ -108,6 +120,14 @@ public class GroupFragment extends Fragment {
         fetchDataTask();
 
         return rootView;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == UPDATE_GROUP && resultCode == Activity.RESULT_OK) {
+            Toast.makeText(getContext(), "ok", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void setDrawerToggle() {

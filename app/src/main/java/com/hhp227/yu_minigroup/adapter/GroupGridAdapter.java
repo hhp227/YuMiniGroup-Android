@@ -18,11 +18,13 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.View
     private Context mContext;
     private List<String> mGroupItemKeys;
     private List<GroupItem> mGroupItemValues;
+    private OnItemClickListener mOnItemClickListener;
 
-    public GroupGridAdapter(Context mContext, List<String> mGroupItemKeys, List<GroupItem> mGroupItemValues) {
+    public GroupGridAdapter(Context mContext, List<String> mGroupItemKeys, List<GroupItem> mGroupItemValues, OnItemClickListener mOnItemClickListener) {
         this.mContext = mContext;
         this.mGroupItemKeys = mGroupItemKeys;
         this.mGroupItemValues = mGroupItemValues;
+        this.mOnItemClickListener = mOnItemClickListener;
     }
 
     @Override
@@ -34,6 +36,10 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.View
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         GroupItem groupItem = mGroupItemValues.get(position);
+        holder.groupLayout.setOnClickListener(v -> {
+            if (mOnItemClickListener != null)
+                mOnItemClickListener.onItemClick(v, position);
+        });
         Glide.with(mContext).load(groupItem.getImage()).transition(new DrawableTransitionOptions().crossFade(150)).into(holder.groupImage);
         holder.groupName.setText(groupItem.getName());
         holder.more.setOnClickListener(v -> {
@@ -60,13 +66,22 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.View
         return mGroupItemValues.size();
     }
 
+    public String getKey(int position) {
+        return mGroupItemKeys.get(position);
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(View v, int position);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView groupImage, more;
-        private LinearLayout groupLayout;
+        private RelativeLayout groupLayout;
         private TextView groupName;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            groupLayout = itemView.findViewById(R.id.rl_group);
             groupImage = itemView.findViewById(R.id.iv_group_image);
             groupName = itemView.findViewById(R.id.tv_title);
             more = itemView.findViewById(R.id.iv_more);
