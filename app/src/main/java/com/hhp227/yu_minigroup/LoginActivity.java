@@ -34,34 +34,33 @@ import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "로그인화면";
-    private Button login;
-    private EditText inputId, inputPassword;
-    private PreferenceManager preferenceManager;
-    private ProgressBar progressBar;
+    private EditText mInputId, mInputPassword;
+    private PreferenceManager mPreferenceManager;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        login = findViewById(R.id.b_login);
-        inputId = findViewById(R.id.et_id);
-        inputPassword = findViewById(R.id.et_password);
-        progressBar = findViewById(R.id.pb_login);
-        preferenceManager = AppController.getInstance().getPreferenceManager();
+        Button login = findViewById(R.id.b_login);
+        mInputId = findViewById(R.id.et_id);
+        mInputPassword = findViewById(R.id.et_password);
+        mProgressBar = findViewById(R.id.pb_login);
+        mPreferenceManager = AppController.getInstance().getPreferenceManager();
 
         // 사용자가 이미 로그인되어있는지 아닌지 확인
-        if (preferenceManager.getUser() != null) {
+        if (mPreferenceManager.getUser() != null) {
             startActivity(new Intent(this, SplashActivity.class));
             finish();
         }
 
         // 로그인 버튼 클릭 이벤트
         login.setOnClickListener(v -> {
-            String id = inputId.getText().toString();
-            String password = inputPassword.getText().toString();
+            String id = mInputId.getText().toString();
+            String password = mInputPassword.getText().toString();
 
             if (!id.isEmpty() && !password.isEmpty()) {
-                progressBar.setVisibility(View.VISIBLE);
+                showProgressBar();
 
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.LOGIN, response -> {
                     VolleyLog.d(TAG, "로그인 응답 : " + response);
@@ -73,7 +72,7 @@ public class LoginActivity extends AppCompatActivity {
                             loginLMS(id, password, null, null);
                         } else {
                             Toast.makeText(getApplicationContext(), "로그인 실패", Toast.LENGTH_LONG).show();
-                            progressBar.setVisibility(View.GONE);
+                            hideProgressBar();
                         }
                     } catch (IOException | SAXException | ParserConfigurationException e) {
                         e.printStackTrace();
@@ -81,7 +80,7 @@ public class LoginActivity extends AppCompatActivity {
                 }, error -> {
                     VolleyLog.e(TAG, "로그인 에러 : " + error.getMessage());
                     Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
-                    progressBar.setVisibility(View.GONE);
+                    hideProgressBar();
                 }) {
                     @Override
                     public byte[] getBody() {
@@ -111,8 +110,8 @@ public class LoginActivity extends AppCompatActivity {
                 };
                 AppController.getInstance().addToRequestQueue(stringRequest);
             } else {
-                inputId.setError(id.isEmpty() ? "아이디를 입력하세요." : null);
-                inputPassword.setError(password.isEmpty() ? "패스워드를 입력하세요." : null);
+                mInputId.setError(id.isEmpty() ? "아이디를 입력하세요." : null);
+                mInputPassword.setError(password.isEmpty() ? "패스워드를 입력하세요." : null);
             }
         });
     }
@@ -121,11 +120,11 @@ public class LoginActivity extends AppCompatActivity {
         String tagStringReq = "req_login_SSO";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, "https://portal.yu.ac.kr/sso/login_process.jsp", response -> {
             VolleyLog.d(TAG, "로그인 응답 : " + response);
-            preferenceManager.storeCookie(cookie);
+            mPreferenceManager.storeCookie(cookie);
         }, error -> {
             VolleyLog.e(TAG, "로그인 에러 : " + error.getMessage());
             Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
-            progressBar.setVisibility(View.GONE);
+            hideProgressBar();
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
@@ -165,17 +164,17 @@ public class LoginActivity extends AppCompatActivity {
             if (ssoToken != null) {
                 User user = new User(id, password);
 
-                preferenceManager.storeUser(user);
+                mPreferenceManager.storeUser(user);
                 // 화면이동
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
-                progressBar.setVisibility(View.GONE);
+                hideProgressBar();
             }
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
             Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
-            progressBar.setVisibility(View.GONE);
+            hideProgressBar();
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
@@ -205,4 +204,13 @@ public class LoginActivity extends AppCompatActivity {
         return "";
     }
 
+    private void showProgressBar() {
+        if (mProgressBar != null)
+            mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressBar() {
+        if (mProgressBar != null)
+            mProgressBar.setVisibility(View.GONE);
+    }
 }

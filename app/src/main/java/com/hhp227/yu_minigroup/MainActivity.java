@@ -1,9 +1,6 @@
 package com.hhp227.yu_minigroup;
 
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.core.view.GravityCompat;
@@ -17,14 +14,14 @@ import com.hhp227.yu_minigroup.fragment.UnivNoticeFragment;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 
 public class MainActivity extends AppCompatActivity {
-    private DrawerLayout drawerLayout;
-    private PreferenceManager preferenceManager;
+    private DrawerLayout mDrawerLayout;
+    private PreferenceManager mPreferenceManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        drawerLayout = findViewById(R.id.drawer_layout);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new GroupFragment()).commit();
         navigationView.setNavigationItemSelectedListener(item -> {
@@ -40,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.nav_menu3:
                     break;
                 case R.id.nav_menu4:
-                    preferenceManager.clear();
+                    mPreferenceManager.clear();
                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                     startActivity(intent);
                     finish();
@@ -50,16 +47,16 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.content_frame, fragment);
                 fragmentTransaction.commit();
             }
-            drawerLayout.closeDrawer(GravityCompat.START);
+            mDrawerLayout.closeDrawer(GravityCompat.START);
             return true;
         });
-        preferenceManager = AppController.getInstance().getPreferenceManager();
+        mPreferenceManager = AppController.getInstance().getPreferenceManager();
     }
 
     @Override
     public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START))
-            drawerLayout.closeDrawer(GravityCompat.START);
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START))
+            mDrawerLayout.closeDrawer(GravityCompat.START);
         else
             super.onBackPressed();
     }

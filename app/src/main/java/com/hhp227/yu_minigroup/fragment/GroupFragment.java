@@ -4,11 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.MotionEvent;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -46,16 +44,15 @@ public class GroupFragment extends Fragment {
     public static final int UPDATE_GROUP = 30;
     private static final String TAG = GroupFragment.class.getSimpleName();
     private AppCompatActivity mActivity;
-    private DrawerLayout drawerLayout;
-    private GroupGridAdapter mGroupGridAdapter;
+    private DrawerLayout mDrawerLayout;
+    private GroupGridAdapter mAdapter;
     private List<String> mGroupItemKeys;
     private List<GroupItem> mGroupItemValues;
     private PreferenceManager mPreferenceManager;
     private ProgressBar mProgressBar;
-    private RecyclerView myGroupList;
     private RelativeLayout mRelativeLayout;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private Toolbar toolbar;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private Toolbar mToolbar;
 
     public GroupFragment() {
     }
@@ -65,21 +62,21 @@ public class GroupFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_group, container, false);
         BottomNavigationView bottomNavigationView = rootView.findViewById(R.id.bnv_group_button);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+        RecyclerView recyclerView = rootView.findViewById(R.id.rv_group);
         mActivity = (AppCompatActivity) getActivity();
-        drawerLayout = mActivity.findViewById(R.id.drawer_layout);
-        myGroupList = rootView.findViewById(R.id.rv_group);
-        toolbar = rootView.findViewById(R.id.toolbar);
-        swipeRefreshLayout = rootView.findViewById(R.id.srl_group);
-        mGroupItemKeys = new ArrayList<>();
-        mGroupItemValues = new ArrayList<>();
-        mGroupGridAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues);
-        mPreferenceManager = AppController.getInstance().getPreferenceManager();
+        mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
+        mToolbar = rootView.findViewById(R.id.toolbar);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.srl_group);
         mProgressBar = rootView.findViewById(R.id.pb_group);
         mRelativeLayout = rootView.findViewById(R.id.rl_group);
+        mGroupItemKeys = new ArrayList<>();
+        mGroupItemValues = new ArrayList<>();
+        mAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues);
+        mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mActivity.setTitle("메인화면");
-        mActivity.setSupportActionBar(toolbar);
+        mActivity.setSupportActionBar(mToolbar);
         setDrawerToggle();
-        mGroupGridAdapter.setOnItemClickListener((v, position) -> {
+        mAdapter.setOnItemClickListener((v, position) -> {
             GroupItem groupItem = mGroupItemValues.get(position);
             if (groupItem.isAd())
                 Toast.makeText(getContext(), "광고", Toast.LENGTH_LONG).show();
@@ -89,21 +86,21 @@ public class GroupFragment extends Fragment {
                 intent.putExtra("grp_id", groupItem.getId());
                 intent.putExtra("grp_nm", groupItem.getName());
                 intent.putExtra("pos", position);
-                intent.putExtra("key", mGroupGridAdapter.getKey(position));
+                intent.putExtra("key", mAdapter.getKey(position));
                 startActivityForResult(intent, UPDATE_GROUP);
             }
         });
-        myGroupList.setLayoutManager(gridLayoutManager);
-        myGroupList.setAdapter(mGroupGridAdapter);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
+        recyclerView.setLayoutManager(gridLayoutManager);
+        recyclerView.setAdapter(mAdapter);
+        mSwipeRefreshLayout.setOnRefreshListener(() -> {
             new Handler().postDelayed(() -> {
                 mGroupItemKeys.clear();
                 mGroupItemValues.clear();
                 fetchDataTask();
-                swipeRefreshLayout.setRefreshing(false);
+                mSwipeRefreshLayout.setRefreshing(false);
             }, 1700);
         });
-        swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light, android.R.color.holo_orange_light, android.R.color.holo_red_light);
+        mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light, android.R.color.holo_orange_light, android.R.color.holo_red_light);
         bottomNavigationView.getMenu().getItem(0).setCheckable(false);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             item.setCheckable(false);
@@ -137,8 +134,8 @@ public class GroupFragment extends Fragment {
     }
 
     private void setDrawerToggle() {
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(mActivity, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(drawerToggle);
+        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(mActivity, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
     }
 
@@ -165,7 +162,7 @@ public class GroupFragment extends Fragment {
                     e.printStackTrace();
                 }
             }
-            mGroupGridAdapter.notifyDataSetChanged();
+            mAdapter.notifyDataSetChanged();
             insertAdvertisement();
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());

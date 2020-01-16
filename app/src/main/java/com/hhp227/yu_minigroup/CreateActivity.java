@@ -20,59 +20,59 @@ import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 
 public class CreateActivity extends AppCompatActivity {
+
     // 인텐트값
     public static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
     public static final int CAMERA_PICK_IMAGE_REQUEST_CODE = 200;
     private static final String TAG = CreateActivity.class.getSimpleName();
-    private Bitmap bitmap;
-    private EditText groupTitle, groupDescription;
-    private ImageView groupImage, resetTitle;
-    private PreferenceManager preferenceManager;
-    private RadioGroup joinType;
-
-    private boolean joinTypeCheck;
-    private String cookie, pushId;
+    private boolean mJoinTypeCheck;
+    private String mCookie, mPushId;
+    private Bitmap mBitmap;
+    private EditText mGroupTitle, mGroupDescription;
+    private ImageView mGroupImage, mResetTitle;
+    private PreferenceManager mPreferenceManager;
+    private RadioGroup mJoinType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        groupTitle = findViewById(R.id.et_title);
-        groupDescription = findViewById(R.id.et_description);
-        resetTitle = findViewById(R.id.iv_reset);
-        groupImage = findViewById(R.id.iv_group_image);
-        joinType = findViewById(R.id.rg_jointype);
-        preferenceManager = AppController.getInstance().getPreferenceManager();
-        cookie = preferenceManager.getCookie();
+        mGroupTitle = findViewById(R.id.et_title);
+        mGroupDescription = findViewById(R.id.et_description);
+        mResetTitle = findViewById(R.id.iv_reset);
+        mGroupImage = findViewById(R.id.iv_group_image);
+        mJoinType = findViewById(R.id.rg_jointype);
+        mPreferenceManager = AppController.getInstance().getPreferenceManager();
+        mCookie = mPreferenceManager.getCookie();
 
         setSupportActionBar(toolbar);
-        groupTitle.addTextChangedListener(new TextWatcher() {
+        mGroupTitle.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                resetTitle.setImageResource(s.length() > 0 ? R.drawable.ic_clear_black_24dp : R.drawable.ic_clear_gray_24dp);
+                mResetTitle.setImageResource(s.length() > 0 ? R.drawable.ic_clear_black_24dp : R.drawable.ic_clear_gray_24dp);
             }
 
             @Override
             public void afterTextChanged(Editable s) {
             }
         });
-        resetTitle.setOnClickListener(v -> {
-            groupTitle.setText("");
+        mResetTitle.setOnClickListener(v -> {
+            mGroupTitle.setText("");
         });
-        groupImage.setOnClickListener(v -> {
+        mGroupImage.setOnClickListener(v -> {
             registerForContextMenu(v);
             openContextMenu(v);
             unregisterForContextMenu(v);
         });
-        joinType.setOnCheckedChangeListener((group, checkedId) -> {
-            joinTypeCheck = checkedId != R.id.rb_auto;
+        mJoinType.setOnCheckedChangeListener((group, checkedId) -> {
+            mJoinTypeCheck = checkedId != R.id.rb_auto;
         });
-        joinType.check(R.id.rb_auto);
+        mJoinType.check(R.id.rb_auto);
     }
 
     @Override
@@ -88,13 +88,13 @@ public class CreateActivity extends AppCompatActivity {
                 finish();
                 return true;
             case R.id.action_send:
-                String title = groupTitle.getText().toString().trim();
-                String description = groupDescription.getText().toString().trim();
-                String join = !joinTypeCheck ? "0" : "1";
+                String title = mGroupTitle.getText().toString().trim();
+                String description = mGroupDescription.getText().toString().trim();
+                String join = !mJoinTypeCheck ? "0" : "1";
                 if (!title.isEmpty() && !description.isEmpty()) {
 
                 } else {
-                    groupTitle.setError(title.isEmpty() ? "그룹명을 입력하세요." : null);
+                    mGroupTitle.setError(title.isEmpty() ? "그룹명을 입력하세요." : null);
                 }
         }
         return super.onOptionsItemSelected(item);
@@ -123,8 +123,8 @@ public class CreateActivity extends AppCompatActivity {
                 startActivityForResult(galleryIntent, CAMERA_PICK_IMAGE_REQUEST_CODE);
                 break;
             case "이미지 없음":
-                groupImage.setImageResource(R.drawable.add_photo);
-                bitmap = null;
+                mGroupImage.setImageResource(R.drawable.add_photo);
+                mBitmap = null;
                 Toast.makeText(getBaseContext(), "이미지 없음 선택", Toast.LENGTH_LONG).show();
                 break;
         }

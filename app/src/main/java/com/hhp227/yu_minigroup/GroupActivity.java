@@ -9,9 +9,9 @@ import com.hhp227.yu_minigroup.adapter.GroupGridAdapter;
 import com.hhp227.yu_minigroup.fragment.GroupFragment;
 
 public class GroupActivity extends AppCompatActivity {
-    private boolean isAdmin;
-    private int position;
-    private String groupId, groupName, key;
+    private boolean mIsAdmin;
+    private int mPosition;
+    private String mGroupId, mGroupName, mKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,12 +19,12 @@ public class GroupActivity extends AppCompatActivity {
         setContentView(R.layout.activity_group);
         Button button = findViewById(R.id.b_test);
         Intent intent = getIntent();
-        isAdmin = intent.getBooleanExtra("admin", false);
-        groupId = intent.getStringExtra("grp_id");
-        groupName = intent.getStringExtra("grp_nm");
-        position = intent.getIntExtra("pos", 0);
+        mIsAdmin = intent.getBooleanExtra("admin", false);
+        mGroupId = intent.getStringExtra("grp_id");
+        mGroupName = intent.getStringExtra("grp_nm");
+        mPosition = intent.getIntExtra("pos", 0);
         button.setOnClickListener(v -> {
-            Toast.makeText(getApplicationContext(), "Is admin : " + isAdmin + ", Position : " + position + ", groupId : " + groupId + ", groupName : " + groupName, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Is admin : " + mIsAdmin + ", Position : " + mPosition + ", groupId : " + mGroupId + ", groupName : " + mGroupName, Toast.LENGTH_LONG).show();
         });
     }
 }
