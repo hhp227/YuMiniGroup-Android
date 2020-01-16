@@ -20,11 +20,10 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.View
     private List<GroupItem> mGroupItemValues;
     private OnItemClickListener mOnItemClickListener;
 
-    public GroupGridAdapter(Context mContext, List<String> mGroupItemKeys, List<GroupItem> mGroupItemValues, OnItemClickListener mOnItemClickListener) {
+    public GroupGridAdapter(Context mContext, List<String> mGroupItemKeys, List<GroupItem> mGroupItemValues) {
         this.mContext = mContext;
         this.mGroupItemKeys = mGroupItemKeys;
         this.mGroupItemValues = mGroupItemValues;
-        this.mOnItemClickListener = mOnItemClickListener;
     }
 
     @Override
@@ -68,6 +67,10 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.View
 
     public String getKey(int position) {
         return mGroupItemKeys.get(position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
+        this.mOnItemClickListener = mOnItemClickListener;
     }
 
     public interface OnItemClickListener {

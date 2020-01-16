@@ -4,10 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.MotionEvent;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -71,22 +72,27 @@ public class GroupFragment extends Fragment {
         swipeRefreshLayout = rootView.findViewById(R.id.srl_group);
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
-        mGroupGridAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues, (v, position) -> {
-            GroupItem groupItem = mGroupItemValues.get(position);
-            Intent intent = new Intent(getContext(), GroupActivity.class);
-            intent.putExtra("admin", groupItem.isAdmin());
-            intent.putExtra("grp_id", groupItem.getId());
-            intent.putExtra("grp_nm", groupItem.getName());
-            intent.putExtra("position", position);
-            intent.putExtra("key", mGroupGridAdapter.getKey(position));
-            startActivityForResult(intent, UPDATE_GROUP);
-        });
+        mGroupGridAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mProgressBar = rootView.findViewById(R.id.pb_group);
         mRelativeLayout = rootView.findViewById(R.id.rl_group);
         mActivity.setTitle("메인화면");
         mActivity.setSupportActionBar(toolbar);
         setDrawerToggle();
+        mGroupGridAdapter.setOnItemClickListener((v, position) -> {
+            GroupItem groupItem = mGroupItemValues.get(position);
+            if (groupItem.isAd())
+                Toast.makeText(getContext(), "광고", Toast.LENGTH_LONG).show();
+            else {
+                Intent intent = new Intent(getContext(), GroupActivity.class);
+                intent.putExtra("admin", groupItem.isAdmin());
+                intent.putExtra("grp_id", groupItem.getId());
+                intent.putExtra("grp_nm", groupItem.getName());
+                intent.putExtra("pos", position);
+                intent.putExtra("key", mGroupGridAdapter.getKey(position));
+                startActivityForResult(intent, UPDATE_GROUP);
+            }
+        });
         myGroupList.setLayoutManager(gridLayoutManager);
         myGroupList.setAdapter(mGroupGridAdapter);
         swipeRefreshLayout.setOnRefreshListener(() -> {
