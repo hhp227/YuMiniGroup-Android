@@ -119,7 +119,7 @@ public class GroupFragment extends Fragment {
         });
         if (AppController.getInstance().getPreferenceManager().getUser() == null)
             logout();
-        mProgressBar.setVisibility(View.VISIBLE);
+        showProgressBar();
         fetchDataTask();
 
         return rootView;
@@ -166,7 +166,7 @@ public class GroupFragment extends Fragment {
             insertAdvertisement();
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
-            mProgressBar.setVisibility(View.GONE);
+            hideProgressBar();
         }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -201,7 +201,7 @@ public class GroupFragment extends Fragment {
             ad.setName("광고");
             mGroupItemValues.add(ad);
         }
-        mProgressBar.setVisibility(View.GONE);
+        hideProgressBar();
         mRelativeLayout.setVisibility(mGroupItemValues.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
@@ -211,5 +211,15 @@ public class GroupFragment extends Fragment {
 
     private boolean adminCheck(String onClick) {
         return onClick.split("'")[1].trim().equals("0");
+    }
+
+    private void showProgressBar() {
+        if (mProgressBar != null)
+            mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressBar() {
+        if (mProgressBar != null)
+            mProgressBar.setVisibility(View.GONE);
     }
 }
