@@ -105,7 +105,7 @@ public class LoginActivity extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         }
-                        return null;
+                        throw new RuntimeException();
                     }
                 };
                 AppController.getInstance().addToRequestQueue(stringRequest);

@@ -6,4 +6,10 @@ public interface EndPoint {
     String LOGIN = SMS_URL + "/login";
     String LOGIN_LMS = BASE_URL + "/ilos/lo/login_sso.acl";
     String GROUP_LIST = BASE_URL + "/ilos/m/community/share_group_list.acl";
+    String CREATE_GROUP = BASE_URL + "/ilos/community/share_group_insert.acl";
+    String REGISTER_GROUP = BASE_URL + "/ilos/community/share_group_register.acl";
+    String WITHDRAWAL_GROUP = BASE_URL + "/ilos/community/share_auth_drop_me.acl";
+    String MODIFY_GROUP = BASE_URL + "/ilos/community/share_group_modify.acl";
+    String UPDATE_GROUP = BASE_URL + "/ilos/community/share_group_update.acl";
+    String DELETE_GROUP = BASE_URL + "/ilos/community/share_group_delete.acl";
 }

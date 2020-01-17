@@ -18,6 +18,7 @@ import com.hhp227.yu_minigroup.adapter.GroupListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.GroupItem;
+import com.hhp227.yu_minigroup.fragment.GroupInfoFragment;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
@@ -30,10 +31,10 @@ import java.util.List;
 import java.util.Map;
 
 public class FindActivity extends AppCompatActivity {
-    private static final int LIMIT = 3;
+    private static final int LIMIT = 15;
     private static final String TAG = FindActivity.class.getSimpleName();
     private boolean mHasRequestedMore;
-    private int mOffSet;
+    private int mOffSet, mMinId;
     private GroupListAdapter mAdapter;
     private List<String> mGroupItemKeys;
     private List<GroupItem> mGroupItemValues;
@@ -47,20 +48,43 @@ public class FindActivity extends AppCompatActivity {
         setContentView(R.layout.activity_find);
         Toolbar toolbar = findViewById(R.id.toolbar);
         RecyclerView recyclerView = findViewById(R.id.rv_group);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         mProgressBar = findViewById(R.id.pb_group);
         mRelativeLayout = findViewById(R.id.rl_group);
         mSwipeRefreshLayout = findViewById(R.id.srl_group);
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
-        mAdapter = new GroupListAdapter(getBaseContext(), mGroupItemKeys, mGroupItemValues);
+        mAdapter = new GroupListAdapter(this, mGroupItemKeys, mGroupItemValues);
         mOffSet = 1;
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mAdapter);
+        recyclerView.post(() -> {
+            mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
+            mAdapter.addFooterView();
+            mAdapter.setButtonType(GroupInfoFragment.TYPE_REQUEST);
+        });
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (!mHasRequestedMore && dy > 0 && manager != null && manager.findLastCompletelyVisibleItemPosition() >= manager.getItemCount() - 1) {
+                    mHasRequestedMore = true;
+                    mOffSet += LIMIT;
+                    mAdapter.setFooterProgressBarVisibility(View.VISIBLE);
+                    mAdapter.notifyDataSetChanged();
+                    fetchGroupList();
+                }
+            }
+        });
         /*FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,10 +94,13 @@ public class FindActivity extends AppCompatActivity {
         });*/
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
             new Handler().postDelayed(() -> {
+                mMinId = 0;
                 mOffSet = 1;
+                mGroupItemKeys.clear();
                 mGroupItemValues.clear();
-                fetchGroupList();
+                mAdapter.addFooterView();
                 mSwipeRefreshLayout.setRefreshing(false);
+                fetchGroupList();
             }, 1000);
         });
         showProgressBar();
@@ -95,7 +122,7 @@ public class FindActivity extends AppCompatActivity {
                 try {
                     Element menuList = element.getFirstElementByClass("menu_list");
                     if (element.getAttributeValue("class").equals("accordion")) {
-                        String id = String.valueOf(groupIdExtract(menuList.getFirstElementByClass("button").getAttributeValue("onclick")));
+                        int id = groupIdExtract(menuList.getFirstElementByClass("button").getAttributeValue("onclick"));
                         String imageUrl = EndPoint.BASE_URL + element.getFirstElement(HTMLElementName.IMG).getAttributeValue("src");
                         String name = element.getFirstElement(HTMLElementName.STRONG).getTextExtractor().toString();
                         StringBuilder info = new StringBuilder();
@@ -107,22 +134,28 @@ public class FindActivity extends AppCompatActivity {
                                     extractedText.substring(0, extractedText.lastIndexOf("생성일")).trim() + "\n" :
                                     extractedText + "\n");
                         }
+                        mMinId = mMinId == 0 ? id : Math.min(mMinId, id);
+                        if (id > mMinId) {
+                            mHasRequestedMore = true;
+                            break;
+                        } else
+                            mHasRequestedMore = false;
                         GroupItem groupItem = new GroupItem();
-                        groupItem.setId(id);
+                        groupItem.setId(String.valueOf(id));
                         groupItem.setImage(imageUrl);
                         groupItem.setName(name);
                         groupItem.setInfo(info.toString().trim());
                         groupItem.setDescription(description);
                         groupItem.setJoinType(joinType.equals("가입방식: 자동 승인") ? "0" : "1");
-                        mGroupItemKeys.add(id);
-                        mGroupItemValues.add(groupItem);
+                        mGroupItemKeys.add(mGroupItemKeys.size() - 1, String.valueOf(id));
+                        mGroupItemValues.add(mGroupItemValues.size() - 1, groupItem);
                     }
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
                 }
             }
+            mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             mAdapter.notifyDataSetChanged();
-            mHasRequestedMore = false;
             hideProgressBar();
             mRelativeLayout.setVisibility(mGroupItemValues.isEmpty() ? View.VISIBLE : View.GONE);
         }, error -> {
@@ -167,7 +200,7 @@ public class FindActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-                return null;
+                throw new RuntimeException();
             }
         });
     }

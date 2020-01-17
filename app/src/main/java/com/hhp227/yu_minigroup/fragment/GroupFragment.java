@@ -128,7 +128,11 @@ public class GroupFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == UPDATE_GROUP && resultCode == Activity.RESULT_OK) {
+        if ((requestCode == CREATE_CODE || requestCode == REGISTER_CODE) && resultCode == Activity.RESULT_OK) {
+            mGroupItemKeys.clear();
+            mGroupItemValues.clear();
+            fetchDataTask();
+        } else if (requestCode == UPDATE_GROUP && resultCode == Activity.RESULT_OK) {
             Toast.makeText(getContext(), "ok", Toast.LENGTH_LONG).show();
         }
     }
