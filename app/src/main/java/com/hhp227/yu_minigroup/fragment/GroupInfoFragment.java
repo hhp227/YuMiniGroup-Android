@@ -140,7 +140,7 @@ public class GroupInfoFragment extends DialogFragment {
             };
             AppController.getInstance().addToRequestQueue(jsonObjectRequest, tag_json_req);
         });
-        close.setOnClickListener(v -> GroupInfoFragment.this.dismiss());
+        close.setOnClickListener(v -> dismiss());
         name.setText(mGroupName);
         info.setText(mGroupInfo);
         desc.setText(mGroupDesc);
