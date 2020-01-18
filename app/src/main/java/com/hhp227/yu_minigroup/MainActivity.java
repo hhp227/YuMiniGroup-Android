@@ -7,6 +7,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.navigation.NavigationView;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.fragment.GroupFragment;
@@ -21,8 +22,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mDrawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        mPreferenceManager = AppController.getInstance().getPreferenceManager();
+
+        // Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713
+        MobileAds.initialize(this, getString(R.string.admob_app_id));
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new GroupFragment()).commit();
         navigationView.setNavigationItemSelectedListener(item -> {
             Fragment fragment = null;
@@ -50,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
             mDrawerLayout.closeDrawer(GravityCompat.START);
             return true;
         });
-        mPreferenceManager = AppController.getInstance().getPreferenceManager();
     }
 
     @Override

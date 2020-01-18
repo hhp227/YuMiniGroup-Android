@@ -3,4 +3,8 @@
     <color name="colorPrimary">#3549B6</color>
     <color name="colorPrimaryDark">#0d3f7a</color>
     <color name="colorAccent">#FF4081</color>
+
+    <!-- AdMob -->
+    <color name="bg_ad_attribution">#FFCC66</color>
+    <color name="txt_ad_attribution">#FFFFFF</color>
 </resources>

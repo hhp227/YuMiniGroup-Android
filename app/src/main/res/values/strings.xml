@@ -16,4 +16,9 @@
     <string name="camera">카메라</string>
     <string name="gallery">갤러리</string>
     <string name="image_none">이미지 없음</string>
+
+    <!-- AdMob -->
+    <string name="admob_app_id">ca-app-pub-6359051986076073~1299706209</string>
+    <string name="native_ad">ca-app-pub-6359051986076073/1199386432</string>
+    <string name="ad_attribution">Ad</string>
 </resources>
