@@ -23,18 +23,20 @@
             android:usesCleartextTraffic="true">
         <activity
                 android:name=".RequestActivity"
-                android:label="@string/title_activity_request"
+                android:label="@string/title_request"
                 android:theme="@style/AppTheme.NoActionBar">
-        </activity>
-        <activity android:name=".GroupActivity">
         </activity>
         <activity
                 android:name=".FindActivity"
+                android:label="@string/title_find"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
                 android:name=".CreateActivity"
+                android:label="@string/title_create"
                 android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity android:name=".GroupActivity">
         </activity>
         <activity
                 android:name=".SplashActivity"

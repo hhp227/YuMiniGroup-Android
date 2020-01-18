@@ -86,19 +86,17 @@ public class FindActivity extends AppCompatActivity {
                 }
             }
         });
-        mSwipeRefreshLayout.setOnRefreshListener(() -> {
-            new Handler().postDelayed(() -> {
-                mMinId = 0;
-                mOffSet = 1;
-                mGroupItemKeys.clear();
-                mGroupItemValues.clear();
-                mAdapter.addFooterView();
-                mSwipeRefreshLayout.setRefreshing(false);
-                fetchGroupList();
-            }, 1000);
-        });
+        mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
+            mMinId = 0;
+            mOffSet = 1;
+            mGroupItemKeys.clear();
+            mGroupItemValues.clear();
+            mAdapter.addFooterView();
+            mSwipeRefreshLayout.setRefreshing(false);
+            fetchGroupList();
+        }, 1000));
         showProgressBar();
-        fetchGroupList();
+        new Handler().postDelayed(this::fetchGroupList, 500);
     }
 
     @Override
