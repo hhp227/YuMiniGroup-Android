@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -23,7 +24,9 @@ import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.*;
+import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.GroupGridAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
@@ -199,6 +202,7 @@ public class GroupFragment extends Fragment {
     }
 
     private void insertAdvertisement() {
+        initFirebaseData();
         if (mGroupItemValues.size() % 2 != 0) {
             GroupItem ad = new GroupItem();
             ad.setAd(true);
@@ -207,6 +211,44 @@ public class GroupFragment extends Fragment {
         }
         hideProgressBar();
         mRelativeLayout.setVisibility(mGroupItemValues.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private void initFirebaseData() {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("UserGroupList");
+        fetchDataTaskFromFirebase(databaseReference.child(mPreferenceManager.getUser().getUid()).orderByValue().equalTo(true), false);
+    }
+
+    private void fetchDataTaskFromFirebase(Query query, final boolean isRecursion) {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (isRecursion) {
+                    try {
+                        String key = dataSnapshot.getKey();
+                        GroupItem value = dataSnapshot.getValue(GroupItem.class);
+                        assert value != null;
+                        int index = mGroupItemKeys.indexOf(value.getId());
+                        if (index > -1) {
+                            //mGroupItemValues.set(index, value); //isAdmin값때문에 주석처리
+                            mGroupItemKeys.set(index, key);
+                        }
+                        mAdapter.notifyDataSetChanged();
+                    } catch (Exception e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                } else {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Groups");
+                        fetchDataTaskFromFirebase(databaseReference.child(snapshot.getKey()), true);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
+            }
+        });
     }
 
     private String groupIdExtract(String href) {

@@ -15,33 +15,49 @@ public class PreferenceManager {
 
     private static final String KEY_USER_ID = "usr_id";
     private static final String KEY_USER_PASSWORD = "usr_pwd";
+    private static final String KEY_USER_NAME = "usr_nm";
+    private static final String KEY_USER_DEPT_NAME = "usr_dept_nm";
+    private static final String KEY_USER_NUMBER = "usr_stu_id";
+    private static final String KEY_USER_GRADE = "usr_grade";
+    private static final String KEY_USER_EMAIL = "usr_mail";
+    private static final String KEY_USER_UNIQUE_ID = "usr_uid";
     private static final String KEY_COOKIE = "cookie";
     private static final String KEY_SSO_TOKEN = "ssotoken";
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
-    private Context context;
+    private SharedPreferences mSharedPreferences;
+    private SharedPreferences.Editor mEditor;
 
     final int PRIVATE_MOD = 0;
 
     public PreferenceManager(Context context) {
-        this.context = context;
-        sharedPreferences = context.getSharedPreferences(PREF_NAME, PRIVATE_MOD);
-        editor = sharedPreferences.edit();
+        mSharedPreferences = context.getSharedPreferences(PREF_NAME, PRIVATE_MOD);
+        mEditor = mSharedPreferences.edit();
     }
 
     public void storeUser(User user) {
-        editor.putString(KEY_USER_ID, user.getUserId());
-        editor.putString(KEY_USER_PASSWORD, user.getPassword());
-        editor.commit();
+        mEditor.putString(KEY_USER_ID, user.getUserId());
+        mEditor.putString(KEY_USER_PASSWORD, user.getPassword());
+        mEditor.putString(KEY_USER_NAME, user.getName());
+        mEditor.putString(KEY_USER_DEPT_NAME, user.getDepartment());
+        mEditor.putString(KEY_USER_NUMBER, user.getNumber());
+        mEditor.putString(KEY_USER_GRADE, user.getGrade());
+        mEditor.putString(KEY_USER_EMAIL, user.getEmail());
+        mEditor.putString(KEY_USER_UNIQUE_ID, user.getUid());
+        mEditor.commit();
 
         Log.i(TAG, "사용자 Session 저장 : " + user.getUserId());
     }
 
     public User getUser() {
-        if (sharedPreferences.getString(KEY_USER_ID, null) != null) {
-            String knuId = sharedPreferences.getString(KEY_USER_ID, null);
-            String password = sharedPreferences.getString(KEY_USER_PASSWORD, null);
-            User user = new User(knuId, password);
+        if (mSharedPreferences.getString(KEY_USER_ID, null) != null) {
+            String yuId = mSharedPreferences.getString(KEY_USER_ID, null);
+            String password = mSharedPreferences.getString(KEY_USER_PASSWORD, null);
+            String name = mSharedPreferences.getString(KEY_USER_NAME, null);
+            String deptName = mSharedPreferences.getString(KEY_USER_DEPT_NAME, null);
+            String number = mSharedPreferences.getString(KEY_USER_NUMBER, null);
+            String grade = mSharedPreferences.getString(KEY_USER_GRADE, null);
+            String email = mSharedPreferences.getString(KEY_USER_EMAIL, null);
+            String uid = mSharedPreferences.getString(KEY_USER_UNIQUE_ID, null);
+            User user = new User(yuId, password, name, deptName, number, grade, email, uid);
 
             return user;
         }
@@ -49,25 +65,25 @@ public class PreferenceManager {
     }
 
     public void storeToken(String token) {
-        editor.putString(KEY_SSO_TOKEN, token);
-        editor.commit();
+        mEditor.putString(KEY_SSO_TOKEN, token);
+        mEditor.commit();
     }
 
     public String getToken() {
-        return sharedPreferences.getString(KEY_SSO_TOKEN, null);
+        return mSharedPreferences.getString(KEY_SSO_TOKEN, null);
     }
 
     public void storeCookie(String cookie) {
-        editor.putString(KEY_COOKIE, cookie);
-        editor.commit();
+        mEditor.putString(KEY_COOKIE, cookie);
+        mEditor.commit();
     }
 
     public String getCookie() {
-        return sharedPreferences.getString(KEY_COOKIE, null);
+        return mSharedPreferences.getString(KEY_COOKIE, null);
     }
 
     public void clear() {
-        editor.clear();
-        editor.commit();
+        mEditor.clear();
+        mEditor.commit();
     }
 }

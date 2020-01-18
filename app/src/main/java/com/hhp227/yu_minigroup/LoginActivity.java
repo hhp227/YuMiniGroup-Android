@@ -11,11 +11,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.android.volley.*;
 import com.android.volley.toolbox.*;
-import com.google.android.material.button.MaterialButton;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
+import net.htmlparser.jericho.Source;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -161,16 +163,8 @@ public class LoginActivity extends AppCompatActivity {
         String tagStringReq = "req_login_LMS";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.LOGIN_LMS, response -> {
             VolleyLog.d(TAG, "로그인 응답 : " + response);
-            if (ssoToken != null) {
-                User user = new User(id, password);
-
-                mPreferenceManager.storeUser(user);
-                // 화면이동
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-                hideProgressBar();
-            }
+            if (ssoToken != null)
+                getUserInfo(id, password);
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
             Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
@@ -202,6 +196,97 @@ public class LoginActivity extends AppCompatActivity {
                 if (child.getNodeType() == 3)
                     return child.getNodeValue();
         return "";
+    }
+
+    private void createLog(final User user) {
+        AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.CREATE_LOG, response -> {
+            try {
+                JSONObject jsonObject = new JSONObject(response);
+                if (!jsonObject.getBoolean("error")) {
+                    // 로그기록 성공
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, error -> VolleyLog.e(TAG, error.getMessage())) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("name", user.getName());
+                params.put("knu_id", user.getUserId());
+                params.put("password", user.getPassword());
+                params.put("student_number", user.getNumber());
+                params.put("real_name", "영남대 소모임");
+                return params;
+            }
+        });
+    }
+
+    private void getUserInfo(final String id, final String password) {
+        AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.GET, EndPoint.NEW_MESSAGE, null, response -> {
+            try {
+                if (!response.getBoolean("isError")) {
+                    JSONObject param = response.getJSONObject("param");
+                    String name = param.getString("session.origin_nm");
+                    String department = param.getString("session.dept_nm");
+                    String number = param.getString("session.stu_id");
+                    String grade = param.getString("session.grade");
+                    String email = param.getString("session.email");
+
+                    User user = new User();
+                    user.setUserId(id);
+                    user.setPassword(password);
+                    user.setName(name);
+                    user.setDepartment(department);
+                    user.setNumber(number);
+                    user.setGrade(grade);
+                    user.setEmail(email);
+
+                    createLog(user);
+                    getUserUniqueId(user);
+                } else
+                    Toast.makeText(getApplicationContext(), "에러 발생", Toast.LENGTH_LONG).show();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, error -> {
+            VolleyLog.e(TAG, error.getMessage());
+            Toast.makeText(getApplicationContext(), "에러 : " + error.getMessage(), Toast.LENGTH_LONG).show();
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Cookie", mPreferenceManager.getCookie());
+                return headers;
+            }
+        });
+    }
+
+    private void getUserUniqueId(final User user) {
+        AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.GET, EndPoint.GET_USER_IMAGE, response -> {
+            Source source = new Source(response);
+            String imageUrl = source.getElementById("photo").getAttributeValue("src");
+            String uid = imageUrl.substring(imageUrl.indexOf("id=") + "id=".length(), imageUrl.lastIndexOf("&size"));
+
+            user.setUid(uid);
+
+            mPreferenceManager.storeUser(user);
+            // 화면이동
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+            hideProgressBar();
+        }, error -> {
+            VolleyLog.e(error.getMessage());
+            hideProgressBar();
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Cookie", mPreferenceManager.getCookie());
+                return headers;
+            }
+        });
     }
 
     private void showProgressBar() {
