@@ -83,17 +83,13 @@ public class CreateActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
             }
         });
-        mResetTitle.setOnClickListener(v -> {
-            mGroupTitle.setText("");
-        });
+        mResetTitle.setOnClickListener(v -> mGroupTitle.setText(""));
         mGroupImage.setOnClickListener(v -> {
             registerForContextMenu(v);
             openContextMenu(v);
             unregisterForContextMenu(v);
         });
-        mJoinType.setOnCheckedChangeListener((group, checkedId) -> {
-            mJoinTypeCheck = checkedId != R.id.rb_auto;
-        });
+        mJoinType.setOnCheckedChangeListener((group, checkedId) -> mJoinTypeCheck = checkedId != R.id.rb_auto);
         mJoinType.check(R.id.rb_auto);
     }
 

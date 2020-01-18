@@ -3,7 +3,6 @@ package com.hhp227.yu_minigroup;
 import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
