@@ -17,11 +17,13 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.MainActivity;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.RequestActivity;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import org.json.JSONException;
 
@@ -88,10 +90,12 @@ public class GroupInfoFragment extends DialogFragment {
                         Intent intent = new Intent(getContext(), MainActivity.class);
                         getActivity().setResult(RESULT_OK, intent);
                         getActivity().finish();
+                        insertGroupToFirebase();
                     } else if (mButtonType == TYPE_CANCEL && !response.getBoolean("isError")) {
                         Toast.makeText(getContext(), "신청취소", Toast.LENGTH_LONG).show();
                         ((RequestActivity) getActivity()).refresh();
                         GroupInfoFragment.this.dismiss();
+                        deleteUserInGroupFromFirebase();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -151,4 +155,56 @@ public class GroupInfoFragment extends DialogFragment {
         return rootView;
     }
 
+    private void insertGroupToFirebase() {
+        DatabaseReference userGroupListReference = FirebaseDatabase.getInstance().getReference("UserGroupList");
+        final DatabaseReference groupsReference = FirebaseDatabase.getInstance().getReference("Groups");
+        groupsReference.child(mKey).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null)
+                    return;
+                GroupItem groupItem = dataSnapshot.getValue(GroupItem.class);
+                Map<String, Boolean> members = groupItem.getMembers() != null && !groupItem.getMembers().containsKey(mPreferenceManager.getUser().getUid()) ? groupItem.getMembers() : new HashMap<String, Boolean>();
+                members.put(mPreferenceManager.getUser().getUid(), mJoinType.equals("0"));
+                groupItem.setMembers(members);
+                groupItem.setMemberCount(members.size());
+                groupsReference.child(mKey).setValue(groupItem);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
+            }
+        });
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put("/" + mPreferenceManager.getUser().getUid() + "/" + mKey, mJoinType.equals("0"));
+        userGroupListReference.updateChildren(childUpdates);
+    }
+
+    private void deleteUserInGroupFromFirebase() {
+        DatabaseReference userGroupListReference = FirebaseDatabase.getInstance().getReference("UserGroupList");
+        final DatabaseReference groupsReference = FirebaseDatabase.getInstance().getReference("Groups");
+        groupsReference.child(mKey).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null)
+                    return;
+                GroupItem groupItem = dataSnapshot.getValue(GroupItem.class);
+                if (groupItem.getMembers() != null && groupItem.getMembers().containsKey(mPreferenceManager.getUser().getUid())) {
+                    Map<String, Boolean> members = groupItem.getMembers();
+                    members.remove(mPreferenceManager.getUser().getUid());
+                    groupItem.setMembers(members);
+                    groupItem.setMemberCount(members.size());
+                }
+                groupsReference.child(mKey).setValue(groupItem);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
+            }
+        });
+        userGroupListReference.child(mPreferenceManager.getUser().getUid()).child(mKey).removeValue();
+    }
 }

@@ -2,12 +2,14 @@ package com.hhp227.yu_minigroup.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -45,9 +47,11 @@ public class GroupFragment extends Fragment {
     public static final int CREATE_CODE = 10;
     public static final int REGISTER_CODE = 20;
     public static final int UPDATE_GROUP = 30;
+
     private static final String TAG = GroupFragment.class.getSimpleName();
     private AppCompatActivity mActivity;
     private DrawerLayout mDrawerLayout;
+    private GridLayoutManager mGridLayoutManager;
     private GroupGridAdapter mAdapter;
     private List<String> mGroupItemKeys;
     private List<GroupItem> mGroupItemValues;
@@ -64,7 +68,6 @@ public class GroupFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_group, container, false);
         BottomNavigationView bottomNavigationView = rootView.findViewById(R.id.bnv_group_button);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         RecyclerView recyclerView = rootView.findViewById(R.id.rv_group);
         mActivity = (AppCompatActivity) getActivity();
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
@@ -72,6 +75,7 @@ public class GroupFragment extends Fragment {
         mSwipeRefreshLayout = rootView.findViewById(R.id.srl_group);
         mProgressBar = rootView.findViewById(R.id.pb_group);
         mRelativeLayout = rootView.findViewById(R.id.rl_group);
+        mGridLayoutManager = new GridLayoutManager(getContext(), 2);
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
         mAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues);
@@ -93,7 +97,7 @@ public class GroupFragment extends Fragment {
                 startActivityForResult(intent, UPDATE_GROUP);
             }
         });
-        recyclerView.setLayoutManager(gridLayoutManager);
+        recyclerView.setLayoutManager(mGridLayoutManager);
         recyclerView.setAdapter(mAdapter);
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
             new Handler().postDelayed(() -> {
@@ -137,6 +141,19 @@ public class GroupFragment extends Fragment {
             fetchDataTask();
         } else if (requestCode == UPDATE_GROUP && resultCode == Activity.RESULT_OK) {
             Toast.makeText(getContext(), "ok", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        switch (newConfig.orientation) {
+            case Configuration.ORIENTATION_PORTRAIT:
+                mGridLayoutManager.setSpanCount(2);
+                break;
+            case Configuration.ORIENTATION_LANDSCAPE:
+                mGridLayoutManager.setSpanCount(4);
+                break;
         }
     }
 

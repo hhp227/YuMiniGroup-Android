@@ -2,6 +2,7 @@ package com.hhp227.yu_minigroup;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -26,19 +27,22 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.GroupItem;
+import com.hhp227.yu_minigroup.helper.BitmapUtil;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
+import com.hhp227.yu_minigroup.volley.util.MultipartRequest;
 import org.json.JSONException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class CreateActivity extends AppCompatActivity {
-
-    // 인텐트값
     public static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
     public static final int CAMERA_PICK_IMAGE_REQUEST_CODE = 200;
+
     private static final String TAG = CreateActivity.class.getSimpleName();
     private boolean mJoinTypeCheck;
     private String mCookie, mPushId;
@@ -210,6 +214,19 @@ public class CreateActivity extends AppCompatActivity {
         return super.onContextItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            mBitmap = (Bitmap) data.getExtras().get("data");
+            mGroupImage.setImageBitmap(mBitmap);
+        } else if (requestCode == CAMERA_PICK_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            Uri fileUri = data.getData();
+            mBitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
+            mGroupImage.setImageBitmap(mBitmap);
+        }
+    }
+
     private void createGroupSuccess(String groupId, String groupName) {
         Intent intent = new Intent(CreateActivity.this, GroupActivity.class);
         intent.putExtra("admin", true);
@@ -223,7 +240,41 @@ public class CreateActivity extends AppCompatActivity {
         Snackbar.make(getCurrentFocus(), "그룹이 생성되었습니다.", Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 
-    private void groupImageUpdate(String groupId, String groupName, String description, String join) {
+    private void groupImageUpdate(String clubGrpId, String grpNm, String txt, String joinDiv) {
+        AppController.getInstance().addToRequestQueue(new MultipartRequest(Request.Method.POST, EndPoint.GROUP_IMAGE_UPDATE, response -> {
+            insertGroupToFirebase(clubGrpId, grpNm, txt, joinDiv);
+            createGroupSuccess(clubGrpId, grpNm);
+        }, error -> {
+            VolleyLog.e(TAG, error.getMessage());
+            hideProgressLayout();
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Cookie", mCookie);
+                return headers;
+            }
+
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("CLUB_GRP_ID", clubGrpId);
+                return params;
+            }
+
+            @Override
+            protected Map<String, DataPart> getByteData() {
+                Map<String, DataPart> params = new HashMap<>();
+                params.put("file", new DataPart(UUID.randomUUID().toString().replace("-", "").concat(".jpg"), getFileDataFromDrawable(mBitmap)));
+                return params;
+            }
+
+            private byte[] getFileDataFromDrawable(Bitmap bitmap) {
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 80, byteArrayOutputStream);
+                return byteArrayOutputStream.toByteArray();
+            }
+        });
     }
 
     private void insertGroupToFirebase(String groupId, String groupName, String description, String joinType) {

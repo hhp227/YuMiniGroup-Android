@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.android.volley.*;
 import com.android.volley.toolbox.StringRequest;
+import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.adapter.GroupListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
@@ -151,6 +152,7 @@ public class FindActivity extends AppCompatActivity {
             mAdapter.notifyDataSetChanged();
             hideProgressBar();
             mRelativeLayout.setVisibility(mGroupItemValues.isEmpty() ? View.VISIBLE : View.GONE);
+            initFirebaseData();
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
             hideProgressBar();
@@ -198,17 +200,46 @@ public class FindActivity extends AppCompatActivity {
         });
     }
 
+    private void initFirebaseData() {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Groups");
+        fetchGroupListFromFirebase(databaseReference.orderByKey());
+    }
+
+    private void fetchGroupListFromFirebase(Query query) {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String key = snapshot.getKey();
+                    GroupItem value = snapshot.getValue(GroupItem.class);
+                    assert value != null;
+                    int index = mGroupItemKeys.indexOf(value.getId());
+                    if (index > -1) {
+                        //mGroupItemValues.set(index, value); //getInfo 구현이 덜되어 주석처리
+                        mGroupItemKeys.set(index, key);
+                    }
+                }
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "가져오기 실패", databaseError.toException());
+            }
+        });
+    }
+
     private int groupIdExtract(String onclick) {
         return Integer.parseInt(onclick.split("[(]|[)]|[,]")[1].trim());
     }
 
     private void showProgressBar() {
-        if (mProgressBar != null)
+        if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE)
             mProgressBar.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressBar() {
-        if (mProgressBar != null)
+        if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE)
             mProgressBar.setVisibility(View.GONE);
     }
 }
