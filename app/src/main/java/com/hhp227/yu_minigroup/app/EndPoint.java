@@ -22,5 +22,7 @@ public interface EndPoint {
 
     // 학교 URL
     String URL_YU = "https://www.yu.ac.kr";
+    String URL_YU_MOBILE = "http://m.yu.ac.kr";
     String URL_YU_NOTICE = URL_YU + "/_korean/about/index.php?c=about_08_a_list&page={PAGE}";
+    String URL_YU_MOBILE_NOTICE = URL_YU_MOBILE + "/_mobile/notice/?c=notice_01_view&seq={ID}";
 }

@@ -120,17 +120,14 @@ public class UnivNoticeFragment extends Fragment {
                 List<Element> tds = tr.getChildElements();
                 String id = tds.get(0).getContent().toString();
                 String title = tds.get(1).getTextExtractor().toString();
-                String url = tds.get(1).getFirstElement(HTMLElementName.A).getAttributeValue("href");
                 String writer = tds.get(2).getContent().toString();
                 String date = tds.get(3).getContent().toString();
 
                 bbsItem.setId(id);
                 bbsItem.setTitle(title);
-                bbsItem.setUrl(url);
                 bbsItem.setWriter(writer);
                 bbsItem.setDate(date);
                 mBbsItemArrayList.add(bbsItem);
-                Log.e("테스트", url);
             }
             mAdapter.notifyDataSetChanged();
             mHasRequestedMore = false;

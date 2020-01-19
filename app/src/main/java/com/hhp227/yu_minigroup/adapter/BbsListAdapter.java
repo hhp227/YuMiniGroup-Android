@@ -38,7 +38,7 @@ public class BbsListAdapter extends RecyclerView.Adapter<BbsListAdapter.BbsListV
         holder.date.setText(bbsItem.getDate());
         holder.cardView.setOnClickListener(v -> {
             Intent intent = new Intent(mActivity, WebViewActivity.class);
-            intent.putExtra("url", EndPoint.URL_YU + bbsItem.getUrl());
+            intent.putExtra("url", EndPoint.URL_YU_MOBILE_NOTICE.replace("{ID}", bbsItem.getId()));
             mActivity.startActivity(intent);
         });
     }
