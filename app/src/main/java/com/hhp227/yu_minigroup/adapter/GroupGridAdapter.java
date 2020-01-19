@@ -16,7 +16,7 @@ import com.hhp227.yu_minigroup.dto.GroupItem;
 
 import java.util.List;
 
-public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.ViewHolder> {
+public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.GroupGridViewHolder> {
     private Context mContext;
     private List<String> mGroupItemKeys;
     private List<GroupItem> mGroupItemValues;
@@ -29,13 +29,13 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.View
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public GroupGridViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.group_grid_item, parent, false);
-        return new ViewHolder(itemView);
+        return new GroupGridViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(GroupGridViewHolder holder, int position) {
         GroupItem groupItem = mGroupItemValues.get(position);
         if (!groupItem.isAd()) {
             holder.groupLayout.setOnClickListener(v -> {
@@ -126,22 +126,18 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.View
         this.mOnItemClickListener = mOnItemClickListener;
     }
 
-    public interface OnItemClickListener {
-        void onItemClick(View v, int position);
-    }
-
     public String getKey(int position) {
         return mGroupItemKeys.get(position);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class GroupGridViewHolder extends RecyclerView.ViewHolder {
         private ImageView groupImage, more;
         private MediaView mediaView;
         private RelativeLayout groupLayout;
         private TextView groupName, headlineView, bodyView, advertiser;
         private UnifiedNativeAdView adView;
 
-        public ViewHolder(View itemView) {
+        public GroupGridViewHolder(View itemView) {
             super(itemView);
             adView = itemView.findViewById(R.id.unav);
             groupLayout = itemView.findViewById(R.id.rl_group);
@@ -153,5 +149,9 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.View
             bodyView = itemView.findViewById(R.id.ad_body);
             advertiser = itemView.findViewById(R.id.ad_advertiser);
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(View v, int position);
     }
 }

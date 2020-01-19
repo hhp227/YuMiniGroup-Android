@@ -6,17 +6,21 @@
         <item
                 android:id="@+id/nav_menu1"
                 android:icon="@drawable/ic_icon"
-                android:title="메인화면"/>
+                android:title="@string/main"/>
         <item
                 android:id="@+id/nav_menu2"
                 android:icon="@drawable/ic_icon"
-                android:title="Fragment 2"/>
+                android:title="@string/yu_news"/>
         <item
                 android:id="@+id/nav_menu3"
                 android:icon="@drawable/ic_icon"
-                android:title="테스트"/>
+                android:title="@string/timetable"/>
         <item
                 android:id="@+id/nav_menu4"
+                android:icon="@drawable/ic_icon"
+                android:title="테스트"/>
+        <item
+                android:id="@+id/nav_menu5"
                 android:icon="@drawable/ic_icon"
                 android:title="@string/logout"/>
     </group>

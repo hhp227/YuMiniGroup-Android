@@ -5,6 +5,9 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="main">메인화면</string>
+    <string name="yu_news">영대소식</string>
+    <string name="timetable">시간표</string>
     <string name="logout">로그아웃</string>
     <string name="action_group_menu1">Test1</string>
     <string name="action_group_menu2">Test2</string>

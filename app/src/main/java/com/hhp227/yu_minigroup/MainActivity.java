@@ -11,6 +11,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.navigation.NavigationView;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.fragment.GroupFragment;
+import com.hhp227.yu_minigroup.fragment.TimetableFragment;
 import com.hhp227.yu_minigroup.fragment.UnivNoticeFragment;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 
@@ -40,8 +41,11 @@ public class MainActivity extends AppCompatActivity {
                     fragment = new UnivNoticeFragment();
                     break;
                 case R.id.nav_menu3:
+                    fragment = new TimetableFragment();
                     break;
                 case R.id.nav_menu4:
+                    break;
+                case R.id.nav_menu5:
                     mPreferenceManager.clear();
                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                     startActivity(intent);

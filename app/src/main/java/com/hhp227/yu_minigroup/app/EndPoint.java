@@ -19,4 +19,8 @@ public interface EndPoint {
 
     // 로그기록
     String CREATE_LOG = "http://knu.dothome.co.kr/knu/v1/register";
+
+    // 학교 URL
+    String URL_YU = "https://www.yu.ac.kr";
+    String URL_YU_NOTICE = URL_YU + "/_korean/about/index.php?c=about_08_a_list&page={PAGE}";
 }

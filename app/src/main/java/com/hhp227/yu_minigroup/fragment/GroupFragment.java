@@ -80,7 +80,7 @@ public class GroupFragment extends Fragment {
         mGroupItemValues = new ArrayList<>();
         mAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
-        mActivity.setTitle("메인화면");
+        mActivity.setTitle(getString(R.string.main));
         mActivity.setSupportActionBar(mToolbar);
         setDrawerToggle();
         mAdapter.setOnItemClickListener((v, position) -> {

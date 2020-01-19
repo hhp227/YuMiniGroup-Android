@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.android.volley.*;
 import com.android.volley.toolbox.*;
+import com.google.android.material.snackbar.Snackbar;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.User;
@@ -70,10 +71,10 @@ public class LoginActivity extends AppCompatActivity {
                         Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new ByteArrayInputStream(response.getBytes("utf-8"))));
                         String code = getTextNodeValue(((Element) document.getElementsByTagName("neo").item(0)).getElementsByTagName("code").item(0));
                         if (code.equals("00")) {
-                            Toast.makeText(LoginActivity.this, "로그인 성공", Toast.LENGTH_LONG).show();
+                            Snackbar.make(getCurrentFocus(), "로그인 성공", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                             loginLMS(id, password, null, null);
                         } else {
-                            Toast.makeText(getApplicationContext(), "로그인 실패", Toast.LENGTH_LONG).show();
+                            Snackbar.make(getCurrentFocus(), "로그인 실패", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                             hideProgressBar();
                         }
                     } catch (IOException | SAXException | ParserConfigurationException e) {
