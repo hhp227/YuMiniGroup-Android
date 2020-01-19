@@ -16,6 +16,7 @@ public interface EndPoint {
     String GROUP_IMAGE_UPDATE = BASE_URL + "/ilos/community/share_group_image_update.acl";
     String NEW_MESSAGE = BASE_URL + "/ilos/message/received_new_message_check.acl";
     String GET_USER_IMAGE = BASE_URL + "/ilos/mp/myinfo_update_photo.acl";
+    String TIMETABLE = BASE_URL + "/ilos/st/main/pop_academic_timetable_form.acl";
 
     // 로그기록
     String CREATE_LOG = "http://knu.dothome.co.kr/knu/v1/register";

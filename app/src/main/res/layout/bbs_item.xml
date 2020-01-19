@@ -46,7 +46,7 @@
                     android:singleLine="true"
                     android:text="Title"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textSize="18dp"/>
+                    android:textSize="17dp"/>
 
             <TextView
                     android:id="@+id/item_date"

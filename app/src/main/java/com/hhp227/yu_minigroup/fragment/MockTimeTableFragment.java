@@ -13,6 +13,11 @@ public class MockTimeTableFragment extends Fragment {
     public MockTimeTableFragment() {
     }
 
+    public static MockTimeTableFragment newInstance() {
+        MockTimeTableFragment fragment = new MockTimeTableFragment();
+        return fragment;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_mock_timetable, container, false);

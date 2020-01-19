@@ -20,6 +20,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.material.snackbar.Snackbar;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.BbsListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
@@ -87,6 +88,7 @@ public class UnivNoticeFragment extends Fragment {
                         mHasRequestedMore = true;
                         mOffSet++; // offSet 증가
                         fetchDataList();
+                        Snackbar.make(recyclerView, "게시판 정보 불러오는 중...", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                     } else
                         mHasRequestedMore = false;
                 }
