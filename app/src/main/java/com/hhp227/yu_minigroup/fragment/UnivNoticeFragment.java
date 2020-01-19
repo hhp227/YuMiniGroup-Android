@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.android.volley.Request;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.hhp227.yu_minigroup.R;
@@ -107,11 +108,11 @@ public class UnivNoticeFragment extends Fragment {
 
     private void fetchDataList() {
         String tag_string_req = "req_yu_news";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.URL_YU_NOTICE.replace("{PAGE}", String.valueOf(mOffSet)), this::parseHTML, this::errorOccur);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.URL_YU_NOTICE.replace("{PAGE}", String.valueOf(mOffSet)), this::onResponse, this::onErrorResponse);
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
 
-    private void parseHTML(String response) {
+    private void onResponse(String response) {
         Source source = new Source(response);
         try {
             Element boardList = source.getFirstElementByClass("boardList");
@@ -138,7 +139,7 @@ public class UnivNoticeFragment extends Fragment {
         }
     }
 
-    private void errorOccur(VolleyError error) {
+    private void onErrorResponse(VolleyError error) {
         Log.e(TAG, error.getMessage());
         hideProgressBar();
     }

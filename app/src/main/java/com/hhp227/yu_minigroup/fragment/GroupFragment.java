@@ -102,8 +102,8 @@ public class GroupFragment extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
             mGroupItemKeys.clear();
             mGroupItemValues.clear();
-            fetchDataTask();
             mSwipeRefreshLayout.setRefreshing(false);
+            fetchDataTask();
         }, 1700));
         mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light, android.R.color.holo_orange_light, android.R.color.holo_red_light);
         bottomNavigationView.getMenu().getItem(0).setCheckable(false);

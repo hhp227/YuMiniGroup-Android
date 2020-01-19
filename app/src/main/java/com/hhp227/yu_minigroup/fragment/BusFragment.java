@@ -1,6 +1,5 @@
 package com.hhp227.yu_minigroup.fragment;
 
-
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,29 +10,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.viewpager.widget.ViewPager;
-import com.google.android.material.tabs.TabLayout;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.adapter.ViewPagerAdapter;
 
-public class TimetableFragment extends Fragment {
+public class BusFragment extends Fragment {
     private AppCompatActivity mActivity;
     private DrawerLayout mDrawerLayout;
-    private TabLayout mTabLayout;
     private Toolbar mToolbar;
-    private ViewPager mViewPager;
-    private ViewPagerAdapter mAdapter;
 
-    public TimetableFragment() {
+    public BusFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_tabs, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_bus, container, false);
         mActivity = (AppCompatActivity) getActivity();
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
         mToolbar = rootView.findViewById(R.id.toolbar);
-        mActivity.setTitle(getString(R.string.timetable));
+        mActivity.setTitle("Fragment04");
         mActivity.setSupportActionBar(mToolbar);
         setDrawerToggle();
 
