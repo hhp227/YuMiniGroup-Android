@@ -1,5 +1,7 @@
 package com.hhp227.yu_minigroup;
 
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -45,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
                     fragment = new TimetableFragment();
                     break;
                 case R.id.nav_menu4:
+                    android.content.ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    clipboard.setText(mPreferenceManager.getCookie());
+                    Toast.makeText(getApplicationContext(), "클립보드에 복사되었습니다!", Toast.LENGTH_SHORT).show();
                     break;
                 case R.id.nav_menu5:
                     mPreferenceManager.clear();

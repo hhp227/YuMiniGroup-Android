@@ -21,6 +21,15 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
+        <activity android:name=".ArticleActivity">
+        </activity>
+        <activity
+                android:name=".VerInfoActivity"
+                android:label="@string/title_activity_ver_info"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity android:name=".ChatActivity">
+        </activity>
         <activity android:name=".WebViewActivity">
         </activity>
         <activity
@@ -38,7 +47,9 @@
                 android:label="@string/title_create"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".GroupActivity">
+        <activity
+                android:name=".GroupActivity"
+                android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
                 android:name=".SplashActivity"

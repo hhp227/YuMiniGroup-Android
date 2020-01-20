@@ -49,14 +49,14 @@ public class SemesterTimeTableFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.GET, EndPoint.TIMETABLE, response -> {
             Element timeTable = new Source(response).getFirstElementByClass("bbslist");
             List<Element> list = timeTable.getAllElements(HTMLElementName.TR);
-            AtomicInteger atomicInteger = new AtomicInteger();
+            AtomicInteger atomInt = new AtomicInteger();
 
             list.stream().limit(ROW).forEach(element -> {
                 List<Element> schedule = element.getChildElements();
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
                 params.weight = 1; // 레이아웃의 weight를 동적으로 설정 (칸의 비율)
                 params.width = getLcdSizeWidth() / 6;
-                params.height = getLcdSizeHeight() / (atomicInteger.get() == 0 ? 20 : 14);
+                params.height = getLcdSizeHeight() / (atomInt.get() == 0 ? 20 : 14);
                 params.setMargins(1, 1, 1, 1);
                 params.gravity = 1;
 
@@ -68,15 +68,15 @@ public class SemesterTimeTableFragment extends Fragment {
 
                 schedule.stream().limit(COL).forEach(elem -> {
                     TextView textView = new TextView(getActivity());
-                    textView.setId(atomicInteger.get());
+                    textView.setId(atomInt.get());
                     textView.setTextSize(10);
                     textView.setGravity(Gravity.CENTER);
-                    textView.setBackgroundColor(Color.parseColor(atomicInteger.get() == 0 ? "#FAF4C0" : "#EAEAEA"));
+                    textView.setBackgroundColor(Color.parseColor(atomInt.get() == 0 ? "#FAF4C0" : "#F1F1F1"));
                     textView.setText(elem.getTextExtractor().toString());
 
                     mLayout.addView(textView, params); //시간표 데이터 출력
                 });
-                atomicInteger.getAndIncrement();
+                atomInt.getAndIncrement();
             });
             hideProgressBar();
         }, error -> {

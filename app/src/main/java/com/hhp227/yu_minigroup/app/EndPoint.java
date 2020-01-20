@@ -14,9 +14,12 @@ public interface EndPoint {
     String DELETE_GROUP = BASE_URL + "/ilos/community/share_group_delete.acl";
     String GROUP_MEMBER_LIST = BASE_URL + "/ilos/community/share_group_member_list.acl";
     String GROUP_IMAGE_UPDATE = BASE_URL + "/ilos/community/share_group_image_update.acl";
-    String NEW_MESSAGE = BASE_URL + "/ilos/message/received_new_message_check.acl";
+    String GROUP_ARTICLE_LIST = BASE_URL + "/ilos/community/share_list.acl";
+
+    String USER_IMAGE = BASE_URL + "/ilos/mp/user_image_view.acl?id={UID}&ext=.jpg";
     String GET_USER_IMAGE = BASE_URL + "/ilos/mp/myinfo_update_photo.acl";
     String TIMETABLE = BASE_URL + "/ilos/st/main/pop_academic_timetable_form.acl";
+    String NEW_MESSAGE = BASE_URL + "/ilos/message/received_new_message_check.acl";
 
     // 로그기록
     String CREATE_LOG = "http://knu.dothome.co.kr/knu/v1/register";

@@ -47,10 +47,9 @@ public class SplashActivity extends AppCompatActivity {
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                Log.e("테스트", response.allHeaders.toString());
-                for (Header header : response.allHeaders)
-                    if (header.getName().equals("Set-Cookie") && header.getValue().contains("SESSION_IMAX"))
-                        loginSSOyuPortal(id, password, header.getValue());
+                response.allHeaders.stream()
+                        .filter(header -> header.getName().equals("Set-Cookie") && header.getValue().contains("SESSION_IMAX"))
+                        .forEach(header -> loginSSOyuPortal(id, password, header.getValue()));
                 return super.parseNetworkResponse(response);
             }
 
@@ -75,10 +74,9 @@ public class SplashActivity extends AppCompatActivity {
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                List<Header> headers = response.allHeaders;
-                for (Header header : headers)
-                    if (header.getName().equals("Set-Cookie") && header.getValue().contains("ssotoken"))
-                        loginLMS(id, password, header.getValue(), cookie);
+                response.allHeaders.stream()
+                        .filter(header -> header.getName().equals("Set-Cookie") && header.getValue().contains("ssotoken"))
+                        .forEach(header -> loginLMS(id, password, header.getValue(), cookie));
                 return super.parseNetworkResponse(response);
             }
 
