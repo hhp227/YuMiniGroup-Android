@@ -120,12 +120,12 @@ public class FindActivity extends AppCompatActivity {
                         StringBuilder info = new StringBuilder();
                         String description = menuList.getAllElementsByClass("info").get(0).getContent().toString();
                         String joinType = menuList.getAllElementsByClass("info").get(1).getTextExtractor().toString().trim();
-                        for (Element span : element.getFirstElement(HTMLElementName.A).getAllElementsByClass("info")) {
+                        element.getFirstElement(HTMLElementName.A).getAllElementsByClass("info").forEach(span -> {
                             String extractedText = span.getTextExtractor().toString();
                             info.append(extractedText.contains("회원수") ?
                                     extractedText.substring(0, extractedText.lastIndexOf("생성일")).trim() + "\n" :
                                     extractedText + "\n");
-                        }
+                        });
                         mMinId = mMinId == 0 ? id : Math.min(mMinId, id);
                         if (id > mMinId) {
                             mHasRequestedMore = true;

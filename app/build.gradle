@@ -8,8 +8,8 @@ android {
         applicationId "com.hhp227.yu_minigroup"
         minSdkVersion 24
         targetSdkVersion 28
-        versionCode 3
-        versionName "1.02"
+        versionCode 4
+        versionName "1.03"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
