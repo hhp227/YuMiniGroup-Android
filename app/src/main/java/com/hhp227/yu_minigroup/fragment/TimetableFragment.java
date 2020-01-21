@@ -35,7 +35,7 @@ public class TimetableFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tabs, container, false);
         List<Fragment> fragmentList = new ArrayList<>();
-        FragmentPagerAdapter adapter = new FragmentPagerAdapter(getChildFragmentManager(), 0) {
+        FragmentPagerAdapter adapter = new FragmentPagerAdapter(getChildFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
             @Override
             public int getCount() {
                 return fragmentList.size();

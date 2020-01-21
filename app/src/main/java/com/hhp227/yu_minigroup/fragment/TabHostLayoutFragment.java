@@ -1,6 +1,6 @@
 package com.hhp227.yu_minigroup.fragment;
 
-
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -15,6 +15,7 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.WriteActivity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -75,7 +76,7 @@ public class TabHostLayoutFragment extends Fragment {
                 .add(Tab4Fragment.newInstance(mIsAdmin, mGroupId, mPosition, mKey))
                 .build()
                 .collect(Collectors.toList());
-        FragmentPagerAdapter adapter = new FragmentPagerAdapter(getChildFragmentManager(), 0) {
+        FragmentPagerAdapter adapter = new FragmentPagerAdapter(getChildFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
             @Override
             public Fragment getItem(int position) {
                 return fragmentList.get(position);
@@ -88,6 +89,8 @@ public class TabHostLayoutFragment extends Fragment {
         };
 
         activity.setSupportActionBar(toolbar);
+        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        activity.getSupportActionBar().setTitle(mGroupName);
         toolbarLayout.setTitleEnabled(false);
         Arrays.stream(TAB_NAMES).forEach(s -> tabLayout.addTab(tabLayout.newTab().setText(s)));
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -107,7 +110,18 @@ public class TabHostLayoutFragment extends Fragment {
             }
         });
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        viewPager.setOffscreenPageLimit(TAB_NAMES.length);
         viewPager.setAdapter(adapter);
+        floatingActionButton.setOnClickListener(v -> {
+            if (tabLayout.getSelectedTabPosition() == 0) {
+                Intent intent = new Intent(getActivity(), WriteActivity.class);
+                intent.putExtra("admin", mIsAdmin);
+                intent.putExtra("grp_id", mGroupId);
+                intent.putExtra("grp_nm", mGroupName);
+                intent.putExtra("key", mKey);
+                startActivity(intent);
+            }
+        });
 
         return rootView;
     }
