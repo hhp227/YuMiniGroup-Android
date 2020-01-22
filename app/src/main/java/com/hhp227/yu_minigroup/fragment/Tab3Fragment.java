@@ -72,17 +72,16 @@ public class Tab3Fragment extends Fragment {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+                if (!mHasRequestedMore && !recyclerView.canScrollVertically(1)) {
+                    mHasRequestedMore = true;
+                    mOffSet += LIMIT;
+                    fetchMemberList();
+                }
             }
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                if (!mHasRequestedMore && dy > 0 && manager != null && manager.findLastCompletelyVisibleItemPosition() >= manager.getItemCount() - 1) {
-                    mHasRequestedMore = true;
-                    mOffSet += LIMIT;
-                    fetchMemberList();
-                }
             }
         });
         swipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {

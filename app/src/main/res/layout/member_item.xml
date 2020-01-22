@@ -18,7 +18,7 @@
                 android:padding="5dp"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/profile_image"
+                android:src="@drawable/profile_img_sqare"
                 android:scaleType="fitCenter"/>
 
     </RelativeLayout>

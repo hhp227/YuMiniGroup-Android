@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SemesterTimeTableFragment extends Fragment {
     private static final int ROW = 26;
     private static final int COL = 6;
-    private static final String TAG = "시간표";
     private LinearLayout mLayout;
     private ProgressBar mProgressBar;
 
@@ -80,7 +79,7 @@ public class SemesterTimeTableFragment extends Fragment {
             });
             hideProgressBar();
         }, error -> {
-            VolleyLog.e(TAG, error.getMessage());
+            VolleyLog.e(TimetableFragment.TAG, error.getMessage());
             hideProgressBar();
         }) {
             @Override

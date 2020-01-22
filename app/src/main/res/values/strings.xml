@@ -25,4 +25,5 @@
     <string name="native_ad">ca-app-pub-6359051986076073/1199386432</string>
     <string name="ad_attribution">Ad</string>
     <string name="title_activity_ver_info">VerInfoActivity</string>
+    <string name="banner_ad_unit_id_settings">ca-app-pub-6359051986076073/6935134700</string>
 </resources>

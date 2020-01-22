@@ -78,12 +78,7 @@ public class UnivNoticeFragment extends Fragment {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                if (!mHasRequestedMore && dy > 0 && linearLayoutManager.findLastCompletelyVisibleItemPosition() >= linearLayoutManager.getItemCount() - 1) {
+                if (!mHasRequestedMore && !recyclerView.canScrollVertically(1)) {
                     if (mOffSet != MAX_PAGE) {
                         mHasRequestedMore = true;
                         mOffSet++; // offSet 증가
@@ -92,6 +87,11 @@ public class UnivNoticeFragment extends Fragment {
                     } else
                         mHasRequestedMore = false;
                 }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
             }
         });
         recyclerView.setLayoutManager(linearLayoutManager);

@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TimetableFragment extends Fragment {
+    public static final String TAG = "시간표";
+
     private static final String[] TAB_NAMES = {"학기시간표", "모의시간표 작성"};
     private AppCompatActivity mActivity;
     private DrawerLayout mDrawerLayout;

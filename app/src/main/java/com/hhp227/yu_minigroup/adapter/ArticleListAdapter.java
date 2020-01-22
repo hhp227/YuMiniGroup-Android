@@ -55,7 +55,7 @@ public class ArticleListAdapter extends RecyclerView.Adapter<ArticleListAdapter.
                 .load(articleItem.getUid() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", articleItem.getUid()), new LazyHeaders.Builder()
                         .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
                         .build()) : null)
-                .apply(RequestOptions.errorOf(R.drawable.profile_image).circleCrop())
+                .apply(RequestOptions.errorOf(R.drawable.profile_img_circle).circleCrop())
                 .into(holder.profileImage);
         holder.title.setText(articleItem.getName() != null ? articleItem.getTitle() + " - " + articleItem.getName() : articleItem.getTitle());
         holder.timestamp.setText(articleItem.getDate() != null ? articleItem.getDate() : new SimpleDateFormat("yyyy.MM.dd a h:mm:ss").format(articleItem.getTimestamp()));
