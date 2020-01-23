@@ -15,7 +15,7 @@ import com.hhp227.yu_minigroup.dto.BbsItem;
 
 import java.util.List;
 
-public class BbsListAdapter extends RecyclerView.Adapter<BbsListAdapter.BbsListViewHolder> {
+public class BbsListAdapter extends RecyclerView.Adapter<BbsListAdapter.BbsListHolder> {
     private Activity mActivity;
     private List<BbsItem> mBbsItemList;
 
@@ -25,13 +25,13 @@ public class BbsListAdapter extends RecyclerView.Adapter<BbsListAdapter.BbsListV
     }
 
     @Override
-    public BbsListAdapter.BbsListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public BbsListAdapter.BbsListHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mActivity).inflate(R.layout.bbs_item, parent, false);
-        return new BbsListViewHolder(view);
+        return new BbsListHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(BbsListAdapter.BbsListViewHolder holder, int position) {
+    public void onBindViewHolder(BbsListAdapter.BbsListHolder holder, int position) {
         BbsItem bbsItem = mBbsItemList.get(position);
         holder.title.setText(bbsItem.getTitle());
         holder.writer.setText(bbsItem.getWriter());
@@ -48,11 +48,11 @@ public class BbsListAdapter extends RecyclerView.Adapter<BbsListAdapter.BbsListV
         return mBbsItemList.size();
     }
 
-    public static class BbsListViewHolder extends RecyclerView.ViewHolder {
+    public static class BbsListHolder extends RecyclerView.ViewHolder {
         private CardView cardView;
         private TextView title, writer, date;
 
-        public BbsListViewHolder(View itemView) {
+        public BbsListHolder(View itemView) {
             super(itemView);
             cardView = itemView.findViewById(R.id.card_view);
             title = itemView.findViewById(R.id.item_title);

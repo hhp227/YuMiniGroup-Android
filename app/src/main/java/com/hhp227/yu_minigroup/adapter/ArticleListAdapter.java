@@ -49,7 +49,7 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         switch (viewType) {
             case TYPE_ITEM:
                 View itemView = LayoutInflater.from(mActivity).inflate(R.layout.article_item, parent, false);
-                return new ArticleItemViewHolder(itemView);
+                return new ArticleItemHolder(itemView);
             case TYPE_LOADER:
                 View footerView = LayoutInflater.from(mActivity).inflate(R.layout.load_more, parent, false);
                 return new FooterHolder(footerView);
@@ -59,10 +59,10 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof ArticleItemViewHolder) {
+        if (holder instanceof ArticleItemHolder) {
             ArticleItem articleItem = mArticleItemValues.get(position);
 
-            ((ArticleItemViewHolder) holder).article.setOnClickListener(v -> {
+            ((ArticleItemHolder) holder).article.setOnClickListener(v -> {
                 if (mOnItemClickListener != null)
                     mOnItemClickListener.onItemClick(v, position);
             });
@@ -71,30 +71,30 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                             .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
                             .build()) : null)
                     .apply(RequestOptions.errorOf(R.drawable.profile_img_circle).circleCrop())
-                    .into(((ArticleItemViewHolder) holder).profileImage);
-            ((ArticleItemViewHolder) holder).title.setText(articleItem.getName() != null ? articleItem.getTitle() + " - " + articleItem.getName() : articleItem.getTitle());
-            ((ArticleItemViewHolder) holder).timestamp.setText(articleItem.getDate() != null ? articleItem.getDate() : new SimpleDateFormat("yyyy.MM.dd a h:mm:ss").format(articleItem.getTimestamp()));
+                    .into(((ArticleItemHolder) holder).profileImage);
+            ((ArticleItemHolder) holder).title.setText(articleItem.getName() != null ? articleItem.getTitle() + " - " + articleItem.getName() : articleItem.getTitle());
+            ((ArticleItemHolder) holder).timestamp.setText(articleItem.getDate() != null ? articleItem.getDate() : new SimpleDateFormat("yyyy.MM.dd a h:mm:ss").format(articleItem.getTimestamp()));
             if (!TextUtils.isEmpty(articleItem.getContent())) {
-                ((ArticleItemViewHolder) holder).content.setText(articleItem.getContent());
-                ((ArticleItemViewHolder) holder).content.setMaxLines(CONTENT_MAX_LINE);
-                ((ArticleItemViewHolder) holder).content.setVisibility(View.VISIBLE);
+                ((ArticleItemHolder) holder).content.setText(articleItem.getContent());
+                ((ArticleItemHolder) holder).content.setMaxLines(CONTENT_MAX_LINE);
+                ((ArticleItemHolder) holder).content.setVisibility(View.VISIBLE);
             } else
-                ((ArticleItemViewHolder) holder).content.setVisibility(View.GONE);
+                ((ArticleItemHolder) holder).content.setVisibility(View.GONE);
 
-            ((ArticleItemViewHolder) holder).contentMore.setVisibility(!TextUtils.isEmpty(articleItem.getContent()) && ((ArticleItemViewHolder) holder).content.getLineCount() > CONTENT_MAX_LINE ? View.VISIBLE : View.GONE);
+            ((ArticleItemHolder) holder).contentMore.setVisibility(!TextUtils.isEmpty(articleItem.getContent()) && ((ArticleItemHolder) holder).content.getLineCount() > CONTENT_MAX_LINE ? View.VISIBLE : View.GONE);
             if (articleItem.getImages() != null && articleItem.getImages().size() > 0) {
-                ((ArticleItemViewHolder) holder).articleImage.setVisibility(View.VISIBLE);
+                ((ArticleItemHolder) holder).articleImage.setVisibility(View.VISIBLE);
                 Glide.with(mActivity)
                         .load(articleItem.getImages().get(0))
                         .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
                         .transition(DrawableTransitionOptions.withCrossFade(150))
-                        .into(((ArticleItemViewHolder) holder).articleImage);
+                        .into(((ArticleItemHolder) holder).articleImage);
             } else
-                ((ArticleItemViewHolder) holder).articleImage.setVisibility(View.GONE);
-            ((ArticleItemViewHolder) holder).replyCount.setText(articleItem.getReplyCount());
+                ((ArticleItemHolder) holder).articleImage.setVisibility(View.GONE);
+            ((ArticleItemHolder) holder).replyCount.setText(articleItem.getReplyCount());
 
-            ((ArticleItemViewHolder) holder).replyButton.setTag(position);
-            ((ArticleItemViewHolder) holder).replyButton.setOnClickListener(v -> {
+            ((ArticleItemHolder) holder).replyButton.setTag(position);
+            ((ArticleItemHolder) holder).replyButton.setOnClickListener(v -> {
                 Intent intent = new Intent(mActivity, ArticleActivity.class);
                 intent.putExtra("grp_id", Tab1Fragment.mGroupId);
                 intent.putExtra("grp_nm", Tab1Fragment.mGroupName);
@@ -137,13 +137,13 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         return mArticleItemKeys.get(position);
     }
 
-    public static class ArticleItemViewHolder extends RecyclerView.ViewHolder {
+    public static class ArticleItemHolder extends RecyclerView.ViewHolder {
         private CardView article;
         private ImageView profileImage, articleImage;
         private LinearLayout replyButton, likeButton;
         private TextView title, timestamp, content, contentMore, replyCount, likeCount;
 
-        public ArticleItemViewHolder(View itemView) {
+        public ArticleItemHolder(View itemView) {
             super(itemView);
             article = itemView.findViewById(R.id.cv_article);
             profileImage = itemView.findViewById(R.id.iv_profile_image);

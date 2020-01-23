@@ -77,16 +77,16 @@ public class Tab4Fragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_tab4, container, false);
         RecyclerView recyclerView = rootView.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(new RecyclerView.Adapter<Tab4ViewHolder>() {
+        recyclerView.setAdapter(new RecyclerView.Adapter<Tab4Holder>() {
 
             @Override
-            public Tab4ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            public Tab4Holder onCreateViewHolder(ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(getContext()).inflate(R.layout.content_tab4, parent, false);
-                return new Tab4ViewHolder(view);
+                return new Tab4Holder(view);
             }
 
             @Override
-            public void onBindViewHolder(Tab4ViewHolder holder, int position) {
+            public void onBindViewHolder(Tab4Holder holder, int position) {
                 mUser = AppController.getInstance().getPreferenceManager().getUser();
                 String stuYuId = mUser.getUserId();
                 String userName = mUser.getName();
@@ -273,12 +273,12 @@ public class Tab4Fragment extends Fragment {
         }
     }
 
-    public class Tab4ViewHolder extends RecyclerView.ViewHolder {
+    public class Tab4Holder extends RecyclerView.ViewHolder {
         private LinearLayout profile, withdrawal, settings, appStore, share, version;
         private ImageView profileImage;
         private TextView name, yuId, withdrawalText;
 
-        public Tab4ViewHolder(View itemView) {
+        public Tab4Holder(View itemView) {
             super(itemView);
             appStore = itemView.findViewById(R.id.ll_appstore);
             name = itemView.findViewById(R.id.tv_name);

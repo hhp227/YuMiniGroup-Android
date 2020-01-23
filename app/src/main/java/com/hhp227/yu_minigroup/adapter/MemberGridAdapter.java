@@ -18,23 +18,23 @@ import com.hhp227.yu_minigroup.dto.MemberItem;
 
 import java.util.List;
 
-public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.MemberGridViewHolder> {
+public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.MemberGridHolder> {
     private Activity mActivity;
     private List<MemberItem> mMemberItemList;
 
-    public MemberGridAdapter(Activity mActivity, List<MemberItem> mMemberItemList) {
-        this.mActivity = mActivity;
-        this.mMemberItemList = mMemberItemList;
+    public MemberGridAdapter(Activity activity, List<MemberItem> memberItemList) {
+        this.mActivity = activity;
+        this.mMemberItemList = memberItemList;
     }
 
     @Override
-    public MemberGridViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MemberGridHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mActivity).inflate(R.layout.member_item, parent, false);
-        return new MemberGridViewHolder(view);
+        return new MemberGridHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(MemberGridViewHolder holder, int position) {
+    public void onBindViewHolder(MemberGridHolder holder, int position) {
         MemberItem memberItem = mMemberItemList.get(position);
         holder.name.setText(memberItem.name);
         Glide.with(mActivity)
@@ -50,11 +50,11 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
         return mMemberItemList.size();
     }
 
-    public static class MemberGridViewHolder extends RecyclerView.ViewHolder {
+    public static class MemberGridHolder extends RecyclerView.ViewHolder {
         private ImageView profileImage;
         private TextView name;
 
-        public MemberGridViewHolder(View itemView) {
+        public MemberGridHolder(View itemView) {
             super(itemView);
             profileImage = itemView.findViewById(R.id.iv_profile_image);
             name = itemView.findViewById(R.id.tv_name);

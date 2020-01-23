@@ -16,7 +16,7 @@ import com.hhp227.yu_minigroup.dto.GroupItem;
 
 import java.util.List;
 
-public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.GroupGridViewHolder> {
+public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.GroupGridHolder> {
     private Context mContext;
     private List<String> mGroupItemKeys;
     private List<GroupItem> mGroupItemValues;
@@ -29,13 +29,13 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.Grou
     }
 
     @Override
-    public GroupGridViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public GroupGridHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.group_grid_item, parent, false);
-        return new GroupGridViewHolder(itemView);
+        return new GroupGridHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(GroupGridViewHolder holder, int position) {
+    public void onBindViewHolder(GroupGridHolder holder, int position) {
         GroupItem groupItem = mGroupItemValues.get(position);
         if (!groupItem.isAd()) {
             holder.groupLayout.setOnClickListener(v -> {
@@ -130,14 +130,14 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.Grou
         return mGroupItemKeys.get(position);
     }
 
-    public static class GroupGridViewHolder extends RecyclerView.ViewHolder {
+    public static class GroupGridHolder extends RecyclerView.ViewHolder {
         private ImageView groupImage, more;
         private MediaView mediaView;
         private RelativeLayout groupLayout;
         private TextView groupName, headlineView, bodyView, advertiser;
         private UnifiedNativeAdView adView;
 
-        public GroupGridViewHolder(View itemView) {
+        public GroupGridHolder(View itemView) {
             super(itemView);
             adView = itemView.findViewById(R.id.unav);
             groupLayout = itemView.findViewById(R.id.rl_group);
