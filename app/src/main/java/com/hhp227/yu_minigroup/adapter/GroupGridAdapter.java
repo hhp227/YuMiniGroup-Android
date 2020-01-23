@@ -122,8 +122,8 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.Grou
         return adText;
     }
 
-    public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
-        this.mOnItemClickListener = mOnItemClickListener;
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.mOnItemClickListener = onItemClickListener;
     }
 
     public String getKey(int position) {

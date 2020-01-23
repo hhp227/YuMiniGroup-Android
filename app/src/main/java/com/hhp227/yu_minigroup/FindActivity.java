@@ -69,15 +69,10 @@ public class FindActivity extends AppCompatActivity {
         });
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                if (!mHasRequestedMore && dy > 0 && manager != null && manager.findLastCompletelyVisibleItemPosition() >= manager.getItemCount() - 4) {
+                if (!mHasRequestedMore && dy > 0 && manager != null && manager.findLastCompletelyVisibleItemPosition() >= manager.getItemCount() - 1) {
                     mHasRequestedMore = true;
                     mOffSet += LIMIT;
                     mAdapter.setFooterProgressBarVisibility(View.VISIBLE);
@@ -144,13 +139,14 @@ public class FindActivity extends AppCompatActivity {
                     }
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
+                } finally {
+                    initFirebaseData();
                 }
             }
             mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             mAdapter.notifyDataSetChanged();
             hideProgressBar();
             mRelativeLayout.setVisibility(mGroupItemValues.isEmpty() ? View.VISIBLE : View.GONE);
-            initFirebaseData();
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
             hideProgressBar();

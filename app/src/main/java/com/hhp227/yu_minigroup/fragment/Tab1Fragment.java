@@ -1,8 +1,14 @@
 package com.hhp227.yu_minigroup.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
+import android.util.Log;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +20,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
+import com.google.firebase.database.*;
+import com.hhp227.yu_minigroup.ArticleActivity;
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.WriteActivity;
 import com.hhp227.yu_minigroup.adapter.ArticleListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
@@ -35,12 +44,15 @@ public class Tab1Fragment extends Fragment {
     public static boolean mIsAdmin;
     public static String mGroupId, mGroupName, mKey;
 
+    private static final String TAG = "소식";
     private boolean mHasRequestedMore;
     private int mOffSet;
     private long mLastClickTime;
     private ArticleListAdapter mAdapter;
     private List<String> mArticleItemKeys;
     private List<ArticleItem> mArticleItemValues;
+    private ProgressBar mProgressBar;
+    private RelativeLayout mRelativeLayout;
 
     public Tab1Fragment() {
     }
@@ -70,20 +82,69 @@ public class Tab1Fragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tab1, container, false);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         RecyclerView recyclerView = rootView.findViewById(R.id.rv_article);
         SwipeRefreshLayout swipeRefreshLayout = rootView.findViewById(R.id.srl_article_list);
+        mProgressBar = rootView.findViewById(R.id.pb_article);
+        mRelativeLayout = rootView.findViewById(R.id.rl_write);
         mArticleItemKeys = new ArrayList<>();
         mArticleItemValues = new ArrayList<>();
         mAdapter = new ArticleListAdapter(getActivity(), mArticleItemKeys, mArticleItemValues, mKey);
         mOffSet = 1;
 
-        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(mAdapter);
+        recyclerView.post(() -> {
+            mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
+            mAdapter.addFooterView();
+        });
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (!mHasRequestedMore && dy > 0 && layoutManager != null && layoutManager.findLastCompletelyVisibleItemPosition() >= layoutManager.getItemCount() - 1) {
+                    mHasRequestedMore = true;
+                    mOffSet += LIMIT;
+                    mAdapter.setFooterProgressBarVisibility(View.VISIBLE);
+                    mAdapter.notifyDataSetChanged();
+                    fetchArticleList();
+                }
+            }
+        });
+        mAdapter.setOnItemClickListener((v, position) -> {
+            ArticleItem articleItem = mArticleItemValues.get(position);
+            Intent intent = new Intent(getContext(), ArticleActivity.class);
+            intent.putExtra("admin", mIsAdmin);
+            intent.putExtra("grp_id", mGroupId);
+            intent.putExtra("grp_nm", mGroupName);
+            intent.putExtra("artl_num", articleItem.getId());
+            intent.putExtra("position", position + 1);
+            intent.putExtra("auth", articleItem.isAuth() || AppController.getInstance().getPreferenceManager().getUser().getUid().equals(articleItem.getUid()));
+            intent.putExtra("grp_key", mKey);
+            intent.putExtra("artl_key", mAdapter.getKey(position));
+            startActivityForResult(intent, UPDATE_ARTICLE);
+        });
+        mRelativeLayout.setOnClickListener(v -> {
+            if (SystemClock.elapsedRealtime() - mLastClickTime < 1000)
+                return;
+            mLastClickTime = SystemClock.elapsedRealtime();
+            Intent intent = new Intent(getActivity(), WriteActivity.class);
+            intent.putExtra("admin", mIsAdmin);
+            intent.putExtra("grp_id", mGroupId);
+            intent.putExtra("grp_nm", mGroupName);
+            intent.putExtra("key", mKey);
+            startActivity(intent);
+        });
         swipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
+            mOffSet = 1;
+            mArticleItemKeys.clear();
+            mArticleItemValues.clear();
+            mAdapter.addFooterView();
             swipeRefreshLayout.setRefreshing(false);
+            fetchArticleList();
         }, 2000));
         swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_red_light, android.R.color.holo_orange_light, android.R.color.holo_green_light, android.R.color.holo_blue_bright);
+        showProgressBar();
         fetchArticleList();
 
         return rootView;
@@ -126,18 +187,22 @@ public class Tab1Fragment extends Fragment {
                     articleItem.setReplyCount(replyCnt);
                     articleItem.setAuth(auth);
 
-                    mArticleItemKeys.add(id);
-                    mArticleItemValues.add(articleItem);
+                    mArticleItemKeys.add(mArticleItemKeys.size() - 1, id);
+                    mArticleItemValues.add(mArticleItemValues.size() - 1, articleItem);
                 }
-                mAdapter.notifyDataSetChanged();
                 mHasRequestedMore = false;
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, e.getMessage());
             } finally {
-
+                initFirebaseData();
             }
+            mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
+            mAdapter.notifyDataSetChanged();
+            hideProgressBar();
+            mRelativeLayout.setVisibility(mArticleItemValues.size() > 1 ? View.GONE : View.VISIBLE);
         }, error -> {
             VolleyLog.e(error.getMessage());
+            hideProgressBar();
         }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -147,5 +212,45 @@ public class Tab1Fragment extends Fragment {
             }
         };
         AppController.getInstance().addToRequestQueue(stringRequest);
+    }
+
+    private void initFirebaseData() {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Articles");
+        fetchArticleListFromFirebase(databaseReference.child(mKey));
+    }
+
+    private void fetchArticleListFromFirebase(Query query) {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String key = snapshot.getKey();
+                    ArticleItem value = snapshot.getValue(ArticleItem.class);
+                    int index = mArticleItemKeys.indexOf(value.getId());
+                    if (index > -1) {
+                        ArticleItem articleItem = mArticleItemValues.get(index);
+                        articleItem.setUid(value.getUid());
+                        mArticleItemValues.set(index, articleItem);
+                        mArticleItemKeys.set(index, key);
+                    }
+                }
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("파이어베이스", databaseError.getMessage());
+            }
+        });
+    }
+
+    private void showProgressBar() {
+        if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE)
+            mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressBar() {
+        if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE)
+            mProgressBar.setVisibility(View.GONE);
     }
 }

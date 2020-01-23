@@ -131,6 +131,8 @@ public class RequestActivity extends AppCompatActivity {
                     }
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
+                } finally {
+                    initFirebaseData();
                 }
             }
             mHasRequestedMore = false;
@@ -138,7 +140,6 @@ public class RequestActivity extends AppCompatActivity {
             mAdapter.notifyDataSetChanged();
             hideProgressBar();
             mRelativeLayout.setVisibility(mGroupItemValues.size() > 1 ? View.GONE : View.VISIBLE);
-            initFirebaseData();
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
             hideProgressBar();
