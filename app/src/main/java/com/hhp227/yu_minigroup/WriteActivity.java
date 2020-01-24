@@ -1,5 +1,6 @@
 package com.hhp227.yu_minigroup;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -31,10 +33,12 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.WriteItem;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
+import com.hhp227.yu_minigroup.volley.util.MultipartRequest;
 import net.htmlparser.jericho.Source;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -50,6 +54,8 @@ public class WriteActivity extends AppCompatActivity {
     private List<String> mImages;
     private List<WriteItem> mContents;
     private PreferenceManager mPreferenceManager;
+    private ProgressDialog mProgressDialog;
+    private RecyclerView mRecyclerView;
     private StringBuilder mMakeHtmlImages;
     private Uri mPhotoUri;
     private WriteListAdapter mAdapter;
@@ -61,11 +67,12 @@ public class WriteActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         LinearLayout buttonImage = findViewById(R.id.ll_image);
         LinearLayout buttonVideo = findViewById(R.id.ll_video);
-        RecyclerView recyclerView = findViewById(R.id.rv_write);
+        mRecyclerView = findViewById(R.id.rv_write);
         mContents = new ArrayList<>();
         mAdapter = new WriteListAdapter(this, mContents);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookie = mPreferenceManager.getCookie();
+        mProgressDialog = new ProgressDialog(this);
         mIsAdmin = getIntent().getBooleanExtra("admin", false);
         mGrpId = getIntent().getStringExtra("grp_id");
         mGrpNm = getIntent().getStringExtra("grp_nm");
@@ -74,10 +81,11 @@ public class WriteActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mAdapter.addHeaderView();
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(mAdapter);
         buttonImage.setOnClickListener(this::showContextMenu);
         buttonVideo.setOnClickListener(this::showContextMenu);
+        mProgressDialog.setCancelable(false);
     }
 
     @Override
@@ -99,10 +107,13 @@ public class WriteActivity extends AppCompatActivity {
                 if (!title.isEmpty() && !(TextUtils.isEmpty(content) && mContents.size() < 2)) {
                     mMakeHtmlImages = new StringBuilder();
                     mImages = new ArrayList<>();
+                    mProgressDialog.setMessage("전송중...");
+                    mProgressDialog.setProgressStyle(mContents.size() > 1 ? ProgressDialog.STYLE_HORIZONTAL : ProgressDialog.STYLE_SPINNER);
+                    showProgressDialog();
 
                     if (mContents.size() > 1) {
-                        int position = 0;
-
+                        int position = 1;
+                        uploadImage(position, mContents.get(position).getBitmap());
                     } else
                         actionSend(mGrpId, title, content);
                 } else
@@ -203,13 +214,60 @@ public class WriteActivity extends AppCompatActivity {
     }
 
     private void uploadImage(int position, Bitmap bitmap) {
+        MultipartRequest multipartRequest = new MultipartRequest(Request.Method.POST, EndPoint.IMAGE_UPLOAD, response -> {
+            int count = position;
+            mProgressDialog.setProgress((int) ((double) (count) / mContents.size() * 100));
+            try {
+                String imageSrc = new String(response.data);
+                imageSrc = EndPoint.BASE_URL + imageSrc.substring(imageSrc.lastIndexOf("/ilosfiles2/"), imageSrc.lastIndexOf("\""));
+                mMakeHtmlImages.append("<p><img src=\"" + imageSrc + "\" width=\"488\"><p>" + (count < mContents.size() - 1 ? "<br>": ""));
+                mImages.add(imageSrc);
+                if (count < mContents.size() - 1) {
+                    count++;
+                    Thread.sleep(700);
+                    uploadImage(count, mContents.get(count).getBitmap());
+                } else {
+                    WriteListAdapter.HeaderHolder holder = mAdapter.getHeaderHolder();
+                    String title = holder.inputTitle.getEditableText().toString();
+                    String content = (!TextUtils.isEmpty(holder.inputContent.getText()) ? Html.toHtml((Spanned) holder.inputContent.getText(), Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL) + "<p><br data-mce-bogus=\"1\"></p>" : "") + mMakeHtmlImages.toString();
+                    actionSend(mGrpId, title, content);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Snackbar.make(getCurrentFocus(), "이미지 업로드 실패", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                hideProgressDialog();
+            }
+        }, error -> {
+            VolleyLog.e(error.getMessage());
+            hideProgressDialog();
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Cookie", mCookie);
+                return headers;
+            }
 
+            @Override
+            protected Map<String, DataPart> getByteData() {
+                Map<String, DataPart> params = new HashMap<>();
+                params.put("file", new DataPart(System.currentTimeMillis() + position + ".jpg", getFileDataFromDrawable(bitmap)));
+                return params;
+            }
+
+            private byte[] getFileDataFromDrawable(Bitmap bitmap) {
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 80, byteArrayOutputStream);
+                return byteArrayOutputStream.toByteArray();
+            }
+        };
+        Volley.newRequestQueue(this).add(multipartRequest);
     }
 
     private void actionSend(String grpId, String title, String content) {
         String tagStringReq = "req_send";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.WRITE_ARTICLE, response -> {
-            //hideProgressDialog();
+            hideProgressDialog();
 
             try {
                 JSONObject jsonObject = new JSONObject(response);
@@ -233,7 +291,7 @@ public class WriteActivity extends AppCompatActivity {
         }, error -> {
             VolleyLog.e(error.getMessage());
             Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
-            //hideProgressDialog();
+            hideProgressDialog();
         }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -302,5 +360,15 @@ public class WriteActivity extends AppCompatActivity {
         map.put("images", mImages);
 
         databaseReference.child(mKey).push().setValue(map);
+    }
+
+    private void showProgressDialog() {
+        if (!mProgressDialog.isShowing())
+            mProgressDialog.show();
+    }
+
+    private void hideProgressDialog() {
+        if (mProgressDialog.isShowing())
+            mProgressDialog.dismiss();
     }
 }
