@@ -2,7 +2,6 @@ package com.hhp227.yu_minigroup.fragment;
 
 import android.os.Bundle;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +34,6 @@ public class Tab2Fragment extends Fragment {
         mList = new ArrayList<>();
         mCalendar = Calendar.getInstance();
         mAdapter = new RecyclerView.Adapter() {
-
             @Override
             public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 if (viewType == TYPE_CALENDAR) {

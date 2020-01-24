@@ -15,6 +15,7 @@ public interface EndPoint {
     String GROUP_MEMBER_LIST = BASE_URL + "/ilos/community/share_group_member_list.acl";
     String GROUP_IMAGE_UPDATE = BASE_URL + "/ilos/community/share_group_image_update.acl";
     String GROUP_ARTICLE_LIST = BASE_URL + "/ilos/community/share_list.acl";
+    String WRITE_ARTICLE = BASE_URL + "/ilos/community/share_insert.acl";
 
     String MEMBER_LIST = BASE_URL + "/ilos/community/share_member_list.acl";
     String USER_IMAGE = BASE_URL + "/ilos/mp/user_image_view.acl?id={UID}&ext=.jpg";
