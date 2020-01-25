@@ -55,7 +55,6 @@ public class WriteActivity extends AppCompatActivity {
     private List<WriteItem> mContents;
     private PreferenceManager mPreferenceManager;
     private ProgressDialog mProgressDialog;
-    private RecyclerView mRecyclerView;
     private StringBuilder mMakeHtmlImages;
     private Uri mPhotoUri;
     private WriteListAdapter mAdapter;
@@ -67,7 +66,7 @@ public class WriteActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         LinearLayout buttonImage = findViewById(R.id.ll_image);
         LinearLayout buttonVideo = findViewById(R.id.ll_video);
-        mRecyclerView = findViewById(R.id.rv_write);
+        RecyclerView recyclerView = findViewById(R.id.rv_write);
         mContents = new ArrayList<>();
         mAdapter = new WriteListAdapter(this, mContents);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
@@ -81,8 +80,8 @@ public class WriteActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mAdapter.addHeaderView();
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setAdapter(mAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(mAdapter);
         buttonImage.setOnClickListener(this::showContextMenu);
         buttonVideo.setOnClickListener(this::showContextMenu);
         mProgressDialog.setCancelable(false);
@@ -216,10 +215,10 @@ public class WriteActivity extends AppCompatActivity {
     private void uploadImage(int position, Bitmap bitmap) {
         MultipartRequest multipartRequest = new MultipartRequest(Request.Method.POST, EndPoint.IMAGE_UPLOAD, response -> {
             int count = position;
-            mProgressDialog.setProgress((int) ((double) (count) / mContents.size() * 100));
+            mProgressDialog.setProgress((int) ((double) (count) / (mContents.size() - 1) * 100));
             try {
                 String imageSrc = new String(response.data);
-                imageSrc = EndPoint.BASE_URL + imageSrc.substring(imageSrc.lastIndexOf("/ilosfiles2/"), imageSrc.lastIndexOf("\""));
+                imageSrc = EndPoint.BASE_URL + imageSrc.substring(imageSrc.lastIndexOf("/ilosfiles/"), imageSrc.lastIndexOf("\""));
                 mMakeHtmlImages.append("<p><img src=\"" + imageSrc + "\" width=\"488\"><p>" + (count < mContents.size() - 1 ? "<br>": ""));
                 mImages.add(imageSrc);
                 if (count < mContents.size() - 1) {
