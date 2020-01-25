@@ -27,7 +27,7 @@ import java.util.List;
 import static com.hhp227.yu_minigroup.fragment.Tab1Fragment.UPDATE_ARTICLE;
 
 public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private static final int TYPE_ITEM = 0;
+    private static final int TYPE_ARTICLE = 0;
     private static final int TYPE_LOADER = 1;
     private static final int CONTENT_MAX_LINE = 4;
     private int mProgressBarVisibility;
@@ -47,7 +47,7 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
-            case TYPE_ITEM:
+            case TYPE_ARTICLE:
                 View itemView = LayoutInflater.from(mActivity).inflate(R.layout.article_item, parent, false);
                 return new ArticleItemHolder(itemView);
             case TYPE_LOADER:
@@ -117,7 +117,7 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public int getItemViewType(int position) {
-        return mArticleItemValues.get(position) != null ? TYPE_ITEM : TYPE_LOADER;
+        return mArticleItemValues.get(position) != null ? TYPE_ARTICLE : TYPE_LOADER;
     }
 
     public void addFooterView() {

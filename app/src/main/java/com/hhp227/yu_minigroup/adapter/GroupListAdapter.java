@@ -19,7 +19,7 @@ import com.hhp227.yu_minigroup.fragment.GroupInfoFragment;
 import java.util.List;
 
 public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private static final int TYPE_ITEM = 0;
+    private static final int TYPE_GROUP = 0;
     private static final int TYPE_LOADER = 1;
     private static final int NAME_MAX_LINE = 2;
     private int mProgressBarVisibility, mButtonType;
@@ -36,7 +36,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
-            case TYPE_ITEM:
+            case TYPE_GROUP:
                 View itemView = LayoutInflater.from(mActivity).inflate(R.layout.group_list_item, parent, false);
                 return new ItemHolder(itemView);
             case TYPE_LOADER:
@@ -83,7 +83,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public int getItemViewType(int position) {
-        return mGroupItemValues.get(position) != null ? TYPE_ITEM : TYPE_LOADER;
+        return mGroupItemValues.get(position) != null ? TYPE_GROUP : TYPE_LOADER;
     }
 
     public void addFooterView() {

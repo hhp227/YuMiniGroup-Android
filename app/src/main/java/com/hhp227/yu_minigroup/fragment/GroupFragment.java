@@ -83,6 +83,7 @@ public class GroupFragment extends Fragment {
         mActivity.setTitle(getString(R.string.main));
         mActivity.setSupportActionBar(mToolbar);
         setDrawerToggle();
+        mAdapter.setHasStableIds(true);
         mAdapter.setOnItemClickListener((v, position) -> {
             GroupItem groupItem = mGroupItemValues.get(position);
             if (groupItem.isAd())

@@ -111,6 +111,11 @@ public class GroupGridAdapter extends RecyclerView.Adapter<GroupGridAdapter.Grou
         return mGroupItemValues.size();
     }
 
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
     private TextView getAdText() {
         TextView adText = new TextView(mContext);
         adText.setText(mContext.getString(R.string.ad_attribution));

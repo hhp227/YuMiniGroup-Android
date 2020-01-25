@@ -65,6 +65,7 @@ public class Tab3Fragment extends Fragment {
         mMemberItems = new ArrayList<>();
         mAdapter = new MemberGridAdapter(getActivity(), mMemberItems);
         mOffSet = 1;
+        mAdapter.setHasStableIds(true);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(mAdapter);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

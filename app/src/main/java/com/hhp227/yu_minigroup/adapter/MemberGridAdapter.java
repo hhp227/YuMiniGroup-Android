@@ -50,6 +50,11 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
         return mMemberItemList.size();
     }
 
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
     public static class MemberGridHolder extends RecyclerView.ViewHolder {
         private ImageView profileImage;
         private TextView name;
