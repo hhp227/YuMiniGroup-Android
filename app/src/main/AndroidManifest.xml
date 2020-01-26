@@ -21,6 +21,8 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
+        <activity android:name=".ReplyModifyActivity">
+        </activity>
         <activity
                 android:name=".ModifyActivity"
                 android:theme="@style/AppTheme.NoActionBar">

@@ -1,5 +1,6 @@
 package com.hhp227.yu_minigroup.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -118,6 +119,7 @@ public class Tab1Fragment extends Fragment {
             intent.putExtra("artl_num", articleItem.getId());
             intent.putExtra("position", position + 1);
             intent.putExtra("auth", articleItem.isAuth() || AppController.getInstance().getPreferenceManager().getUser().getUid().equals(articleItem.getUid()));
+            intent.putExtra("isbottom", v.getId() == R.id.ll_reply);
             intent.putExtra("grp_key", mKey);
             intent.putExtra("artl_key", mAdapter.getKey(position));
             startActivityForResult(intent, UPDATE_ARTICLE);
@@ -146,6 +148,21 @@ public class Tab1Fragment extends Fragment {
         fetchArticleList();
 
         return rootView;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == UPDATE_ARTICLE && resultCode == Activity.RESULT_OK) {
+            int position = data.getIntExtra("position", 0) - 1;
+            ArticleItem articleItem = mArticleItemValues.get(position);
+            articleItem.setTitle(data.getStringExtra("sbjt"));
+            articleItem.setContent(data.getStringExtra("txt"));
+            articleItem.setImages(data.getStringArrayListExtra("img")); // firebase data
+            articleItem.setReplyCount(data.getStringExtra("cmmt_cnt"));
+            mArticleItemValues.set(position, articleItem);
+            mAdapter.notifyItemChanged(position);
+        }
     }
 
     private void fetchArticleList() {

@@ -95,16 +95,8 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
             ((ArticleItemHolder) holder).replyButton.setTag(position);
             ((ArticleItemHolder) holder).replyButton.setOnClickListener(v -> {
-                Intent intent = new Intent(mActivity, ArticleActivity.class);
-                intent.putExtra("grp_id", Tab1Fragment.mGroupId);
-                intent.putExtra("grp_nm", Tab1Fragment.mGroupName);
-                intent.putExtra("artl_num", articleItem.getId());
-                intent.putExtra("position", position + 1);
-                intent.putExtra("auth", articleItem.isAuth());
-                intent.putExtra("isbottom", true);
-                intent.putExtra("grp_key", mGroupKey);
-                intent.putExtra("artl_key", getKey(position));
-                mActivity.startActivityForResult(intent, UPDATE_ARTICLE);
+                if (mOnItemClickListener != null)
+                    mOnItemClickListener.onItemClick(v, position);
             });
         } else if (holder instanceof FooterHolder)
             ((FooterHolder) holder).progressBar.setVisibility(mProgressBarVisibility);
