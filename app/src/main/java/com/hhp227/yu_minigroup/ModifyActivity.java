@@ -5,10 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.view.ContextMenu;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,9 +20,7 @@ import com.hhp227.yu_minigroup.dto.WriteItem;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.hhp227.yu_minigroup.WriteActivity.CAMERA_PICK_IMAGE_REQUEST_CODE;
 import static com.hhp227.yu_minigroup.WriteActivity.REQUEST_IMAGE_CAPTURE;
@@ -62,11 +57,14 @@ public class ModifyActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mAdapter.addHeaderView();
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(mAdapter);
         buttonImage.setOnClickListener(this::showContextMenu);
         buttonVideo.setOnClickListener(this::showContextMenu);
+        Map<String, Object> headerMap = new HashMap<>();
+        headerMap.put("title", mTitle);
+        headerMap.put("content", mContent);
+        mAdapter.addHeaderView(headerMap);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(mAdapter);
         mProgressDialog.setCancelable(false);
         if (mImageList.size() > 0) {
             mImageList.forEach(s -> mContents.add(new WriteItem(null, null, s)));

@@ -79,7 +79,7 @@ public class WriteActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mAdapter.addHeaderView();
+        mAdapter.addHeaderView(new HashMap<>());
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mAdapter);
         buttonImage.setOnClickListener(this::showContextMenu);
@@ -100,9 +100,8 @@ public class WriteActivity extends AppCompatActivity {
                 finish();
                 return true;
             case R.id.action_send:
-                WriteListAdapter.HeaderHolder holder = mAdapter.getHeaderHolder();
-                String title = holder.inputTitle.getEditableText().toString();
-                String content = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N ? Html.toHtml((Spanned) holder.inputContent.getText(), Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL) : Html.toHtml((Spanned) holder.inputContent.getText());
+                String title = (String) mAdapter.getTextMap().get("title");
+                String content = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N ? Html.toHtml((Spanned) mAdapter.getTextMap().get("content"), Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL) : Html.toHtml((Spanned) mAdapter.getTextMap().get("content"));
                 if (!title.isEmpty() && !(TextUtils.isEmpty(content) && mContents.size() < 2)) {
                     mMakeHtmlImages = new StringBuilder();
                     mImages = new ArrayList<>();
@@ -226,9 +225,8 @@ public class WriteActivity extends AppCompatActivity {
                     Thread.sleep(700);
                     uploadImage(count, mContents.get(count).getBitmap());
                 } else {
-                    WriteListAdapter.HeaderHolder holder = mAdapter.getHeaderHolder();
-                    String title = holder.inputTitle.getEditableText().toString();
-                    String content = (!TextUtils.isEmpty(holder.inputContent.getText()) ? Html.toHtml((Spanned) holder.inputContent.getText(), Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL) + "<p><br data-mce-bogus=\"1\"></p>" : "") + mMakeHtmlImages.toString();
+                    String title = (String) mAdapter.getTextMap().get("title");
+                    String content = (!TextUtils.isEmpty(mAdapter.getTextMap().get("content").toString()) ? Html.toHtml((Spanned) mAdapter.getTextMap().get("content"), Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL) + "<p><br data-mce-bogus=\"1\"></p>" : "") + mMakeHtmlImages.toString();
                     actionSend(mGrpId, title, content);
                 }
             } catch (Exception e) {
@@ -353,9 +351,9 @@ public class WriteActivity extends AppCompatActivity {
         map.put("id", artlNum);
         map.put("uid", mPreferenceManager.getUser().getUid());
         map.put("name", mPreferenceManager.getUser().getName());
-        map.put("title", mAdapter.getHeaderHolder().inputTitle.getText().toString());
+        map.put("title", mAdapter.getTextMap().get("title"));
         map.put("timestamp", System.currentTimeMillis());
-        map.put("content", TextUtils.isEmpty(mAdapter.getHeaderHolder().inputContent.getText().toString()) ? null : mAdapter.getHeaderHolder().inputContent.getText().toString());
+        map.put("content", TextUtils.isEmpty(mAdapter.getTextMap().get("content").toString()) ? null : mAdapter.getTextMap().get("content").toString());
         map.put("images", mImages);
 
         databaseReference.child(mKey).push().setValue(map);

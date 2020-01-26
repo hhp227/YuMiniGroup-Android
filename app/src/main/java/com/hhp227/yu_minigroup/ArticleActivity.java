@@ -58,6 +58,7 @@ public class ArticleActivity extends AppCompatActivity {
     private List<Object> mReplyItemValues;
     private PreferenceManager mPreferenceManager;
     private ProgressBar mProgressBar;
+    private RecyclerView mRecyclerView;
     private ReplyListAdapter mAdapter;
     private Source mSource;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -68,12 +69,12 @@ public class ArticleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        RecyclerView recyclerView = findViewById(R.id.rv_article);
         mButtonSend = findViewById(R.id.cv_btn_send);
         mInputReply = findViewById(R.id.et_reply);
         mSendText = findViewById(R.id.tv_btn_send);
         mSwipeRefreshLayout = findViewById(R.id.srl_article);
         mProgressBar = findViewById(R.id.pb_article);
+        mRecyclerView = findViewById(R.id.rv_article);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         Intent intent = getIntent();
         mGroupId = intent.getStringExtra("grp_id");
@@ -123,8 +124,8 @@ public class ArticleActivity extends AppCompatActivity {
 
         });
         mAdapter.setHasStableIds(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(mAdapter);
         mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
             mSwipeRefreshLayout.setRefreshing(false);
         }, 1000));
@@ -256,6 +257,7 @@ public class ArticleActivity extends AppCompatActivity {
     }
 
     private void setListViewBottom() {
+        new Handler().postDelayed(() -> mRecyclerView.scrollToPosition(mReplyItemValues.size() - 1), 300);
     }
 
     private void deliveryUpdate(String title, String content, List<String> imageList, String replyCnt) {
@@ -300,6 +302,31 @@ public class ArticleActivity extends AppCompatActivity {
     }
 
     private void fetchReplyListFromFirebase() {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Replys");
+        databaseReference.child(mArticleKey).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        String key = snapshot.getKey();
+                        ReplyItem value = snapshot.getValue(ReplyItem.class);
+                        int index = mReplyItemKeys.indexOf(value.getId());
+                        if (index > -1) {
+                            ReplyItem replyItem = (ReplyItem) mReplyItemValues.get(index);
+                            replyItem.setUid(value.getUid());
+                            mReplyItemValues.set(index, replyItem);
+                            mReplyItemKeys.set(index, key);
+                        }
+                    }
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
+            }
+        });
     }
 
     private void showProgressBar() {

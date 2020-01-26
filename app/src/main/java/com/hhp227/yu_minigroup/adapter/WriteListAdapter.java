@@ -13,12 +13,14 @@ import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.dto.WriteItem;
 
 import java.util.List;
+import java.util.Map;
 
 public class WriteListAdapter extends RecyclerView.Adapter {
     private static final int TYPE_TEXT = 0;
     private static final int TYPE_CONTENT = 1;
     private Context mContext;
     private List<WriteItem> mWriteItemList;
+    private Map<String, Object> mTextMap;
     private HeaderHolder mHeaderHolder;
 
     public WriteListAdapter(Context context, List<WriteItem> writeItemList) {
@@ -43,7 +45,10 @@ public class WriteListAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof HeaderHolder) {
-
+            String title = (String) mTextMap.get("title");
+            String content = (String) mTextMap.get("content");
+            ((HeaderHolder) holder).inputTitle.setText(title);
+            ((HeaderHolder) holder).inputContent.setText(content);
         } else if (holder instanceof ItemHolder) {
             WriteItem writeItem = mWriteItemList.get(position);
 
@@ -65,15 +70,18 @@ public class WriteListAdapter extends RecyclerView.Adapter {
         return position < 1 ? TYPE_TEXT : TYPE_CONTENT;
     }
 
-    public void addHeaderView() {
+    public void addHeaderView(Map<String, Object> textMap) {
+        this.mTextMap = textMap;
         mWriteItemList.add(new WriteItem());
     }
 
-    public HeaderHolder getHeaderHolder() {
-        return mHeaderHolder;
+    public Map<String, Object> getTextMap() {
+        mTextMap.put("title", mHeaderHolder.inputTitle.getText().toString());
+        mTextMap.put("content", mHeaderHolder.inputContent.getText());
+        return mTextMap;
     }
 
-    public class HeaderHolder extends RecyclerView.ViewHolder {
+    public static class HeaderHolder extends RecyclerView.ViewHolder {
         public TextView inputTitle, inputContent;
 
         public HeaderHolder(View itemView) {
