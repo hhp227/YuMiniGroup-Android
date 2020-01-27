@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ll_message"
+        android:gravity="left"
+        android:orientation="vertical"
+        android:paddingTop="5dp"
+        android:paddingStart="5dp"
+        android:paddingBottom="5dp">
+
+    <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <ImageView
+                android:id="@+id/iv_profile_image"
+                android:layout_width="41dp"
+                android:layout_height="41dp"
+                android:src="@drawable/profile_img_circle"
+                android:scaleType="fitCenter"/>
+
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="7dp">
+
+            <TextView
+                    android:id="@+id/tv_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#777777"
+                    android:textSize="13dp"
+                    android:textStyle="bold"
+                    android:paddingBottom="2dp"/>
+
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                <TextView
+                        android:id="@+id/tv_message"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="4.5"
+                        android:background="@drawable/bg_other_msg"
+                        android:padding="9dp"
+                        android:text="메시지"
+                        android:textColor="#434343"
+                        android:textSize="16dp"/>
+
+                <TextView
+                        android:id="@+id/tv_timestamp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:layout_marginEnd="50dp"
+                        android:paddingBottom="2dp"
+                        android:text="시간"
+                        android:textSize="10dp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

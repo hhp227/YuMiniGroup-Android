@@ -612,7 +612,7 @@ public class ArticleActivity extends AppCompatActivity {
     }
 }
 
-// 리사이클러뷰 더러워서 사용안합니다.
+// 리사이클러뷰
 /*public class ArticleActivity extends AppCompatActivity {
     private static final int UPDATE_REPLY = 10;
     private static final String TAG = ArticleActivity.class.getSimpleName();

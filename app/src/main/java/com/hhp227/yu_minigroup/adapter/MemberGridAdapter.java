@@ -21,6 +21,7 @@ import java.util.List;
 public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.MemberGridHolder> {
     private Activity mActivity;
     private List<MemberItem> mMemberItemList;
+    private OnItemClickListener mOnItemClickListener;
 
     public MemberGridAdapter(Activity activity, List<MemberItem> memberItemList) {
         this.mActivity = activity;
@@ -43,6 +44,10 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
                         .build()))
                 .apply(new RequestOptions().centerCrop().error(R.drawable.profile_img_sqare))
                 .into(holder.profileImage);
+        holder.itemView.setOnClickListener(v -> {
+            if (mOnItemClickListener != null)
+                mOnItemClickListener.onItemClick(v, position);
+        });
     }
 
     @Override
@@ -55,6 +60,10 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
         return position;
     }
 
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.mOnItemClickListener = onItemClickListener;
+    }
+
     public static class MemberGridHolder extends RecyclerView.ViewHolder {
         private ImageView profileImage;
         private TextView name;
@@ -64,5 +73,9 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
             profileImage = itemView.findViewById(R.id.iv_profile_image);
             name = itemView.findViewById(R.id.tv_name);
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(View view, int position);
     }
 }

@@ -66,6 +66,21 @@ public class Tab3Fragment extends Fragment {
         mAdapter = new MemberGridAdapter(getActivity(), mMemberItems);
         mOffSet = 1;
         mAdapter.setHasStableIds(true);
+        mAdapter.setOnItemClickListener((view, position) -> {
+            MemberItem memberItem = mMemberItems.get(position);
+            String uid = memberItem.uid;
+            String name = memberItem.name;
+            String value = memberItem.value;
+
+            Bundle args = new Bundle();
+            args.putString("uid", uid);
+            args.putString("name", name);
+            args.putString("value", value);
+
+            UserFragment newFragment = UserFragment.newInstance();
+            newFragment.setArguments(args);
+            newFragment.show(getChildFragmentManager(), "dialog");
+        });
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(mAdapter);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

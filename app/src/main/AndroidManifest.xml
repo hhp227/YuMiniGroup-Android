@@ -21,13 +21,17 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
-        <activity android:name=".ReplyModifyActivity">
+        <activity
+                android:name=".ReplyModifyActivity"
+                android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
                 android:name=".ModifyActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".PictureActivity">
+        <activity
+                android:name=".PictureActivity"
+                android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity android:name=".ProfileActivity">
         </activity>
@@ -46,7 +50,9 @@
                 android:label="@string/title_activity_ver_info"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".ChatActivity">
+        <activity
+                android:name=".ChatActivity"
+                android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity android:name=".WebViewActivity">
         </activity>
