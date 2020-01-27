@@ -153,8 +153,8 @@ public class ArticleActivity extends AppCompatActivity {
         showProgressBar();
         fetchArticleData();
 
-        if (mIsBottom)
-            setListViewBottom();
+        // 수정
+        // setListViewBottom 메소드를 fetchReplyData 메소드로 뺌
     }
 
     @Override
@@ -438,6 +438,8 @@ public class ArticleActivity extends AppCompatActivity {
                 mReplyItemValues.add(replyItem);
             }
             mAdapter.notifyDataSetChanged();
+            if (mIsBottom)
+                setListViewBottom();
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
@@ -488,12 +490,14 @@ public class ArticleActivity extends AppCompatActivity {
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
 
+    // 수정 경북대 소모임에도 반영
     /**
      * 리스트뷰 하단으로 간다.
      */
     private void setListViewBottom() {
         new Handler().postDelayed(() -> {
             final int articleHeight = mArticleDetail.getMeasuredHeight();
+            mIsBottom = false;
             mListView.setSelection(articleHeight);
         }, 300);
     }

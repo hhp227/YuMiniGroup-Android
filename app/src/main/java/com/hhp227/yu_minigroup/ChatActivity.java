@@ -28,23 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/*
-And it works the same as set android:transcriptMode="alwaysScroll" to ListView.
-recyclerView.addOnLayoutChangeListener(new OnLayoutChangeListener() {
-    @Override
-    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight,
-            int oldBottom) {
-        if (bottom < oldBottom) {
-            recyclerView.post(new Runnable() {
-                @Override
-                public void run() {
-                    recyclerView.scrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
-                }
-            });
-        }
-    }
-});
- */
 public class ChatActivity extends AppCompatActivity {
     private static final int LIMIT = 20;
     private boolean mHasRequestedMore, mHasSelection, mIsGroupChat;
@@ -63,6 +46,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         Intent intent = getIntent();
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         Toolbar toolbar = findViewById(R.id.toolbar);
         mButtonSend = findViewById(R.id.cv_btn_send);
         mInputMessage = findViewById(R.id.et_input_msg);
@@ -104,10 +88,31 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
         mAdapter.setHasStableIds(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setAdapter(mAdapter);
+        //layoutManager.setStackFromEnd(true);
+        /*mRecyclerView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (bottom < oldBottom && mHasSelection)
+                mRecyclerView.post(() -> mRecyclerView.scrollToPosition(mMessageItemList.size() - 1));
+        });*/
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (!recyclerView.canScrollVertically(-1)) {
+                    mHasRequestedMore = true;
+                    fetchMessageList(mIsGroupChat ? mDatabaseReference.child(mReceiver).orderByKey().endAt(mCursor).limitToLast(LIMIT) : mDatabaseReference.child(mSender).child(mReceiver).orderByKey().endAt(mCursor).limitToLast(LIMIT), mMessageItemList.size(), mCursor);
+                    mCursor = null;
+                }
+            }
 
-        fetchMessageList(mIsGroupChat ? mDatabaseReference.child(mReceiver).orderByKey().limitToLast(LIMIT) : mDatabaseReference.child(mSender).child(mReceiver).orderByKey().limitToLast(LIMIT), 0, "");
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                //mHasSelection = layoutManager.findFirstCompletelyVisibleItemPosition() + layoutManager.getChildCount() > layoutManager.getItemCount() - 20;
+            }
+        });
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setAdapter(mAdapter);
+        fetchMessageList(mIsGroupChat ? mDatabaseReference.child(mReceiver).orderByValue().limitToLast(LIMIT) : mDatabaseReference.child(mSender).child(mReceiver).orderByValue().limitToLast(LIMIT), 0, "");
     }
 
     @Override
@@ -133,27 +138,23 @@ public class ChatActivity extends AppCompatActivity {
                 mMessageItemList.add(mMessageItemList.size() - prevCnt, messageItem);
                 mAdapter.notifyItemRangeChanged(mMessageItemList.size() > 1 ? mMessageItemList.size() - 2 : 0, 2);
                 /*if (mHasSelection || mHasRequestedMore)
-                    mListView.setSelection(prevCnt == 0 ? mMessageItemList.size() : mMessageItemList.size() - prevCnt + 1);*/
+                    mRecyclerView.scrollToPosition(prevCnt == 0 ? mMessageItemList.size() - 1 : mMessageItemList.size() - prevCnt);*/
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
             }
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         });
     }

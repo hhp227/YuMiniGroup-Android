@@ -54,7 +54,7 @@ public class GroupFragment extends Fragment {
     private GridLayoutManager mGridLayoutManager;
     private GroupGridAdapter mAdapter;
     private List<String> mGroupItemKeys;
-    private List<GroupItem> mGroupItemValues;
+    private List<Object> mGroupItemValues;
     private PreferenceManager mPreferenceManager;
     private ProgressBar mProgressBar;
     private RelativeLayout mRelativeLayout;
@@ -85,7 +85,7 @@ public class GroupFragment extends Fragment {
         setDrawerToggle();
         mAdapter.setHasStableIds(true);
         mAdapter.setOnItemClickListener((v, position) -> {
-            GroupItem groupItem = mGroupItemValues.get(position);
+            GroupItem groupItem = (GroupItem) mGroupItemValues.get(position);
             if (groupItem.isAd())
                 Toast.makeText(getContext(), "광고", Toast.LENGTH_LONG).show();
             else {
@@ -96,6 +96,12 @@ public class GroupFragment extends Fragment {
                 intent.putExtra("pos", position);
                 intent.putExtra("key", mAdapter.getKey(position));
                 startActivityForResult(intent, UPDATE_GROUP);
+            }
+        });
+        mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT ? 2 : 1;
             }
         });
         recyclerView.setLayoutManager(mGridLayoutManager);
@@ -148,9 +154,21 @@ public class GroupFragment extends Fragment {
         super.onConfigurationChanged(newConfig);
         switch (newConfig.orientation) {
             case Configuration.ORIENTATION_PORTRAIT:
+                mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                    @Override
+                    public int getSpanSize(int position) {
+                        return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT ? 2 : 1;
+                    }
+                });
                 mGridLayoutManager.setSpanCount(2);
                 break;
             case Configuration.ORIENTATION_LANDSCAPE:
+                mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                    @Override
+                    public int getSpanSize(int position) {
+                        return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT ? 4 : 1;
+                    }
+                });
                 mGridLayoutManager.setSpanCount(4);
                 break;
         }
@@ -166,6 +184,7 @@ public class GroupFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.GROUP_LIST, response -> {
             Source source = new Source(response);
             List<Element> listElementA = source.getAllElements(HTMLElementName.A);
+            mAdapter.addHeaderView("가입중인 그룹");
             for (Element elementA : listElementA) {
                 try {
                     String id = groupIdExtract(elementA.getAttributeValue("onclick"));
@@ -219,7 +238,7 @@ public class GroupFragment extends Fragment {
 
     private void insertAdvertisement() {
         initFirebaseData();
-        if (mGroupItemValues.size() % 2 != 0) {
+        if (mGroupItemValues.size() % 2 == 0) {
             GroupItem ad = new GroupItem();
             ad.setAd(true);
             ad.setName("광고");

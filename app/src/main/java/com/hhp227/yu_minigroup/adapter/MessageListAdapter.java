@@ -90,7 +90,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         return new SimpleDateFormat("a h:mm", Locale.getDefault()).format(time);
     }
 
-    public class MessageListHolder extends RecyclerView.ViewHolder {
+    public static class MessageListHolder extends RecyclerView.ViewHolder {
         private ImageView profileImage;
         private LinearLayout messageBox;
         private TextView name, message, timeStamp;
