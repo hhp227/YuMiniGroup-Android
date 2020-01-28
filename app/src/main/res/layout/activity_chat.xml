@@ -35,19 +35,19 @@
             <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:background="#f4faff">
 
                 <FrameLayout
                         android:id="@+id/list_container"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="vertical">
 
                     <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/rv_message"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="#f4faff"
+                            android:layout_height="match_parent"
                             android:divider="@null"
                             android:overScrollMode="ifContentScrolls"
                             android:scrollbarStyle="outsideOverlay"

@@ -2,6 +2,7 @@ package com.hhp227.yu_minigroup;
 
 import android.content.Intent;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -21,6 +22,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.adapter.MessageListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
@@ -44,6 +46,7 @@ public class ChatActivity extends AppCompatActivity {
     private String mCursor, mSender, mReceiver, mValue;
     private TextView mSendText;
     private User mUser;
+    private View.OnLayoutChangeListener mOnLayoutChangeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +67,10 @@ public class ChatActivity extends AppCompatActivity {
         mValue = intent.getStringExtra("value");
         mIsGroupChat = intent.getBooleanExtra("grp_chat", false);
         mAdapter = new MessageListAdapter(this, mMessageItemList, mSender);
+        mOnLayoutChangeListener = (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (bottom < oldBottom)
+                mRecyclerView.post(() -> mRecyclerView.scrollToPosition(mMessageItemList.size() - 1));
+        };
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -113,14 +120,20 @@ public class ChatActivity extends AppCompatActivity {
                 //mHasSelection = layoutManager.findFirstCompletelyVisibleItemPosition() + layoutManager.getChildCount() > layoutManager.getItemCount() - 20;
             }
         });*/
+        mRecyclerView.addOnLayoutChangeListener(mOnLayoutChangeListener);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setAdapter(mAdapter);
+
         fetchMessageList(mIsGroupChat ? mDatabaseReference.child(mReceiver).orderByValue().limitToLast(LIMIT) : mDatabaseReference.child(mSender).child(mReceiver).orderByValue().limitToLast(LIMIT), 0, "");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        View.OnLayoutChangeListener onLayoutChangeListener = mOnLayoutChangeListener;
+        if (onLayoutChangeListener != null)
+            this.mRecyclerView.removeOnLayoutChangeListener(onLayoutChangeListener);
+        mOnLayoutChangeListener = null;
     }
 
     @Override
@@ -197,4 +210,14 @@ public class ChatActivity extends AppCompatActivity {
 
     private void sendLMSMessage() {
     }
+
+    public /* synthetic */ void c(int position) {
+        Log.e("scrollTo() position : %s", Integer.valueOf(position) + "");
+        ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(position, (int) (((float) mRecyclerView.getHeight()) * 0.25f));
+        Log.e("scrollTo() position : %s", "" + (int) (((float) mRecyclerView.getHeight()) * 0.25f));
+        new Handler().postDelayed(() -> {
+
+        }, 200);
+    }
+
 }
