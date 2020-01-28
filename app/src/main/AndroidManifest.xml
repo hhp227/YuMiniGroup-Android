@@ -48,6 +48,7 @@
         <activity
                 android:name=".VerInfoActivity"
                 android:label="@string/title_activity_ver_info"
+                android:launchMode="singleTask"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
@@ -59,6 +60,7 @@
         <activity
                 android:name=".RequestActivity"
                 android:label="@string/title_request"
+                android:launchMode="singleTask"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity

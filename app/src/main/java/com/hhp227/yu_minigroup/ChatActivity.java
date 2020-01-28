@@ -1,11 +1,15 @@
 package com.hhp227.yu_minigroup;
 
 import android.content.Intent;
+import android.graphics.Rect;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
-    private static final int LIMIT = 20;
+    private static final int LIMIT = 10;
     private boolean mHasRequestedMore, mHasSelection, mIsGroupChat;
     private CardView mButtonSend;
     private DatabaseReference mDatabaseReference;
@@ -88,19 +92,18 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
         mAdapter.setHasStableIds(true);
-        //layoutManager.setStackFromEnd(true);
-        /*mRecyclerView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-            if (bottom < oldBottom && mHasSelection)
-                mRecyclerView.post(() -> mRecyclerView.scrollToPosition(mMessageItemList.size() - 1));
-        });*/
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        layoutManager.setStackFromEnd(true);
+
+        // 임시로 뺌
+        /*mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (!recyclerView.canScrollVertically(-1)) {
+                if (!recyclerView.canScrollVertically(-1) && !mHasRequestedMore) {
                     mHasRequestedMore = true;
-                    fetchMessageList(mIsGroupChat ? mDatabaseReference.child(mReceiver).orderByKey().endAt(mCursor).limitToLast(LIMIT) : mDatabaseReference.child(mSender).child(mReceiver).orderByKey().endAt(mCursor).limitToLast(LIMIT), mMessageItemList.size(), mCursor);
-                    mCursor = null;
+                    //fetchMessageList(mIsGroupChat ? mDatabaseReference.child(mReceiver).orderByKey().endAt(mCursor).limitToLast(LIMIT) : mDatabaseReference.child(mSender).child(mReceiver).orderByKey().endAt(mCursor).limitToLast(LIMIT), mMessageItemList.size(), mCursor);
+                    //mCursor = null;
+                    Toast.makeText(getApplicationContext(), "mHasRequestedMore : " + mHasRequestedMore, Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -109,10 +112,15 @@ public class ChatActivity extends AppCompatActivity {
                 super.onScrolled(recyclerView, dx, dy);
                 //mHasSelection = layoutManager.findFirstCompletelyVisibleItemPosition() + layoutManager.getChildCount() > layoutManager.getItemCount() - 20;
             }
-        });
+        });*/
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setAdapter(mAdapter);
         fetchMessageList(mIsGroupChat ? mDatabaseReference.child(mReceiver).orderByValue().limitToLast(LIMIT) : mDatabaseReference.child(mSender).child(mReceiver).orderByValue().limitToLast(LIMIT), 0, "");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
@@ -128,6 +136,7 @@ public class ChatActivity extends AppCompatActivity {
         query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                /*Log.e("1", "s : " + s + ", mCursor" + mCursor);
                 if (mCursor == null)
                     mCursor = s;
                 else if (prevCursor.equals(dataSnapshot.getKey())) {
@@ -135,10 +144,14 @@ public class ChatActivity extends AppCompatActivity {
                     return;
                 }
                 MessageItem messageItem = dataSnapshot.getValue(MessageItem.class);
-                mMessageItemList.add(mMessageItemList.size() - prevCnt, messageItem);
+                mMessageItemList.add(mMessageItemList.size() - prevCnt, messageItem); // 새로 추가하면 prevCnt는 0으로 됨
                 mAdapter.notifyItemRangeChanged(mMessageItemList.size() > 1 ? mMessageItemList.size() - 2 : 0, 2);
-                /*if (mHasSelection || mHasRequestedMore)
+                Log.e("테스트", "size : " + mMessageItemList.size() + ", prevCnt : " + prevCnt + ", mCursor" + mCursor);
+                if (mHasSelection || mHasRequestedMore)
                     mRecyclerView.scrollToPosition(prevCnt == 0 ? mMessageItemList.size() - 1 : mMessageItemList.size() - prevCnt);*/
+                MessageItem messageItem = dataSnapshot.getValue(MessageItem.class);
+                mMessageItemList.add(messageItem);
+                mAdapter.notifyItemInserted(mMessageItemList.size() - 1);
             }
 
             @Override

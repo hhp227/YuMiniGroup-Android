@@ -59,7 +59,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         } else {
             holder.name.setVisibility(getItemViewType(position) == MSG_TYPE_RIGHT ? View.GONE : View.VISIBLE);
             holder.profileImage.setVisibility(View.VISIBLE);
-            holder.messageBox.setPadding(10, 10, 10, 10);
+            holder.messageBox.setPadding(holder.messageBox.getPaddingLeft(), 10, holder.messageBox.getPaddingRight(), 10); // 수정완료 경북대 소모임에도 반영할것
             Glide.with(mContext)
                     .load(messageItem.getFrom() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", messageItem.getFrom()), new LazyHeaders.Builder()
                             .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
@@ -67,8 +67,8 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                     .apply(RequestOptions.errorOf(R.drawable.profile_img_circle).circleCrop())
                     .into(holder.profileImage);
         }
-        if (position + 1 != mMessageItems.size() && getTimeStamp(messageItem.getTimeStamp()).equals(getTimeStamp(mMessageItems.get(position + 1).getTimeStamp())) && messageItem.getFrom().equals(mMessageItems.get(position + 1).getFrom()))
-            holder.timeStamp.setText("");
+        // 경북대 소모임에도 반영할것
+        holder.timeStamp.setVisibility(position + 1 != mMessageItems.size() && getTimeStamp(messageItem.getTimeStamp()).equals(getTimeStamp(mMessageItems.get(position + 1).getTimeStamp())) && messageItem.getFrom().equals(mMessageItems.get(position + 1).getFrom()) ? View.INVISIBLE : View.VISIBLE);
     }
 
     @Override

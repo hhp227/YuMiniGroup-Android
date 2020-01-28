@@ -118,9 +118,6 @@ public class Tab4Fragment extends Fragment {
             }
 
             private void onClick(View v) {
-                if (SystemClock.elapsedRealtime() - mLastClickTime < 1000)
-                    return;
-                mLastClickTime = SystemClock.elapsedRealtime();
                 switch (v.getId()) {
                     case R.id.ll_profile:
                         startActivity(new Intent(getContext(), ProfileActivity.class));
