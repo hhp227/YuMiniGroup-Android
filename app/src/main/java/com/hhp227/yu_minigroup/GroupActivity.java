@@ -47,7 +47,7 @@ public class GroupActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
             intent.putExtra("grp_chat", true);
             intent.putExtra("chat_nm", mGroupName);
-            intent.putExtra("uid", mGroupId);
+            intent.putExtra("uid", mKey); // 코드 수정 경북대 소모임에도 적용할것
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
