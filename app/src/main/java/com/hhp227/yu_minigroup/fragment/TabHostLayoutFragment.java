@@ -2,6 +2,7 @@ package com.hhp227.yu_minigroup.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TabHost;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -32,6 +33,8 @@ public class TabHostLayoutFragment extends Fragment {
     private boolean mIsAdmin;
     private int mPosition;
     private String mGroupId, mGroupName, mKey;
+    private TabLayout mTabLayout;
+    private ViewPager mViewPager;
 
     public TabHostLayoutFragment() {
     }
@@ -65,9 +68,7 @@ public class TabHostLayoutFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_tab_host_layout, container, false);
         CollapsingToolbarLayout toolbarLayout = rootView.findViewById(R.id.collapsing_toolbar);
         FloatingActionButton floatingActionButton = rootView.findViewById(R.id.fab);
-        TabLayout tabLayout = rootView.findViewById(R.id.tab_layout);
         Toolbar toolbar = rootView.findViewById(R.id.toolbar);
-        ViewPager viewPager = rootView.findViewById(R.id.view_pager);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         List<Fragment> fragmentList = Stream.<Fragment>builder()
                 .add(Tab1Fragment.newInstance(mIsAdmin, mGroupId, mGroupName, mKey))
@@ -87,17 +88,19 @@ public class TabHostLayoutFragment extends Fragment {
                 return fragmentList.size();
             }
         };
+        mTabLayout = rootView.findViewById(R.id.tab_layout);
+        mViewPager = rootView.findViewById(R.id.view_pager);
 
         activity.setSupportActionBar(toolbar);
         activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         activity.getSupportActionBar().setTitle(mGroupName);
         toolbarLayout.setTitleEnabled(false);
-        Arrays.stream(TAB_NAMES).forEach(s -> tabLayout.addTab(tabLayout.newTab().setText(s)));
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        Arrays.stream(TAB_NAMES).forEach(s -> mTabLayout.addTab(mTabLayout.newTab().setText(s)));
+        mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 int position = tab.getPosition();
-                viewPager.setCurrentItem(position);
+                mViewPager.setCurrentItem(position);
                 floatingActionButton.setVisibility(position != 0 ? View.GONE : View.VISIBLE);
             }
 
@@ -109,11 +112,11 @@ public class TabHostLayoutFragment extends Fragment {
             public void onTabReselected(TabLayout.Tab tab) {
             }
         });
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        viewPager.setOffscreenPageLimit(TAB_NAMES.length);
-        viewPager.setAdapter(adapter);
+        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
+        mViewPager.setOffscreenPageLimit(TAB_NAMES.length);
+        mViewPager.setAdapter(adapter);
         floatingActionButton.setOnClickListener(v -> {
-            if (tabLayout.getSelectedTabPosition() == 0) {
+            if (mTabLayout.getSelectedTabPosition() == 0) {
                 Intent intent = new Intent(getActivity(), WriteActivity.class);
                 intent.putExtra("admin", mIsAdmin);
                 intent.putExtra("grp_id", mGroupId);
@@ -124,5 +127,13 @@ public class TabHostLayoutFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mViewPager.clearOnPageChangeListeners();
+        mTabLayout.clearOnTabSelectedListeners();
+        mTabLayout.removeAllTabs();
     }
 }

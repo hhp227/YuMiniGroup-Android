@@ -41,6 +41,8 @@ public class FindActivity extends AppCompatActivity {
     private List<GroupItem> mGroupItemValues;
     private ProgressBar mProgressBar;
     private RelativeLayout mRelativeLayout;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.OnScrollListener mOnScrollListener;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
@@ -48,7 +50,7 @@ public class FindActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        RecyclerView recyclerView = findViewById(R.id.rv_group);
+        mRecyclerView = findViewById(R.id.rv_group);
         mProgressBar = findViewById(R.id.pb_group);
         mRelativeLayout = findViewById(R.id.rl_group);
         mSwipeRefreshLayout = findViewById(R.id.srl_group);
@@ -56,18 +58,7 @@ public class FindActivity extends AppCompatActivity {
         mGroupItemValues = new ArrayList<>();
         mAdapter = new GroupListAdapter(this, mGroupItemKeys, mGroupItemValues);
         mOffSet = 1;
-
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.post(() -> {
-            mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
-            mAdapter.addFooterView();
-            mAdapter.setButtonType(GroupInfoFragment.TYPE_REQUEST);
-        });
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        mOnScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -80,7 +71,19 @@ public class FindActivity extends AppCompatActivity {
                     fetchGroupList();
                 }
             }
+        };
+
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.post(() -> {
+            mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
+            mAdapter.addFooterView();
+            mAdapter.setButtonType(GroupInfoFragment.TYPE_REQUEST);
         });
+        mRecyclerView.addOnScrollListener(mOnScrollListener);
         mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
             mMinId = 0;
             mOffSet = 1;
@@ -92,6 +95,14 @@ public class FindActivity extends AppCompatActivity {
         }, 1000));
         showProgressBar();
         new Handler().postDelayed(this::fetchGroupList, 500);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mOnScrollListener != null)
+            mRecyclerView.removeOnScrollListener(mOnScrollListener);
+        mOnScrollListener = null;
     }
 
     @Override

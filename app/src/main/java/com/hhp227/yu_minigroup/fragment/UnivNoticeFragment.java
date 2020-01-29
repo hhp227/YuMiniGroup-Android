@@ -43,6 +43,8 @@ public class UnivNoticeFragment extends Fragment {
     private BbsListAdapter mAdapter;
     private DrawerLayout mDrawerLayout;
     private ProgressBar mProgressBar;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.OnScrollListener mOnScrollListener;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private Toolbar mToolbar;
 
@@ -53,7 +55,7 @@ public class UnivNoticeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_list, container, false);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity);
-        RecyclerView recyclerView = rootView.findViewById(R.id.recycler_view);
+        mRecyclerView = rootView.findViewById(R.id.recycler_view);
         mActivity = (AppCompatActivity) getActivity();
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
         mProgressBar = rootView.findViewById(R.id.progress_circular);
@@ -61,20 +63,7 @@ public class UnivNoticeFragment extends Fragment {
         mSwipeRefreshLayout = rootView.findViewById(R.id.srl);
         mBbsItemArrayList = new ArrayList<>();
         mAdapter = new BbsListAdapter(mActivity, mBbsItemArrayList);
-
-        // 처음 offSet은 1이다, 파싱이 되는 동안 업데이트 될것
-        mOffSet = 1;
-
-        mActivity.setTitle(getString(R.string.yu_news));
-        mActivity.setSupportActionBar(mToolbar);
-        setDrawerToggle();
-        mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
-            mOffSet = 1; // offSet 초기화
-            mBbsItemArrayList.clear();
-            mSwipeRefreshLayout.setRefreshing(false);
-            fetchDataList();
-        }, 1000));
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        mOnScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -93,13 +82,35 @@ public class UnivNoticeFragment extends Fragment {
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
             }
-        });
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(mAdapter);
+        };
+
+        // 처음 offSet은 1이다, 파싱이 되는 동안 업데이트 될것
+        mOffSet = 1;
+
+        mActivity.setTitle(getString(R.string.yu_news));
+        mActivity.setSupportActionBar(mToolbar);
+        setDrawerToggle();
+        mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
+            mOffSet = 1; // offSet 초기화
+            mBbsItemArrayList.clear();
+            mSwipeRefreshLayout.setRefreshing(false);
+            fetchDataList();
+        }, 1000));
+        mRecyclerView.addOnScrollListener(mOnScrollListener);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.setAdapter(mAdapter);
         showProgressBar();
         fetchDataList();
 
         return rootView;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mOnScrollListener != null)
+            mRecyclerView.removeOnScrollListener(mOnScrollListener);
+        mOnScrollListener = null;
     }
 
     private void setDrawerToggle() {
