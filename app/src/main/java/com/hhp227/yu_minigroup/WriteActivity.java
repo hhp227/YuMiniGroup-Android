@@ -265,7 +265,6 @@ public class WriteActivity extends AppCompatActivity {
         String tagStringReq = "req_send";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.WRITE_ARTICLE, response -> {
             hideProgressDialog();
-
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 boolean error = jsonObject.getBoolean("isError");
