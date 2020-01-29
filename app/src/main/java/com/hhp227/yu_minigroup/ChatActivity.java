@@ -1,29 +1,20 @@
 package com.hhp227.yu_minigroup;
 
 import android.content.Intent;
-import android.graphics.Rect;
-import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SimpleItemAnimator;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.adapter.MessageListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
@@ -44,12 +35,11 @@ public class ChatActivity extends AppCompatActivity {
     private List<MessageItem> mMessageItemList;
     private MessageListAdapter mAdapter;
     private RecyclerView mRecyclerView;
-    private String mCursor, mSender, mReceiver, mValue;
+    private String mCursor, mSender, mReceiver, mValue, mFirstMessageKey;
     private TextView mSendText;
     private TextWatcher mTextWatcher;
     private User mUser;
     private View.OnLayoutChangeListener mOnLayoutChangeListener;
-    private String mFirstMessageKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,7 +154,6 @@ public class ChatActivity extends AppCompatActivity {
                     mHasRequestedMore = false;
                     return;
                 }
-
                 MessageItem messageItem = dataSnapshot.getValue(MessageItem.class);
                 mMessageItemList.add(mMessageItemList.size() - prevCnt, messageItem); // 새로 추가하면 prevCnt는 0으로 됨
                 mAdapter.notifyDataSetChanged();
