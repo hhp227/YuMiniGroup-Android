@@ -16,8 +16,8 @@ public class UserSeatFragment extends Fragment {
     public UserSeatFragment() {
     }
 
-    public static SemesterTimeTableFragment newInstance() {
-        SemesterTimeTableFragment fragment = new SemesterTimeTableFragment();
+    public static UserSeatFragment newInstance() {
+        UserSeatFragment fragment = new UserSeatFragment();
         return fragment;
     }
 
@@ -26,7 +26,7 @@ public class UserSeatFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_user_seat, container, false);
         WebView webView = rootView.findViewById(R.id.wv_seat);
         WebSettings webSettings = webView.getSettings();
-        webView.loadUrl(EndPoint.URL_YU_LIBRARY_SEAT);
+        webView.loadUrl(EndPoint.URL_YU_LIBRARY_SEAT_IMAGE);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setUseWideViewPort(true);
         webView.getSettings().setBuiltInZoomControls(true);
