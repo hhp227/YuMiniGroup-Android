@@ -17,8 +17,8 @@
                 android:title="@string/timetable"/>
         <item
                 android:id="@+id/nav_menu4"
-                android:icon="@drawable/ic_icon"
-                android:title="테스트"/>
+                android:icon="@drawable/ic_event_seat_gray_24dp"
+                android:title="@string/library_seat"/>
         <item
                 android:id="@+id/nav_menu5"
                 android:icon="@drawable/ic_exit_to_app_gray_24dp"

@@ -107,6 +107,7 @@ public class Tab4Fragment extends Fragment {
                     holder.withdrawalText.setText("소모임 탈퇴");
                     holder.settings.setVisibility(View.GONE);
                 }
+                holder.feedback.setOnClickListener(this::onClick);
                 holder.appStore.setOnClickListener(this::onClick);
                 holder.share.setOnClickListener(this::onClick);
                 holder.version.setOnClickListener(this::onClick);
@@ -191,6 +192,15 @@ public class Tab4Fragment extends Fragment {
                         intent.putExtra("key", mKey);
                         startActivityForResult(intent, GroupFragment.UPDATE_GROUP);
                         break;
+                    case R.id.ll_feedback:
+                        Intent email = new Intent(Intent.ACTION_SEND);
+                        email.setType("plain/Text");
+                        email.putExtra(Intent.EXTRA_EMAIL, "hong227@naver.com");
+                        email.putExtra(Intent.EXTRA_SUBJECT, "영남대소모임 건의사항");
+                        email.putExtra(Intent.EXTRA_TEXT, "작성자 (Writer) : " + mUser.getName() + "\n앱 버전 (AppVer) : " + "" + "\n내용 (Content) : " + "");
+                        email.setType("message/rfc822");
+                        startActivity(email);
+                        break;
                     case R.id.ll_appstore:
                         String appUrl = "https://play.google.com/store/apps/details?id=" + getContext().getPackageName();
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(appUrl)));
@@ -271,13 +281,14 @@ public class Tab4Fragment extends Fragment {
     }
 
     public class Tab4Holder extends RecyclerView.ViewHolder {
-        private LinearLayout profile, withdrawal, settings, appStore, share, version;
+        private LinearLayout profile, withdrawal, settings, feedback, appStore, share, version;
         private ImageView profileImage;
         private TextView name, yuId, withdrawalText;
 
         public Tab4Holder(View itemView) {
             super(itemView);
             appStore = itemView.findViewById(R.id.ll_appstore);
+            feedback = itemView.findViewById(R.id.ll_feedback);
             name = itemView.findViewById(R.id.tv_name);
             profile = itemView.findViewById(R.id.ll_profile);
             profileImage = itemView.findViewById(R.id.iv_profile_image);

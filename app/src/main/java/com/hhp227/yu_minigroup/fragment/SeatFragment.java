@@ -1,6 +1,5 @@
 package com.hhp227.yu_minigroup.fragment;
 
-
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,17 +19,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class TimetableFragment extends Fragment {
-    public static final String TAG = "시간표";
+public class SeatFragment extends Fragment {
+    public static final String TAG = "도서관 좌석";
 
-    private static final String[] TAB_NAMES = {"학기시간표", "모의시간표 작성"};
+    private static final String[] TAB_NAMES = {"좌석이용현황", "상세좌석현황"};
     private AppCompatActivity mActivity;
     private DrawerLayout mDrawerLayout;
     private TabLayout mTabLayout;
     private Toolbar mToolbar;
     private ViewPager mViewPager;
 
-    public TimetableFragment() {
+    public SeatFragment() {
     }
 
     @Override
@@ -56,8 +55,8 @@ public class TimetableFragment extends Fragment {
         mActivity.setTitle(getString(R.string.timetable));
         mActivity.setSupportActionBar(mToolbar);
         setDrawerToggle();
-        fragmentList.add(SemesterTimeTableFragment.newInstance());
-        fragmentList.add(MockTimeTableFragment.newInstance());
+        fragmentList.add(ClickerFragment.newInstance());
+        fragmentList.add(UserSeatFragment.newInstance());
         Arrays.stream(TAB_NAMES).forEach(s -> mTabLayout.addTab(mTabLayout.newTab().setText(s)));
         mTabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));

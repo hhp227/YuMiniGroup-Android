@@ -14,6 +14,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.navigation.NavigationView;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.fragment.GroupFragment;
+import com.hhp227.yu_minigroup.fragment.SeatFragment;
 import com.hhp227.yu_minigroup.fragment.TimetableFragment;
 import com.hhp227.yu_minigroup.fragment.UnivNoticeFragment;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
@@ -47,9 +48,7 @@ public class MainActivity extends AppCompatActivity {
                     fragment = new TimetableFragment();
                     break;
                 case R.id.nav_menu4:
-                    android.content.ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    clipboard.setText(mPreferenceManager.getCookie());
-                    Toast.makeText(getApplicationContext(), "클립보드에 복사되었습니다!", Toast.LENGTH_SHORT).show();
+                    fragment = new SeatFragment();
                     break;
                 case R.id.nav_menu5:
                     mPreferenceManager.clear();
