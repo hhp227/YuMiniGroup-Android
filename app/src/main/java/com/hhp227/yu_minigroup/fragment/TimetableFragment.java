@@ -69,8 +69,9 @@ public class TimetableFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mTabLayout.clearOnTabSelectedListeners();
         mViewPager.clearOnPageChangeListeners();
+        mTabLayout.clearOnTabSelectedListeners();
+        mTabLayout.removeAllTabs();
     }
 
     private void setDrawerToggle() {

@@ -26,6 +26,7 @@ public class BusFragment extends Fragment {
         mActivity = (AppCompatActivity) getActivity();
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
         mToolbar = rootView.findViewById(R.id.toolbar);
+
         mActivity.setTitle("Fragment04");
         mActivity.setSupportActionBar(mToolbar);
         setDrawerToggle();

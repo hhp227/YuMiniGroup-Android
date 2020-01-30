@@ -12,28 +12,29 @@ import com.hhp227.yu_minigroup.adapter.PicturePagerAdapter;
 import java.util.List;
 
 public class PictureActivity extends AppCompatActivity {
-    private TextView mCount;
     private List<String> mImages;
+    private TextView mCount;
+    private ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_picture);
+        PicturePagerAdapter pagerAdapter = new PicturePagerAdapter(this, mImages);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        ViewPager viewPager = findViewById(R.id.view_pager);
+        mViewPager = findViewById(R.id.view_pager);
         mCount = findViewById(R.id.tv_count);
-
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         int position = 0;
         Bundle b = getIntent().getExtras();
         if (b != null) {
             mImages = b.getStringArrayList("images");
             position = b.getInt("position");
         }
-        PicturePagerAdapter pagerAdapter = new PicturePagerAdapter(this, mImages);
-        viewPager.setAdapter(pagerAdapter);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mViewPager.setAdapter(pagerAdapter);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             }
@@ -47,9 +48,15 @@ public class PictureActivity extends AppCompatActivity {
             public void onPageScrollStateChanged(int state) {
             }
         });
-        viewPager.setCurrentItem(position, false);
+        mViewPager.setCurrentItem(position, false);
         mCount.setVisibility(mImages.size() > 1 ? View.VISIBLE : View.GONE);
         mCount.setText((position + 1) + " / " + mImages.size());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mViewPager.clearOnPageChangeListeners();
     }
 
     @Override

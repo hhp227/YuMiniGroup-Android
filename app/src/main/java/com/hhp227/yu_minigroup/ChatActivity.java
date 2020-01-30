@@ -94,7 +94,6 @@ public class ChatActivity extends AppCompatActivity {
         mInputMessage.addTextChangedListener(mTextWatcher);
         mAdapter.setHasStableIds(true);
         layoutManager.setStackFromEnd(true);
-
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -126,9 +125,9 @@ public class ChatActivity extends AppCompatActivity {
         if (mOnLayoutChangeListener != null)
             mRecyclerView.removeOnLayoutChangeListener(mOnLayoutChangeListener);
         mRecyclerView.clearOnScrollListeners();
+        mMessageItemList.clear();
         mTextWatcher = null;
         mOnLayoutChangeListener = null;
-        mMessageItemList.clear();
     }
 
     @Override

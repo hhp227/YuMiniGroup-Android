@@ -149,12 +149,9 @@ public class ArticleActivity extends AppCompatActivity {
         mListView.addHeaderView(mArticleDetail);
         mListView.setAdapter(mAdapter);
         mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(this::refresh, 1000));
-        registerForContextMenu(mListView); // 콘텍스트메뉴
+        registerForContextMenu(mListView);
         showProgressBar();
         fetchArticleData();
-
-        // 수정
-        // setListViewBottom 메소드를 fetchReplyData 메소드로 뺌
     }
 
     @Override
@@ -194,15 +191,16 @@ public class ArticleActivity extends AppCompatActivity {
                         JSONObject jsonObject = new JSONObject(response);
                         boolean error = jsonObject.getBoolean("isError");
                         if (!error) {
-                            Toast.makeText(getApplicationContext(), "삭제완료", Toast.LENGTH_LONG).show();
                             Intent groupIntent = new Intent(ArticleActivity.this, GroupActivity.class);
                             groupIntent.putExtra("admin", getIntent().getBooleanExtra("admin", false));
                             groupIntent.putExtra("grp_id", mGroupId);
                             groupIntent.putExtra("grp_nm", mGroupName);
                             groupIntent.putExtra("key", mGroupKey);
+
                             // 모든 이전 activity 초기화
                             groupIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(groupIntent);
+                            Toast.makeText(getApplicationContext(), "삭제완료", Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(getApplicationContext(), "삭제할수 없습니다.", Toast.LENGTH_LONG).show();
                         }
@@ -354,7 +352,6 @@ public class ArticleActivity extends AppCompatActivity {
                 String name = listTitle.substring(listTitle.lastIndexOf("-") + 1).trim();
                 String timeStamp = viewArt.getFirstElement(HTMLElementName.TD).getTextExtractor().toString();
                 String content = contentExtractor(viewArt.getFirstElementByClass("list_cont"), true);
-
                 List<Element> images = viewArt.getAllElements(HTMLElementName.IMG);
                 String replyCnt = commentWrap.getContent().getFirstElement(HTMLElementName.P).getTextExtractor().toString();
 
@@ -394,7 +391,6 @@ public class ArticleActivity extends AppCompatActivity {
                     mArticleImages.setVisibility(View.VISIBLE);
                 } else
                     mArticleImages.setVisibility(View.GONE);
-
                 fetchReplyData(commentList);
                 if (mIsUpdate)
                     deliveryUpdate(title, contentExtractor(viewArt.getFirstElementByClass("list_cont"), true), mImageList, replyCnt);
@@ -459,6 +455,7 @@ public class ArticleActivity extends AppCompatActivity {
             try {
                 fetchReplyData(commentList);
                 hideProgressBar();
+
                 // 전송할때마다 리스트뷰 아래로
                 setListViewBottom();
             } catch (Exception e) {
@@ -490,13 +487,12 @@ public class ArticleActivity extends AppCompatActivity {
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
 
-    // 수정 경북대 소모임에도 반영
     /**
      * 리스트뷰 하단으로 간다.
      */
     private void setListViewBottom() {
         new Handler().postDelayed(() -> {
-            final int articleHeight = mArticleDetail.getMeasuredHeight();
+            int articleHeight = mArticleDetail.getMeasuredHeight();
             mIsBottom = false;
             mListView.setSelection(articleHeight);
         }, 300);

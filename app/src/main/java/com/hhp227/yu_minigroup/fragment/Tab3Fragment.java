@@ -65,6 +65,7 @@ public class Tab3Fragment extends Fragment {
         mMemberItems = new ArrayList<>();
         mAdapter = new MemberGridAdapter(getActivity(), mMemberItems);
         mOffSet = 1;
+
         mAdapter.setHasStableIds(true);
         mAdapter.setOnItemClickListener((view, position) -> {
             MemberItem memberItem = mMemberItems.get(position);
@@ -107,7 +108,7 @@ public class Tab3Fragment extends Fragment {
         }, 1000));
         showProgressBar();
         fetchMemberList();
-        
+
         return rootView;
     }
 
@@ -117,6 +118,7 @@ public class Tab3Fragment extends Fragment {
             try {
                 Source source = new Source(response);
                 Element memberList = source.getElementById("member_list");
+
                 // 페이징 처리
                 String page = memberList.getFirstElementByClass("paging").getFirstElement("title", "현재 선택 목록", false).getTextExtractor().toString();
                 List<Element> inputElements = memberList.getAllElements("name", "memberIdCheck", false);

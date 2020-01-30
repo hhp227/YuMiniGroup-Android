@@ -30,14 +30,13 @@ public class ReplyModifyActivity extends AppCompatActivity {
     private Holder mHolder;
     private String mGroupId, mArticleId, mReplyId, mReply, mArticleKey, mReplyKey;
     private Snackbar mProgressSnackBar;
-    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reply_modify);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        mRecyclerView = findViewById(R.id.rv_write);
+        RecyclerView recyclerView = findViewById(R.id.rv_write);
 
         Intent intent = getIntent();
         mGroupId = intent.getStringExtra("grp_id");
@@ -50,8 +49,8 @@ public class ReplyModifyActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setAdapter(new RecyclerView.Adapter<Holder>() {
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new RecyclerView.Adapter<Holder>() {
 
             @Override
             public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -72,14 +71,11 @@ public class ReplyModifyActivity extends AppCompatActivity {
         });
     }
 
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.write, menu);
         return true;
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -182,7 +178,7 @@ public class ReplyModifyActivity extends AppCompatActivity {
     public class Holder extends RecyclerView.ViewHolder {
         private EditText inputReply;
 
-        public Holder(View itemView) {
+        Holder(View itemView) {
             super(itemView);
             inputReply = itemView.findViewById(R.id.et_reply);
         }

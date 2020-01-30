@@ -64,7 +64,6 @@ public class ModifyActivity extends AppCompatActivity {
         mAdapter = new WriteListAdapter(this, mContents);
         mCookie = AppController.getInstance().getPreferenceManager().getCookie();
         mProgressDialog = new ProgressDialog(this);
-
         mGrpId = intent.getStringExtra("grp_id");
         mArtlNum = intent.getStringExtra("artl_num");
         mTitle = intent.getStringExtra("sbjt");
@@ -77,6 +76,7 @@ public class ModifyActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         buttonImage.setOnClickListener(this::showContextMenu);
         buttonVideo.setOnClickListener(this::showContextMenu);
+
         Map<String, Object> headerMap = new HashMap<>();
         headerMap.put("title", mTitle);
         headerMap.put("content", mContent);
@@ -114,7 +114,7 @@ public class ModifyActivity extends AppCompatActivity {
 
                     if (mContents.size() > 1) {
                         int position = 1;
-                        uploadImage(position, mContents.get(position)); // 경북대 소모임에 position이  0으로 되어있음 수정할것
+                        uploadImage(position, mContents.get(position));
                     } else
                         actionSend(title, content);
                 } else
@@ -146,7 +146,6 @@ public class ModifyActivity extends AppCompatActivity {
         switch (item.getGroupId()) {
             case 0:
                 int position = item.getItemId();
-                //mImageList.remove(position - 1);
                 mContents.remove(position);
                 mAdapter.notifyItemRemoved(position);
                 return true;

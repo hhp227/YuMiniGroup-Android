@@ -265,6 +265,7 @@ public class WriteActivity extends AppCompatActivity {
         String tagStringReq = "req_send";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.WRITE_ARTICLE, response -> {
             hideProgressDialog();
+
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 boolean error = jsonObject.getBoolean("isError");
@@ -275,6 +276,7 @@ public class WriteActivity extends AppCompatActivity {
                     intent.putExtra("grp_id", grpId);
                     intent.putExtra("grp_nm", mGrpNm);
                     intent.putExtra("key", mKey);
+
                     // 이전 Activity 초기화
                     intent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);

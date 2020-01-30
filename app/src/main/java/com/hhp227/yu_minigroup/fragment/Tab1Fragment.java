@@ -169,7 +169,9 @@ public class Tab1Fragment extends Fragment {
         String params = "?CLUB_GRP_ID=" + mGroupId + "&startL=" + mOffSet + "&displayL=" + LIMIT;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.GROUP_ARTICLE_LIST + params, response -> {
             Source source = new Source(response);
+            hideProgressBar();
             try {
+
                 // 페이징 처리
                 String page = source.getFirstElementByClass("paging").getFirstElement("title", "현재 선택 목록", false).getTextExtractor().toString();
                 List<Element> list = source.getAllElementsByClass("listbox2");
@@ -213,7 +215,6 @@ public class Tab1Fragment extends Fragment {
             }
             mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             mAdapter.notifyDataSetChanged();
-            hideProgressBar();
             mRelativeLayout.setVisibility(mArticleItemValues.size() > 1 ? View.GONE : View.VISIBLE);
         }, error -> {
             VolleyLog.e(error.getMessage());

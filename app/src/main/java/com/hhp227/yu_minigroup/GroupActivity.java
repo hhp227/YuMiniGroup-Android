@@ -29,6 +29,7 @@ public class GroupActivity extends AppCompatActivity {
         mPosition = intent.getIntExtra("pos", 0);
         mKey = intent.getStringExtra("key");
         TabHostLayoutFragment fragMain = TabHostLayoutFragment.newInstance(mIsAdmin, mGroupId, mGroupName, mPosition, mKey);
+
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragMain).commit();
     }
 
@@ -47,7 +48,7 @@ public class GroupActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
             intent.putExtra("grp_chat", true);
             intent.putExtra("chat_nm", mGroupName);
-            intent.putExtra("uid", mKey); // 코드 수정 경북대 소모임에도 적용할것
+            intent.putExtra("uid", mKey);
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);

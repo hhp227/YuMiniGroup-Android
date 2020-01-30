@@ -81,6 +81,7 @@ public class GroupInfoFragment extends DialogFragment {
         TextView info = rootView.findViewById(R.id.tv_info);
         TextView desc = rootView.findViewById(R.id.tv_desciption);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
+
         button.setOnClickListener(v -> {
             String tag_json_req = "req_register";
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, mButtonType == TYPE_REQUEST ? EndPoint.REGISTER_GROUP : EndPoint.WITHDRAWAL_GROUP, null, response -> {

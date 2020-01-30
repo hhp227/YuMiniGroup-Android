@@ -80,6 +80,7 @@ public class GroupFragment extends Fragment {
         mGroupItemValues = new ArrayList<>();
         mAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
+
         mActivity.setTitle(getString(R.string.main));
         mActivity.setSupportActionBar(mToolbar);
         setDrawerToggle();
@@ -202,6 +203,8 @@ public class GroupFragment extends Fragment {
                     mGroupItemValues.add(groupItem);
                 } catch (NullPointerException e) {
                     e.printStackTrace();
+                } finally {
+                    initFirebaseData();
                 }
             }
             mAdapter.notifyDataSetChanged();
@@ -237,7 +240,6 @@ public class GroupFragment extends Fragment {
     }
 
     private void insertAdvertisement() {
-        initFirebaseData();
         if (mGroupItemValues.size() % 2 == 0) {
             GroupItem ad = new GroupItem();
             ad.setAd(true);

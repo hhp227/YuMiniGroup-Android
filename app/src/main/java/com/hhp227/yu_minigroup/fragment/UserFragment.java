@@ -46,6 +46,7 @@ public class UserFragment extends DialogFragment {
             mName = bundle.getString("name");
             mValue = bundle.getString("value");
         }
+
         Glide.with(getActivity()).load(EndPoint.USER_IMAGE.replace("{UID}", mUid)).apply(RequestOptions.errorOf(R.drawable.profile_img_circle).circleCrop()).into(profileImage);
         userName.setText(mName);
         if (mUid.equals(AppController.getInstance().getPreferenceManager().getUser().getUid()))

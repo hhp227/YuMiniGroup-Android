@@ -41,6 +41,7 @@ public class RequestActivity extends AppCompatActivity {
     private List<String> mGroupItemKeys;
     private List<GroupItem> mGroupItemValues;
     private ProgressBar mProgressBar;
+    private RecyclerView mRecyclerView;
     private RelativeLayout mRelativeLayout;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
@@ -49,7 +50,7 @@ public class RequestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        RecyclerView recyclerView = findViewById(R.id.rv_group);
+        mRecyclerView = findViewById(R.id.rv_group);
         mProgressBar = findViewById(R.id.pb_group);
         mRelativeLayout = findViewById(R.id.rl_group);
         mSwipeRefreshLayout = findViewById(R.id.srl_group);
@@ -60,15 +61,15 @@ public class RequestActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.post(() -> {
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.post(() -> {
             mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             mAdapter.addFooterView();
             mAdapter.setButtonType(GroupInfoFragment.TYPE_CANCEL);
         });
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -90,6 +91,12 @@ public class RequestActivity extends AppCompatActivity {
         mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(this::refresh, 1000));
         showProgressBar();
         new Handler().postDelayed(this::fetchGroupList, 500);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mRecyclerView.clearOnScrollListeners();
     }
 
     @Override
