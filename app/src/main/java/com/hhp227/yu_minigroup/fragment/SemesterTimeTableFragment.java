@@ -1,8 +1,10 @@
 package com.hhp227.yu_minigroup.fragment;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.*;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -72,6 +74,13 @@ public class SemesterTimeTableFragment extends Fragment {
                     textView.setGravity(Gravity.CENTER);
                     textView.setBackgroundColor(Color.parseColor(atomInt.get() == 0 ? "#FAF4C0" : "#F1F1F1"));
                     textView.setText(elem.getTextExtractor().toString());
+                    if (!TextUtils.isEmpty(textView.getText()))
+                        textView.setOnClickListener(v -> {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                            builder.setMessage(elem.getTextExtractor().toString());
+                            builder.setNegativeButton("닫기", (dialog, which) -> dialog.dismiss());
+                            builder.create().show();
+                        });
 
                     mLayout.addView(textView, params); //시간표 데이터 출력
                 });
