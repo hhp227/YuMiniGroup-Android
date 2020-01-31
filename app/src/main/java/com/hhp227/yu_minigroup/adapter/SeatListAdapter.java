@@ -43,6 +43,7 @@ public class SeatListAdapter extends RecyclerView.Adapter {
             ((SeatListHolder) holder).cardView.setOnClickListener(v -> {
                 Intent intent = new Intent(mActivity, WebViewActivity.class);
                 intent.putExtra("url", EndPoint.URL_YU_LIBRARY_SEAT_DETAIL.replace("{ID}", seatItem.id));
+                intent.putExtra("title", mActivity.getString(R.string.library_seat));
                 mActivity.startActivity(intent);
             });
         }

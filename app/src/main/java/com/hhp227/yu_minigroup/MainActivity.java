@@ -3,6 +3,8 @@ package com.hhp227.yu_minigroup;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,9 +12,14 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.navigation.NavigationView;
 import com.hhp227.yu_minigroup.app.AppController;
+import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.fragment.GroupFragment;
 import com.hhp227.yu_minigroup.fragment.SeatFragment;
 import com.hhp227.yu_minigroup.fragment.TimetableFragment;
@@ -28,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         NavigationView navigationView = findViewById(R.id.nav_view);
+        ImageView profileImage = navigationView.getHeaderView(0).findViewById(R.id.iv_profile_image);
+        TextView name = navigationView.getHeaderView(0).findViewById(R.id.tv_name);
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
 
@@ -64,6 +73,12 @@ public class MainActivity extends AppCompatActivity {
             mDrawerLayout.closeDrawer(GravityCompat.START);
             return true;
         });
+        Glide.with(getApplicationContext())
+                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mPreferenceManager.getUser().getUid()), new LazyHeaders.Builder().addHeader("Cookie", mPreferenceManager.getCookie()).build()))
+                .apply(new RequestOptions().circleCrop())
+                .into(profileImage);
+        profileImage.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), ProfileActivity.class)));
+        name.setText(mPreferenceManager.getUser().getName());
     }
 
     @Override

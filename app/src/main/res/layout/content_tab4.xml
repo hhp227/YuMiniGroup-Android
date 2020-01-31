@@ -28,7 +28,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="15dp"
+                    android:layout_marginStart="15dp"
                     android:text="사용자 설정"
                     android:textSize="12dp"
                     android:textStyle="bold"/>
@@ -59,7 +59,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:paddingLeft="10dp">
+                        android:paddingStart="10dp">
 
                     <TextView
                             android:id="@+id/tv_name"
@@ -87,7 +87,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="15dp"
+                    android:layout_marginStart="15dp"
                     android:text="소모임 설정"
                     android:textSize="12dp"
                     android:textStyle="bold"/>
@@ -155,7 +155,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="15dp"
+                    android:layout_marginStart="15dp"
                     android:text="어플리케이션 정보"
                     android:textSize="12dp"
                     android:textStyle="bold"/>
@@ -205,7 +205,7 @@
                         android:layout_height="wrap_content"
                         android:textSize="15dp"
                         android:layout_marginTop="15dp"
-                        android:text="개발자에게 의견보내기"
+                        android:text="버그 리포트"
                         android:textStyle="bold" />
 
             </LinearLayout>

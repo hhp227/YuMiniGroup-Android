@@ -19,7 +19,7 @@ public class WebViewActivity extends AppCompatActivity {
         String url = getIntent().getStringExtra("url");
 
         if (actionBar != null) {
-            actionBar.setTitle(getString(R.string.yu_news));
+            actionBar.setTitle(getIntent().getStringExtra("title"));
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         webView.loadUrl(url);

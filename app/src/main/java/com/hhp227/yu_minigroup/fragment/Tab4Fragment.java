@@ -25,6 +25,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.*;
 import com.hhp227.yu_minigroup.R;
@@ -112,6 +116,7 @@ public class Tab4Fragment extends Fragment {
                 holder.appStore.setOnClickListener(this::onClick);
                 holder.share.setOnClickListener(this::onClick);
                 holder.version.setOnClickListener(this::onClick);
+                holder.adView.loadAd(new AdRequest.Builder().build());
             }
 
             @Override
@@ -282,12 +287,14 @@ public class Tab4Fragment extends Fragment {
     }
 
     public class Tab4Holder extends RecyclerView.ViewHolder {
+        private AdView adView;
         private LinearLayout profile, withdrawal, settings, feedback, appStore, share, version;
         private ImageView profileImage;
         private TextView name, yuId, withdrawalText;
 
         public Tab4Holder(View itemView) {
             super(itemView);
+            adView = itemView.findViewById(R.id.ad_view);
             appStore = itemView.findViewById(R.id.ll_appstore);
             feedback = itemView.findViewById(R.id.ll_feedback);
             name = itemView.findViewById(R.id.tv_name);

@@ -42,7 +42,7 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
                 .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", memberItem.uid), new LazyHeaders.Builder()
                         .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
                         .build()))
-                .apply(new RequestOptions().centerCrop().error(R.drawable.profile_img_sqare))
+                .apply(new RequestOptions().centerCrop().error(R.drawable.profile_img_square))
                 .into(holder.profileImage);
         holder.itemView.setOnClickListener(v -> {
             if (mOnItemClickListener != null)
