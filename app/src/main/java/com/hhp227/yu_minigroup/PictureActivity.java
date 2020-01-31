@@ -20,7 +20,6 @@ public class PictureActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_picture);
-        PicturePagerAdapter pagerAdapter = new PicturePagerAdapter(this, mImages);
         Toolbar toolbar = findViewById(R.id.toolbar);
         mViewPager = findViewById(R.id.view_pager);
         mCount = findViewById(R.id.tv_count);
@@ -30,6 +29,7 @@ public class PictureActivity extends AppCompatActivity {
             mImages = b.getStringArrayList("images");
             position = b.getInt("position");
         }
+        PicturePagerAdapter pagerAdapter = new PicturePagerAdapter(this, mImages);
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

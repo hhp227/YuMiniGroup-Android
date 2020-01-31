@@ -25,6 +25,8 @@ public class WebViewActivity extends AppCompatActivity {
         webView.loadUrl(url);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setUseWideViewPort(true);
+        webView.getSettings().setBuiltInZoomControls(true);
+        webView.getSettings().setSupportZoom(true);
         webSettings.setJavaScriptEnabled(true);
     }
 

@@ -1,17 +1,19 @@
 package com.hhp227.yu_minigroup.dto;
 
 public class SeatItem {
+    public String id;
     public String name;
-    public String total;
-    public String residual;
-    public String rate;
+    public String count;
+    public String occupied;
+    public String percentageInteger;
     public String status;
 
-    public SeatItem(String name, String total, String residual, String rate, String status) {
+    public SeatItem(String id, String name, String count, String occupied, String percentageInteger, String status) {
+        this.id = id;
         this.name = name;
-        this.total = total;
-        this.residual = residual;
-        this.rate = rate;
+        this.count = count;
+        this.occupied = occupied;
+        this.percentageInteger = percentageInteger;
         this.status = status;
     }
 }

@@ -53,6 +53,7 @@ public class TimetableFragment extends Fragment {
         mToolbar = rootView.findViewById(R.id.toolbar);
         mTabLayout = rootView.findViewById(R.id.tab_layout);
         mViewPager = rootView.findViewById(R.id.view_pager);
+
         mActivity.setTitle(getString(R.string.timetable));
         mActivity.setSupportActionBar(mToolbar);
         setDrawerToggle();
