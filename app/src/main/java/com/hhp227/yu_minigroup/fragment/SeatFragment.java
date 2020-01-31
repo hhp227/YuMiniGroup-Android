@@ -60,7 +60,7 @@ public class SeatFragment extends Fragment {
 
         mActivity.setTitle(getString(R.string.library_seat));
         mActivity.setSupportActionBar(mToolbar);
-        toolbarLayout.setTitleEnabled(true);
+        toolbarLayout.setTitleEnabled(false);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(mAdapter);
         mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(this::refresh, 1000));

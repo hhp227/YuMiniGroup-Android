@@ -2,6 +2,7 @@ package com.hhp227.yu_minigroup.fragment;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -201,9 +202,9 @@ public class Tab4Fragment extends Fragment {
                     case R.id.ll_feedback:
                         Intent email = new Intent(Intent.ACTION_SEND);
                         email.setType("plain/Text");
-                        email.putExtra(Intent.EXTRA_EMAIL, "hong227@naver.com");
+                        email.putExtra(Intent.EXTRA_EMAIL, new String[] {"hong227@naver.com"});
                         email.putExtra(Intent.EXTRA_SUBJECT, "영남대소모임 건의사항");
-                        email.putExtra(Intent.EXTRA_TEXT, "작성자 (Writer) : " + mUser.getName() + "\n앱 버전 (AppVer) : " + "" + "\n내용 (Content) : " + "");
+                        email.putExtra(Intent.EXTRA_TEXT, "작성자 (Writer) : " + mUser.getName() + "\n기기 모델 (Model) : " + Build.MODEL + "\n앱 버전 (AppVer) : " + Build.VERSION.RELEASE + "\n내용 (Content) : " + "");
                         email.setType("message/rfc822");
                         startActivity(email);
                         break;
