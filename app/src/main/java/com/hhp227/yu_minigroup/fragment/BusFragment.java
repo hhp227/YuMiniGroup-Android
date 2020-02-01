@@ -1,6 +1,8 @@
 package com.hhp227.yu_minigroup.fragment;
 
 import android.os.Bundle;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -11,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.app.EndPoint;
 
 public class BusFragment extends Fragment {
     private AppCompatActivity mActivity;
@@ -23,13 +26,21 @@ public class BusFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_bus, container, false);
+        WebView webView = rootView.findViewById(R.id.wv_bus);
+        WebSettings webSettings = webView.getSettings();
         mActivity = (AppCompatActivity) getActivity();
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
         mToolbar = rootView.findViewById(R.id.toolbar);
 
-        mActivity.setTitle("Fragment04");
+        mActivity.setTitle(getString(R.string.shuttle_bus));
         mActivity.setSupportActionBar(mToolbar);
         setDrawerToggle();
+
+        // 임시로 웹뷰 사용
+        webView.loadUrl(EndPoint.URL_YU_SHUTTLE_BUS);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setJavaScriptEnabled(true);
 
         return rootView;
     }

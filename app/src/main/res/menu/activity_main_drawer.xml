@@ -21,6 +21,10 @@
                 android:title="@string/library_seat"/>
         <item
                 android:id="@+id/nav_menu5"
+                android:icon="@drawable/ic_directions_bus_gray_24dp"
+                android:title="@string/shuttle_bus"/>
+        <item
+                android:id="@+id/nav_menu6"
                 android:icon="@drawable/ic_exit_to_app_gray_24dp"
                 android:title="@string/logout"/>
     </group>

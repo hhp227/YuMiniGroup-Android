@@ -23,10 +23,10 @@ public class WebViewActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         webView.loadUrl(url);
-        webView.getSettings().setLoadWithOverviewMode(true);
-        webView.getSettings().setUseWideViewPort(true);
-        webView.getSettings().setBuiltInZoomControls(true);
-        webView.getSettings().setSupportZoom(true);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setSupportZoom(true);
         webSettings.setJavaScriptEnabled(true);
     }
 

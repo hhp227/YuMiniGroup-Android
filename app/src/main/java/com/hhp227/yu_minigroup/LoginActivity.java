@@ -203,6 +203,7 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 if (!jsonObject.getBoolean("error")) {
+
                     // 로그기록 성공
                 }
             } catch (JSONException e) {
