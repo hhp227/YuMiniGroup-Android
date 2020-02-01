@@ -16,7 +16,7 @@
             android:id="@+id/iv_profile_image"
             android:layout_width="75dp"
             android:layout_height="75dp"
-            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:scaleType="fitXY"
             android:src="@drawable/profile_img_circle" />
 
@@ -25,6 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="16dp"
+            android:layout_marginStart="10dp"
             android:text="이름"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 

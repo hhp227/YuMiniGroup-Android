@@ -113,7 +113,7 @@ public class LoginActivity extends AppCompatActivity {
                 };
                 AppController.getInstance().addToRequestQueue(stringRequest);
             } else {
-                mInputId.setError(id.isEmpty() ? "아이디를 입력하세요." : null);
+                mInputId.setError(id.isEmpty() ? "아이디 또는 학번을 입력하세요." : null);
                 mInputPassword.setError(password.isEmpty() ? "패스워드를 입력하세요." : null);
             }
         });
