@@ -185,7 +185,6 @@ public class GroupFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.GROUP_LIST, response -> {
             Source source = new Source(response);
             List<Element> listElementA = source.getAllElements(HTMLElementName.A);
-            mAdapter.addHeaderView("가입중인 그룹");
             for (Element elementA : listElementA) {
                 try {
                     String id = groupIdExtract(elementA.getAttributeValue("onclick"));
@@ -240,6 +239,11 @@ public class GroupFragment extends Fragment {
     }
 
     private void insertAdvertisement() {
+        if (!mGroupItemValues.isEmpty()) {
+            mAdapter.addHeaderView("가입중인 그룹");
+            mRelativeLayout.setVisibility(View.GONE);
+        } else
+            mRelativeLayout.setVisibility(View.VISIBLE);
         if (mGroupItemValues.size() % 2 == 0) {
             GroupItem ad = new GroupItem();
             ad.setAd(true);
@@ -247,7 +251,6 @@ public class GroupFragment extends Fragment {
             mGroupItemValues.add(ad);
         }
         hideProgressBar();
-        mRelativeLayout.setVisibility(mGroupItemValues.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private void initFirebaseData() {

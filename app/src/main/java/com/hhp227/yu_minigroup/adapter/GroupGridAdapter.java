@@ -152,9 +152,9 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
     public void addHeaderView(String text) {
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put("text", text);
-        mGroupItemKeys.add(text);
-        mGroupItemValues.add(headerMap);
-        notifyItemInserted(mGroupItemValues.size() - 1);
+        mGroupItemKeys.add(0, text);
+        mGroupItemValues.add(0, headerMap);
+        notifyItemInserted(0);
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
