@@ -222,6 +222,7 @@ public class CreateActivity extends AppCompatActivity {
         intent.putExtra("admin", true);
         intent.putExtra("grp_id", groupId);
         intent.putExtra("grp_nm", groupName);
+        intent.putExtra("grp_img", EndPoint.BASE_URL + (mBitmap != null ? "/ilosfiles/club/photo/" + groupId.concat(".jpg") : "/ilos/images/community/share_nophoto.gif")); // 경북대 소모임에는 없음
         intent.putExtra("key", mPushId);
         setResult(RESULT_OK, intent);
         startActivity(intent);
@@ -276,7 +277,7 @@ public class CreateActivity extends AppCompatActivity {
         groupItem.setTimestamp(System.currentTimeMillis());
         groupItem.setAuthor(mPreferenceManager.getUser().getName());
         groupItem.setAuthorUid(mPreferenceManager.getUser().getUid());
-        groupItem.setImage(EndPoint.BASE_URL + (mBitmap != null ? "/ilosfiles2/club/photo/" + groupId.concat(".jpg") : "/ilos/images/community/share_nophoto.gif"));
+        groupItem.setImage(EndPoint.BASE_URL + (mBitmap != null ? "/ilosfiles/club/photo/" + groupId.concat(".jpg") : "/ilos/images/community/share_nophoto.gif"));
         groupItem.setName(groupName);
         groupItem.setDescription(description);
         groupItem.setJoinType(joinType);

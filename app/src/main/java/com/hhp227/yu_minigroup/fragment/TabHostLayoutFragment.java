@@ -2,7 +2,9 @@ package com.hhp227.yu_minigroup.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.widget.TabHost;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -12,6 +14,8 @@ import android.view.ViewGroup;
 
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -27,24 +31,26 @@ public class TabHostLayoutFragment extends Fragment {
     private static final String IS_ADMIN = "admin";
     private static final String GROUP_ID = "grp_id";
     private static final String GROUP_NAME = "grp_nm";
+    private static final String GROUP_IMAGE = "grp_img";
     private static final String POSITION = "position";
     private static final String KEY = "key";
     private static final String[] TAB_NAMES = {"소식", "일정", "맴버", "설정"};
     private boolean mIsAdmin;
     private int mPosition;
-    private String mGroupId, mGroupName, mKey;
+    private String mGroupId, mGroupName, mGroupImage, mKey;
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
 
     public TabHostLayoutFragment() {
     }
 
-    public static TabHostLayoutFragment newInstance(boolean isAdmin, String groupId, String groupName, int position, String key) {
+    public static TabHostLayoutFragment newInstance(boolean isAdmin, String groupId, String groupName, String groupImage, int position, String key) {
         TabHostLayoutFragment fragment = new TabHostLayoutFragment();
         Bundle args = new Bundle();
         args.putBoolean(IS_ADMIN, isAdmin);
         args.putString(GROUP_ID, groupId);
         args.putString(GROUP_NAME, groupName);
+        args.putString(GROUP_IMAGE, groupImage);
         args.putInt(POSITION, position);
         args.putString(KEY, key);
         fragment.setArguments(args);
@@ -58,6 +64,7 @@ public class TabHostLayoutFragment extends Fragment {
             mIsAdmin = getArguments().getBoolean(IS_ADMIN);
             mGroupId = getArguments().getString(GROUP_ID);
             mGroupName = getArguments().getString(GROUP_NAME);
+            mGroupImage = getArguments().getString(GROUP_IMAGE);
             mPosition = getArguments().getInt(POSITION);
             mKey = getArguments().getString(KEY);
         }
@@ -68,10 +75,13 @@ public class TabHostLayoutFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_tab_host_layout, container, false);
         CollapsingToolbarLayout toolbarLayout = rootView.findViewById(R.id.collapsing_toolbar);
         FloatingActionButton floatingActionButton = rootView.findViewById(R.id.fab);
+        ImageView headerImage = rootView.findViewById(R.id.iv_header);
+        ImageView titleImage = rootView.findViewById(R.id.iv_title);
         Toolbar toolbar = rootView.findViewById(R.id.toolbar);
+        View gradient = rootView.findViewById(R.id.gradient);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         List<Fragment> fragmentList = Stream.<Fragment>builder()
-                .add(Tab1Fragment.newInstance(mIsAdmin, mGroupId, mGroupName, mKey))
+                .add(Tab1Fragment.newInstance(mIsAdmin, mGroupId, mGroupName, mGroupImage, mKey))
                 .add(new Tab2Fragment())
                 .add(Tab3Fragment.newInstance(mGroupId))
                 .add(Tab4Fragment.newInstance(mIsAdmin, mGroupId, mPosition, mKey))
@@ -121,10 +131,25 @@ public class TabHostLayoutFragment extends Fragment {
                 intent.putExtra("admin", mIsAdmin);
                 intent.putExtra("grp_id", mGroupId);
                 intent.putExtra("grp_nm", mGroupName);
+                intent.putExtra("grp_img", mGroupImage);
                 intent.putExtra("key", mKey);
                 startActivity(intent);
             }
         });
+
+        // 경북대 소모임에는 없음
+        if (!mGroupImage.contains("share_nophoto")) {
+            Glide.with(this)
+                    .load(mGroupImage)
+                    .apply(RequestOptions.errorOf(R.drawable.header))
+                    .into(headerImage);
+            titleImage.setVisibility(View.INVISIBLE);
+            gradient.setVisibility(View.VISIBLE);
+        } else {
+            titleImage.setVisibility(View.VISIBLE);
+            gradient.setVisibility(View.INVISIBLE);
+        }
+
 
         return rootView;
     }

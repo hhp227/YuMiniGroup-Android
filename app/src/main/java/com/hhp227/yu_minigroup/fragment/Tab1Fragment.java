@@ -41,7 +41,7 @@ public class Tab1Fragment extends Fragment {
     public static final int LIMIT = 10;
     public static final int UPDATE_ARTICLE = 20;
     public static boolean mIsAdmin;
-    public static String mGroupId, mGroupName, mKey;
+    public static String mGroupId, mGroupName, mGroupImage, mKey;
 
     private static final String TAG = "소식";
     private boolean mHasRequestedMore;
@@ -56,12 +56,13 @@ public class Tab1Fragment extends Fragment {
     public Tab1Fragment() {
     }
 
-    public static Tab1Fragment newInstance(boolean isAdmin, String grpId, String grpNm, String key) {
+    public static Tab1Fragment newInstance(boolean isAdmin, String grpId, String grpNm, String grpImg, String key) {
         Tab1Fragment fragment = new Tab1Fragment();
         Bundle args = new Bundle();
         args.putBoolean("admin", isAdmin);
         args.putString("grp_id", grpId);
         args.putString("grp_nm", grpNm);
+        args.putString("grp_img", grpImg);
         args.putString("key", key);
         fragment.setArguments(args);
         return fragment;
@@ -74,6 +75,7 @@ public class Tab1Fragment extends Fragment {
             mIsAdmin = getArguments().getBoolean("admin");
             mGroupId = getArguments().getString("grp_id");
             mGroupName = getArguments().getString("grp_nm");
+            mGroupImage = getArguments().getString("grp_img");
             mKey = getArguments().getString("key");
         }
     }
@@ -116,6 +118,7 @@ public class Tab1Fragment extends Fragment {
             intent.putExtra("admin", mIsAdmin);
             intent.putExtra("grp_id", mGroupId);
             intent.putExtra("grp_nm", mGroupName);
+            intent.putExtra("grp_img", mGroupImage);
             intent.putExtra("artl_num", articleItem.getId());
             intent.putExtra("position", position + 1);
             intent.putExtra("auth", articleItem.isAuth() || AppController.getInstance().getPreferenceManager().getUser().getUid().equals(articleItem.getUid()));
@@ -132,6 +135,7 @@ public class Tab1Fragment extends Fragment {
             intent.putExtra("admin", mIsAdmin);
             intent.putExtra("grp_id", mGroupId);
             intent.putExtra("grp_nm", mGroupName);
+            intent.putExtra("grp_img", mGroupImage);
             intent.putExtra("key", mKey);
             startActivity(intent);
         });

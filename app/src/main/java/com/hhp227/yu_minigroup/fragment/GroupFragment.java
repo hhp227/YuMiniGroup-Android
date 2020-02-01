@@ -94,6 +94,7 @@ public class GroupFragment extends Fragment {
                 intent.putExtra("admin", groupItem.isAdmin());
                 intent.putExtra("grp_id", groupItem.getId());
                 intent.putExtra("grp_nm", groupItem.getName());
+                intent.putExtra("grp_img", groupItem.getImage()); // 경북대 소모임에는 없음
                 intent.putExtra("pos", position);
                 intent.putExtra("key", mAdapter.getKey(position));
                 startActivityForResult(intent, UPDATE_GROUP);

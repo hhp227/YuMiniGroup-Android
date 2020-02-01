@@ -32,6 +32,11 @@
                     android:contentDescription="TODO"
                     app:layout_collapseMode="parallax"/>
 
+            <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_gradient_seat"/>
+
             <androidx.appcompat.widget.Toolbar
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"

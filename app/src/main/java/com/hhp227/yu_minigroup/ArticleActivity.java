@@ -60,7 +60,7 @@ public class ArticleActivity extends AppCompatActivity {
     private static final String TAG = ArticleActivity.class.getSimpleName();
     private boolean mIsBottom, mIsUpdate, mIsAuthorized;
     private int mPosition;
-    private String mGroupId, mArticleId, mGroupName, mGroupKey, mArticleKey;
+    private String mGroupId, mArticleId, mGroupName, mGroupImage, mGroupKey, mArticleKey;
     private CardView mButtonSend;
     private EditText mInputReply;
     private ImageView mArticleProfile;
@@ -97,6 +97,7 @@ public class ArticleActivity extends AppCompatActivity {
         Intent intent = getIntent();
         mGroupId = intent.getStringExtra("grp_id");
         mGroupName = intent.getStringExtra("grp_nm");
+        mGroupImage = intent.getStringExtra("grp_img");
         mArticleId = intent.getStringExtra("artl_num");
         mGroupKey = intent.getStringExtra("grp_key");
         mArticleKey = intent.getStringExtra("artl_key");
@@ -195,6 +196,7 @@ public class ArticleActivity extends AppCompatActivity {
                             groupIntent.putExtra("admin", getIntent().getBooleanExtra("admin", false));
                             groupIntent.putExtra("grp_id", mGroupId);
                             groupIntent.putExtra("grp_nm", mGroupName);
+                            groupIntent.putExtra("grp_img", mGroupImage);
                             groupIntent.putExtra("key", mGroupKey);
 
                             // 모든 이전 activity 초기화

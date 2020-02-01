@@ -16,7 +16,7 @@ import com.hhp227.yu_minigroup.fragment.TabHostLayoutFragment;
 public class GroupActivity extends AppCompatActivity {
     private boolean mIsAdmin;
     private int mPosition;
-    private String mGroupId, mGroupName, mKey;
+    private String mGroupId, mGroupName, mGroupImage, mKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,9 +26,10 @@ public class GroupActivity extends AppCompatActivity {
         mIsAdmin = intent.getBooleanExtra("admin", false);
         mGroupId = intent.getStringExtra("grp_id");
         mGroupName = intent.getStringExtra("grp_nm");
+        mGroupImage = intent.getStringExtra("grp_img");
         mPosition = intent.getIntExtra("pos", 0);
         mKey = intent.getStringExtra("key");
-        TabHostLayoutFragment fragMain = TabHostLayoutFragment.newInstance(mIsAdmin, mGroupId, mGroupName, mPosition, mKey);
+        TabHostLayoutFragment fragMain = TabHostLayoutFragment.newInstance(mIsAdmin, mGroupId, mGroupName, mGroupImage, mPosition, mKey);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragMain).commit();
     }

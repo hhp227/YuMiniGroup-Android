@@ -50,7 +50,7 @@ public class WriteActivity extends AppCompatActivity {
 
     private static final String TAG = WriteActivity.class.getSimpleName();
     private boolean mIsAdmin;
-    private String mGrpId, mGrpNm, mCurrentPhotoPath, mCookie, mKey;
+    private String mGrpId, mGrpNm, mGrpImg, mCurrentPhotoPath, mCookie, mKey;
     private List<String> mImages;
     private List<WriteItem> mContents;
     private PreferenceManager mPreferenceManager;
@@ -75,6 +75,7 @@ public class WriteActivity extends AppCompatActivity {
         mIsAdmin = getIntent().getBooleanExtra("admin", false);
         mGrpId = getIntent().getStringExtra("grp_id");
         mGrpNm = getIntent().getStringExtra("grp_nm");
+        mGrpImg = getIntent().getStringExtra("grp_img");
         mKey = getIntent().getStringExtra("key");
 
         setSupportActionBar(toolbar);
@@ -275,6 +276,7 @@ public class WriteActivity extends AppCompatActivity {
                     intent.putExtra("admin", mIsAdmin);
                     intent.putExtra("grp_id", grpId);
                     intent.putExtra("grp_nm", mGrpNm);
+                    intent.putExtra("grp_img", mGrpImg);
                     intent.putExtra("key", mKey);
 
                     // 이전 Activity 초기화
