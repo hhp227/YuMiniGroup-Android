@@ -101,6 +101,7 @@ public class WriteActivity extends AppCompatActivity {
                 finish();
                 return true;
             case R.id.action_send:
+                //String test = "<p style=\"margin-top: 0; margin-bottom: 0;\" dir=\"ltr\">&nbsp;</p><embed title=\"YouTube video player\" class=\"youtube-player\" autostart=\"true\" src=\"//www.youtube.com/embed/mH2vkHJrtkI?autoplay=1\"  width=\"488\" height=\"274\"></embed>"; // 유튜브 태그
                 String title = (String) mAdapter.getTextMap().get("title");
                 String content = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N ? Html.toHtml((Spanned) mAdapter.getTextMap().get("content"), Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL) : Html.toHtml((Spanned) mAdapter.getTextMap().get("content"));
                 if (!title.isEmpty() && !(TextUtils.isEmpty(content) && mContents.size() < 2)) {
