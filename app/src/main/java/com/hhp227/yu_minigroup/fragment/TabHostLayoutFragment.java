@@ -1,18 +1,25 @@
 package com.hhp227.yu_minigroup.fragment;
 
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TabHost;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.viewpager.widget.ViewPager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -21,6 +28,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.WriteActivity;
+import com.hhp227.yu_minigroup.adapter.GroupGridAdapter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +47,7 @@ public class TabHostLayoutFragment extends Fragment {
     private int mPosition;
     private String mGroupId, mGroupName, mGroupImage, mKey;
     private TabLayout mTabLayout;
+    private Toolbar mToolbar;
     private ViewPager mViewPager;
 
     public TabHostLayoutFragment() {
@@ -77,7 +86,6 @@ public class TabHostLayoutFragment extends Fragment {
         FloatingActionButton floatingActionButton = rootView.findViewById(R.id.fab);
         ImageView headerImage = rootView.findViewById(R.id.iv_header);
         ImageView titleImage = rootView.findViewById(R.id.iv_title);
-        Toolbar toolbar = rootView.findViewById(R.id.toolbar);
         View gradient = rootView.findViewById(R.id.gradient);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         List<Fragment> fragmentList = Stream.<Fragment>builder()
@@ -99,9 +107,10 @@ public class TabHostLayoutFragment extends Fragment {
             }
         };
         mTabLayout = rootView.findViewById(R.id.tab_layout);
+        mToolbar = rootView.findViewById(R.id.toolbar);
         mViewPager = rootView.findViewById(R.id.view_pager);
 
-        activity.setSupportActionBar(toolbar);
+        activity.setSupportActionBar(mToolbar);
         activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         activity.getSupportActionBar().setTitle(mGroupName);
         toolbarLayout.setTitleEnabled(false);
@@ -145,11 +154,21 @@ public class TabHostLayoutFragment extends Fragment {
                     .into(headerImage);
             titleImage.setVisibility(View.INVISIBLE);
             gradient.setVisibility(View.VISIBLE);
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            getActivity().getWindow().setStatusBarColor(Color.TRANSPARENT);
+            ViewGroup.LayoutParams toolbarLayoutParams = mToolbar.getLayoutParams();
+            toolbarLayoutParams.height = toolbarLayoutParams.height + getStatusBarHeight();
+            mToolbar.setPadding(0, getStatusBarHeight(), 0, 0);
+            mToolbar.setLayoutParams(toolbarLayoutParams);
+            LinearLayout.LayoutParams toolbarLayoutLayoutParams = (LinearLayout.LayoutParams) toolbarLayout.getLayoutParams();
+            toolbarLayoutLayoutParams.height = toolbarLayoutLayoutParams.height + getStatusBarHeight();
+            toolbarLayout.setLayoutParams(toolbarLayoutLayoutParams);
         } else {
             titleImage.setVisibility(View.VISIBLE);
             gradient.setVisibility(View.INVISIBLE);
         }
-
 
         return rootView;
     }
@@ -160,5 +179,25 @@ public class TabHostLayoutFragment extends Fragment {
         mViewPager.clearOnPageChangeListeners();
         mTabLayout.clearOnTabSelectedListeners();
         mTabLayout.removeAllTabs();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        switch (newConfig.orientation) {
+            case Configuration.ORIENTATION_LANDSCAPE:
+
+                // 툴바, 탭레이아웃 간격 벌어짐 귀찮아서 나중에...
+                break;
+        }
+    }
+
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
     }
 }

@@ -48,7 +48,10 @@ public class GroupFragment extends Fragment {
     public static final int REGISTER_CODE = 20;
     public static final int UPDATE_GROUP = 30;
 
+    private static final int PORTAIT_SPAN_COUNT = 2;
+    private static final int LANDSCAPE_SPAN_COUNT = 4;
     private static final String TAG = GroupFragment.class.getSimpleName();
+    private int mSpanCount;
     private AppCompatActivity mActivity;
     private DrawerLayout mDrawerLayout;
     private GridLayoutManager mGridLayoutManager;
@@ -75,7 +78,10 @@ public class GroupFragment extends Fragment {
         mSwipeRefreshLayout = rootView.findViewById(R.id.srl_group);
         mProgressBar = rootView.findViewById(R.id.pb_group);
         mRelativeLayout = rootView.findViewById(R.id.rl_group);
-        mGridLayoutManager = new GridLayoutManager(getContext(), 2);
+        mSpanCount = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? PORTAIT_SPAN_COUNT :
+                     getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? LANDSCAPE_SPAN_COUNT :
+                     0;
+        mGridLayoutManager = new GridLayoutManager(getContext(), mSpanCount);
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
         mAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues);
@@ -103,7 +109,7 @@ public class GroupFragment extends Fragment {
         mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT ? 2 : 1;
+                return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT ? mSpanCount : 1;
             }
         });
         recyclerView.setLayoutManager(mGridLayoutManager);
@@ -156,24 +162,19 @@ public class GroupFragment extends Fragment {
         super.onConfigurationChanged(newConfig);
         switch (newConfig.orientation) {
             case Configuration.ORIENTATION_PORTRAIT:
-                mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                    @Override
-                    public int getSpanSize(int position) {
-                        return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT ? 2 : 1;
-                    }
-                });
-                mGridLayoutManager.setSpanCount(2);
+                mSpanCount = PORTAIT_SPAN_COUNT;
                 break;
             case Configuration.ORIENTATION_LANDSCAPE:
-                mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                    @Override
-                    public int getSpanSize(int position) {
-                        return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT ? 4 : 1;
-                    }
-                });
-                mGridLayoutManager.setSpanCount(4);
+                mSpanCount = LANDSCAPE_SPAN_COUNT;
                 break;
         }
+        mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT ? mSpanCount : 1;
+            }
+        });
+        mGridLayoutManager.setSpanCount(mSpanCount);
     }
 
     private void setDrawerToggle() {
@@ -243,14 +244,14 @@ public class GroupFragment extends Fragment {
         if (!mGroupItemValues.isEmpty()) {
             mAdapter.addHeaderView("가입중인 그룹");
             mRelativeLayout.setVisibility(View.GONE);
+            if (mGroupItemValues.size() % 2 == 0) {
+                GroupItem ad = new GroupItem();
+                ad.setAd(true);
+                ad.setName("광고");
+                mGroupItemValues.add(ad);
+            }
         } else
             mRelativeLayout.setVisibility(View.VISIBLE);
-        if (mGroupItemValues.size() % 2 == 0) {
-            GroupItem ad = new GroupItem();
-            ad.setAd(true);
-            ad.setName("광고");
-            mGroupItemValues.add(ad);
-        }
         hideProgressBar();
     }
 
