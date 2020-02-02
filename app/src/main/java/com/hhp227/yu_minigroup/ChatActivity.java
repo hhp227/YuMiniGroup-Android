@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -15,12 +16,19 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.android.volley.Request;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.adapter.MessageListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
+import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.MessageItem;
 import com.hhp227.yu_minigroup.dto.User;
+import org.json.JSONException;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +90,7 @@ public class ChatActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(intent.getStringExtra("chat_nm") + (mIsGroupChat ? " 그룹채팅방" : ""));
         mButtonSend.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(mInputMessage.getText().toString().trim())) {
                 sendMessage();
@@ -206,5 +215,52 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendLMSMessage() {
+        AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.POST, EndPoint.SEND_MESSAGE, null, response -> {
+            try {
+                if (!response.getBoolean("isError"))
+                    Log.d("채팅", response.getString("message"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, error -> VolleyLog.e(error.getMessage())) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Cookie", AppController.getInstance().getPreferenceManager().getCookie());
+                return headers;
+            }
+
+            @Override
+            public String getBodyContentType() {
+                return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
+            }
+
+            @Override
+            public byte[] getBody() {
+                Map<String, String> params = new HashMap<>();
+                params.put("TXT", mInputMessage.getText().toString());
+                params.put("send_msg", "Y");
+                params.put("USERS", mValue);
+                if (params.size() > 0) {
+                    StringBuilder encodedParams = new StringBuilder();
+                    try {
+                        params.forEach((k, v) -> {
+                            try {
+                                encodedParams.append(URLEncoder.encode(k, getParamsEncoding()));
+                                encodedParams.append('=');
+                                encodedParams.append(URLEncoder.encode(v, getParamsEncoding()));
+                                encodedParams.append('&');
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                        return encodedParams.toString().getBytes(getParamsEncoding());
+                    } catch (UnsupportedEncodingException uee) {
+                        throw new RuntimeException("Encoding not supported: " + getParamsEncoding(), uee);
+                    }
+                }
+                return null;
+            }
+        }, "req_send_msg");
     }
 }
