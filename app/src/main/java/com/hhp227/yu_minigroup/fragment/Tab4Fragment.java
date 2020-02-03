@@ -59,7 +59,7 @@ public class Tab4Fragment extends Fragment {
         Bundle args = new Bundle();
         args.putBoolean("admin", isAdmin);
         args.putString("grp_id", grpId);
-        args.putInt("position", position);
+        args.putInt("pos", position);
         args.putString("key", key);
         Tab4Fragment fragment = new Tab4Fragment();
         fragment.setArguments(args);
@@ -72,7 +72,7 @@ public class Tab4Fragment extends Fragment {
         if (getArguments() != null) {
             mIsAdmin = getArguments().getBoolean("admin");
             mGroupId = getArguments().getString("grp_id");
-            mPosition = getArguments().getInt("position");
+            mPosition = getArguments().getInt("pos");
             mKey = getArguments().getString("key");
         }
     }

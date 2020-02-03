@@ -40,7 +40,7 @@ public class TabHostLayoutFragment extends Fragment {
     private static final String GROUP_ID = "grp_id";
     private static final String GROUP_NAME = "grp_nm";
     private static final String GROUP_IMAGE = "grp_img";
-    private static final String POSITION = "position";
+    private static final String POSITION = "pos";
     private static final String KEY = "key";
     private static final String[] TAB_NAMES = {"소식", "일정", "맴버", "설정"};
     private boolean mIsAdmin;
