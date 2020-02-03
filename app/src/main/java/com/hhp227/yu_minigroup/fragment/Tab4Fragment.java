@@ -109,6 +109,7 @@ public class Tab4Fragment extends Fragment {
                     holder.withdrawalText.setText("소모임 탈퇴");
                     holder.settings.setVisibility(View.GONE);
                 }
+                holder.notice.setOnClickListener(this::onClick);
                 holder.feedback.setOnClickListener(this::onClick);
                 holder.appStore.setOnClickListener(this::onClick);
                 holder.share.setOnClickListener(this::onClick);
@@ -194,6 +195,9 @@ public class Tab4Fragment extends Fragment {
                         intent.putExtra("grp_id", mGroupId);
                         intent.putExtra("key", mKey);
                         startActivityForResult(intent, GroupFragment.UPDATE_GROUP);
+                        break;
+                    case R.id.ll_notice:
+                        startActivity(new Intent(getContext(), NoticeActivity.class));
                         break;
                     case R.id.ll_feedback:
                         Intent email = new Intent(Intent.ACTION_SEND);
@@ -285,7 +289,7 @@ public class Tab4Fragment extends Fragment {
 
     public class Tab4Holder extends RecyclerView.ViewHolder {
         private AdView adView;
-        private LinearLayout profile, withdrawal, settings, feedback, appStore, share, version;
+        private LinearLayout profile, withdrawal, settings, notice, feedback, appStore, share, version;
         private ImageView profileImage;
         private TextView name, yuId, withdrawalText;
 
@@ -295,6 +299,7 @@ public class Tab4Fragment extends Fragment {
             appStore = itemView.findViewById(R.id.ll_appstore);
             feedback = itemView.findViewById(R.id.ll_feedback);
             name = itemView.findViewById(R.id.tv_name);
+            notice = itemView.findViewById(R.id.ll_notice);
             profile = itemView.findViewById(R.id.ll_profile);
             profileImage = itemView.findViewById(R.id.iv_profile_image);
             settings = itemView.findViewById(R.id.ll_settings);

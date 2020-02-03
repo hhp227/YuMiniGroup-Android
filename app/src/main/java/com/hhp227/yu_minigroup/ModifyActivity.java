@@ -135,7 +135,7 @@ public class ModifyActivity extends AppCompatActivity {
                 break;
             case R.id.ll_video:
                 menu.setHeaderTitle("동영상 선택");
-                menu.add(3, Menu.NONE, Menu.NONE, "동영상");
+                menu.add(3, Menu.NONE, Menu.NONE, "유튜브");
                 break;
         }
     }
@@ -173,7 +173,7 @@ public class ModifyActivity extends AppCompatActivity {
                 }
                 return true;
             case 3:
-                Toast.makeText(getApplicationContext(), "동영상 선택", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "다음버젼에서 사용할수 있습니다.", Toast.LENGTH_LONG).show();
                 return true;
         }
         return false;
