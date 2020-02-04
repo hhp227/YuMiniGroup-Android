@@ -4,8 +4,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".RequestActivity">
+        android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
             android:layout_height="wrap_content"
@@ -25,15 +24,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
+        
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-                android:id="@+id/srl_group"
+                android:id="@+id/srl_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent">
-
+            
             <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_group"
+                    android:id="@+id/recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scrollbars="vertical"
@@ -58,6 +57,7 @@
                 android:visibility="gone">
 
             <TextView
+                    android:id="@+id/text"
                     android:text="가입신청중인 그룹이 없습니다."
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -65,7 +65,7 @@
                     android:layout_centerVertical="true"/>
 
         </RelativeLayout>
-
+        
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

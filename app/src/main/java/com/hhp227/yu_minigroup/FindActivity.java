@@ -48,12 +48,12 @@ public class FindActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_find);
+        setContentView(R.layout.activity_list);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        mRecyclerView = findViewById(R.id.rv_group);
+        mRecyclerView = findViewById(R.id.recycler_view);
         mProgressBar = findViewById(R.id.pb_group);
         mRelativeLayout = findViewById(R.id.rl_group);
-        mSwipeRefreshLayout = findViewById(R.id.srl_group);
+        mSwipeRefreshLayout = findViewById(R.id.srl_list);
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
         mAdapter = new GroupListAdapter(this, mGroupItemKeys, mGroupItemValues);

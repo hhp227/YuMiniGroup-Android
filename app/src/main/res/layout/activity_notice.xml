@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
                 android:layout_centerHorizontal="true"
-                android:text="내용 : 다음버젼에서는 유튜브 첨부를 추가할 예정입니다."
+                android:text="내용 : 경북대 소모임앱을 이용해주셔서 감사합니다. \n 문의사항은 구글 플레이스토어에 게시되어있는 \n 개발자 연락처로 주세요. \n \n 기능 추가에 관한 문의를 주셔도 됩니다. \n 많은 이용부탁드립니다. 감사합니다."
                 app:layout_constraintTop_toBottomOf="@id/tv_title"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>

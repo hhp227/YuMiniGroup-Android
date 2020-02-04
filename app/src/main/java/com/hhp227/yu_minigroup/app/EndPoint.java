@@ -41,4 +41,7 @@ public interface EndPoint {
     String URL_YU_LIBRARY_SEAT_ROOMS = URL_YU_LIBRARY_SEAT + "/Clicker/GetClickerReadingRooms";
     String URL_YU_LIBRARY_SEAT_DETAIL = URL_YU_LIBRARY_SEAT + "/clicker/UserSeat/{ID}";
     String URL_YU_SHUTTLE_BUS = URL_YU_MOBILE + "/_mobile/life/?c=life_02_02";
+
+    // 유튜브 API
+    String URL_YOUTUBE_API = "https://www.googleapis.com/youtube/v3/search";
 }
