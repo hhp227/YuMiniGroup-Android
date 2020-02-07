@@ -1,7 +1,9 @@
 package com.hhp227.yu_minigroup.fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +11,15 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.android.volley.Request;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.StringRequest;
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.calendar.ExtendedCalendarView;
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.Source;
 
 import java.util.*;
 
@@ -84,13 +93,34 @@ public class Tab2Fragment extends Fragment {
         };
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
-        addHeaderView();
+        fetchDataTask();
         return rootView;
     }
 
     private void fetchDataTask() {
         String year = String.valueOf(mCalendar.get(Calendar.YEAR));
         String month = String.format("%02d", mCalendar.get(Calendar.MONTH) + 1);
+
+        AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, "http://m.yu.ac.kr/_mobile/info/?c=info_01_01&year=" + year, response -> {
+            Source source = new Source(response);
+            try {
+                mList.clear();
+                addHeaderView();
+                Element infoCalendar = source.getFirstElementByClass("info_calendar case");
+                for (int i = 0; i < infoCalendar.getAllElements(HTMLElementName.A).size(); i++) {
+                    if (infoCalendar.getAllElements(HTMLElementName.A).get(i).getAttributeValue("id").equals("list_" + year + month))
+                        infoCalendar.getAllElements(HTMLElementName.UL).get(i).getAllElements(HTMLElementName.LI).forEach(element -> {
+                            Map<String, String> map = new HashMap<>();
+                            map.put("날짜", element.getFirstElement(HTMLElementName.P).getTextExtractor().toString());
+                            map.put("내용", element.getFirstElement(HTMLElementName.STRONG).getTextExtractor().toString());
+                            mList.add(map);
+                        });
+                }
+                mAdapter.notifyDataSetChanged();
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }, error -> VolleyLog.e(error.getMessage())));
     }
 
     public void addHeaderView() {

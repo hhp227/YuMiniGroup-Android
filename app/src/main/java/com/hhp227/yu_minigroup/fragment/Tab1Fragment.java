@@ -8,6 +8,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -191,6 +192,11 @@ public class Tab1Fragment extends Fragment {
                     String date = viewArt.getFirstElement(HTMLElementName.TD).getTextExtractor().toString();
                     List<Element> images = viewArt.getAllElements(HTMLElementName.IMG);
                     List<String> imageList = new ArrayList<>();
+                    //
+                    // 유튜브 추가
+                    List<Element> youtube = viewArt.getAllElementsByClass("youtube-player");
+                    Log.e(TAG, youtube.toString());
+                    //
                     if (images.size() > 0)
                         images.forEach(image -> imageList.add(!image.getAttributeValue("src").contains("http") ? EndPoint.BASE_URL + image.getAttributeValue("src") : image.getAttributeValue("src")));
                     StringBuilder content = new StringBuilder();

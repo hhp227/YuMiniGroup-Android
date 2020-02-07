@@ -49,7 +49,7 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         switch (viewType) {
             case TYPE_ARTICLE:
                 View itemView = LayoutInflater.from(mActivity).inflate(R.layout.article_item, parent, false);
-                return new ArticleItemHolder(itemView);
+                return new ItemHolder(itemView);
             case TYPE_LOADER:
                 View footerView = LayoutInflater.from(mActivity).inflate(R.layout.load_more, parent, false);
                 return new FooterHolder(footerView);
@@ -59,10 +59,10 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof ArticleItemHolder) {
+        if (holder instanceof ItemHolder) {
             ArticleItem articleItem = mArticleItemValues.get(position);
 
-            ((ArticleItemHolder) holder).article.setOnClickListener(v -> {
+            ((ItemHolder) holder).article.setOnClickListener(v -> {
                 if (mOnItemClickListener != null)
                     mOnItemClickListener.onItemClick(v, position);
             });
@@ -71,30 +71,30 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                             .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
                             .build()) : null)
                     .apply(RequestOptions.errorOf(R.drawable.profile_img_circle).circleCrop())
-                    .into(((ArticleItemHolder) holder).profileImage);
-            ((ArticleItemHolder) holder).title.setText(articleItem.getName() != null ? articleItem.getTitle() + " - " + articleItem.getName() : articleItem.getTitle());
-            ((ArticleItemHolder) holder).timestamp.setText(articleItem.getDate() != null ? articleItem.getDate() : new SimpleDateFormat("yyyy.MM.dd a h:mm:ss").format(articleItem.getTimestamp()));
+                    .into(((ItemHolder) holder).profileImage);
+            ((ItemHolder) holder).title.setText(articleItem.getName() != null ? articleItem.getTitle() + " - " + articleItem.getName() : articleItem.getTitle());
+            ((ItemHolder) holder).timestamp.setText(articleItem.getDate() != null ? articleItem.getDate() : new SimpleDateFormat("yyyy.MM.dd a h:mm:ss").format(articleItem.getTimestamp()));
             if (!TextUtils.isEmpty(articleItem.getContent())) {
-                ((ArticleItemHolder) holder).content.setText(articleItem.getContent());
-                ((ArticleItemHolder) holder).content.setMaxLines(CONTENT_MAX_LINE);
-                ((ArticleItemHolder) holder).content.setVisibility(View.VISIBLE);
+                ((ItemHolder) holder).content.setText(articleItem.getContent());
+                ((ItemHolder) holder).content.setMaxLines(CONTENT_MAX_LINE);
+                ((ItemHolder) holder).content.setVisibility(View.VISIBLE);
             } else
-                ((ArticleItemHolder) holder).content.setVisibility(View.GONE);
+                ((ItemHolder) holder).content.setVisibility(View.GONE);
 
-            ((ArticleItemHolder) holder).contentMore.setVisibility(!TextUtils.isEmpty(articleItem.getContent()) && ((ArticleItemHolder) holder).content.getLineCount() > CONTENT_MAX_LINE ? View.VISIBLE : View.GONE);
+            ((ItemHolder) holder).contentMore.setVisibility(!TextUtils.isEmpty(articleItem.getContent()) && ((ItemHolder) holder).content.getLineCount() > CONTENT_MAX_LINE ? View.VISIBLE : View.GONE);
             if (articleItem.getImages() != null && articleItem.getImages().size() > 0) {
-                ((ArticleItemHolder) holder).articleImage.setVisibility(View.VISIBLE);
+                ((ItemHolder) holder).articleImage.setVisibility(View.VISIBLE);
                 Glide.with(mActivity)
                         .load(articleItem.getImages().get(0))
                         .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
                         .transition(DrawableTransitionOptions.withCrossFade(150))
-                        .into(((ArticleItemHolder) holder).articleImage);
+                        .into(((ItemHolder) holder).articleImage);
             } else
-                ((ArticleItemHolder) holder).articleImage.setVisibility(View.GONE);
-            ((ArticleItemHolder) holder).replyCount.setText(articleItem.getReplyCount());
+                ((ItemHolder) holder).articleImage.setVisibility(View.GONE);
+            ((ItemHolder) holder).replyCount.setText(articleItem.getReplyCount());
 
-            ((ArticleItemHolder) holder).replyButton.setTag(position);
-            ((ArticleItemHolder) holder).replyButton.setOnClickListener(v -> {
+            ((ItemHolder) holder).replyButton.setTag(position);
+            ((ItemHolder) holder).replyButton.setOnClickListener(v -> {
                 if (mOnItemClickListener != null)
                     mOnItemClickListener.onItemClick(v, position);
             });
@@ -129,13 +129,13 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         return mArticleItemKeys.get(position);
     }
 
-    public static class ArticleItemHolder extends RecyclerView.ViewHolder {
+    public static class ItemHolder extends RecyclerView.ViewHolder {
         private CardView article;
         private ImageView profileImage, articleImage;
         private LinearLayout replyButton, likeButton;
         private TextView title, timestamp, content, contentMore, replyCount, likeCount;
 
-        public ArticleItemHolder(View itemView) {
+        public ItemHolder(View itemView) {
             super(itemView);
             article = itemView.findViewById(R.id.cv_article);
             profileImage = itemView.findViewById(R.id.iv_profile_image);
