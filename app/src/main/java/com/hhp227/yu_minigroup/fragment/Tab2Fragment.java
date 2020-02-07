@@ -29,7 +29,6 @@ public class Tab2Fragment extends Fragment {
     private static final String TAG = "일정";
     private Calendar mCalendar;
     private RecyclerView.Adapter mAdapter;
-    private HashMap<String, String> mMap;
     private List<Map<String, String>> mList;
     private RecyclerView mRecyclerView;
 
