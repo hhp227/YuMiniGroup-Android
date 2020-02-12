@@ -278,8 +278,6 @@ public class GroupFragment extends Fragment {
                         mAdapter.notifyDataSetChanged();
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage());
-                    } finally {
-                        mActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     }
                 } else {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -287,6 +285,7 @@ public class GroupFragment extends Fragment {
                         fetchDataTaskFromFirebase(databaseReference.child(snapshot.getKey()), true);
                     }
                 }
+                mActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             }
 
             @Override
