@@ -214,10 +214,10 @@ public class LoginActivity extends AppCompatActivity {
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
                 params.put("name", user.getName());
-                params.put("knu_id", user.getUserId());
+                params.put("user_id", user.getUserId());
                 params.put("password", user.getPassword());
                 params.put("student_number", user.getNumber());
-                params.put("real_name", "영남대 소모임");
+                params.put("type", "영남대 소모임");
                 return params;
             }
         });

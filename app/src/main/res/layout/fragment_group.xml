@@ -54,12 +54,28 @@
                 android:layout_height="match_parent"
                 android:visibility="gone">
 
+            <ImageView
+                    android:layout_width="186dp"
+                    android:layout_height="110dp"
+                    android:src="@drawable/yu_minigroup"
+                    android:layout_above="@id/tv_nogroups"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="20dp"/>
+
             <TextView
                     android:text="가입한 그룹이 없습니다."
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:layout_centerVertical="true"/>
+                    android:layout_above="@id/tv_nogroups"/>
+
+            <TextView
+                    android:id="@+id/tv_nogroups"
+                    android:text="그룹찾기를 통해 가입하거나 새로운 모임을 생성하세요."
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginTop="20dp"/>
 
         </RelativeLayout>
 
