@@ -1,5 +1,6 @@
 package com.hhp227.yu_minigroup;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,12 +30,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class YouTubeSearchActivity extends AppCompatActivity {
+    public static final String API_KEY = "AIzaSyCHF6p97aduruLMxgCuEVfFaKUiGPcMuOQ";
+
     private static final int LIMIT = 50;
-    private static final String API_KEY = "AIzaSyA-Y2OLwlPCIjr-CtLG6_CyPQWLAiRi7qg";
+    private int mType;
     private YouTubeListAdapter mAdapter;
     private List<YouTubeItem> mYouTubeItemList;
     private ProgressBar mProgressBar;
-    private String searchText;
+    private String mSearchText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,10 +49,18 @@ public class YouTubeSearchActivity extends AppCompatActivity {
         mProgressBar = findViewById(R.id.pb_group);
         mYouTubeItemList = new ArrayList<>();
         mAdapter = new YouTubeListAdapter(this, mYouTubeItemList);
-        searchText = "";
+        mSearchText = "";
+        mType = getIntent().getIntExtra("type", 0);
 
         setSupportActionBar(toolbar);
-        mAdapter.setOnItemClickListener((v, position) -> Toast.makeText(getApplicationContext(), "다음버젼에서 첨부 가능합니다.", Toast.LENGTH_LONG).show());
+        mAdapter.setOnItemClickListener((v, position) -> {//리팩토링 요망
+            YouTubeItem youTubeItem = mYouTubeItemList.get(position);
+            Intent intent = new Intent(this, mType == 0 ? WriteActivity.class : ModifyActivity.class);
+
+            intent.putExtra("youtube", youTubeItem);
+            setResult(RESULT_OK, intent);
+            finish();
+        });//
         mAdapter.setHasStableIds(true);
         swipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
             mYouTubeItemList.clear();
@@ -86,7 +97,7 @@ public class YouTubeSearchActivity extends AppCompatActivity {
             public boolean onQueryTextSubmit(String query) {
                 showProgressBar();
                 mYouTubeItemList.clear();
-                searchText = query;
+                mSearchText = query;
                 fetchDataTask();
                 searchView.clearFocus();
                 return true;
@@ -101,7 +112,7 @@ public class YouTubeSearchActivity extends AppCompatActivity {
     }
 
     private void fetchDataTask() {
-        AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.GET, EndPoint.URL_YOUTUBE_API + "?part=snippet&key=" + API_KEY + "&q=" + searchText + "&maxResults=" + LIMIT, null, response -> {
+        AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.GET, EndPoint.URL_YOUTUBE_API + "?part=snippet&key=" + API_KEY + "&q=" + mSearchText + "&maxResults=" + LIMIT, null, response -> {
             hideProgressBar();
             try {
                 JSONArray items = response.getJSONArray("items");

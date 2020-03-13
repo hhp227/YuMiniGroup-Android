@@ -5,14 +5,13 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-    <LinearLayout
-            android:layout_width="fill_parent"
+    <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:divider="@null"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
-            android:orientation="vertical">
+            android:layout_marginTop="10dp">
 
         <ImageView
                 android:id="@+id/iv_image_preview"
@@ -22,12 +21,15 @@
                 android:scaleType="fitXY"
                 android:visibility="visible"/>
 
-        <VideoView
-                android:id="@+id/vv_video_preview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"/>
+        <ImageView
+                android:id="@+id/iv_video_preview"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_centerInParent="true"
+                android:visibility="visible"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/video_mark"/>
 
-    </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

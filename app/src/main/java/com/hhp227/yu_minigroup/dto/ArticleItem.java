@@ -7,11 +7,12 @@ public class ArticleItem {
     private long timestamp;
     private String id, uid, name, title, content, date, replyCount;
     private List<String> images;
+    private YouTubeItem youtube;
 
     public ArticleItem() {
     }
 
-    public ArticleItem(String id, String uid, String name, String title, String content, List<String> images, String date, String replyCount, boolean auth, long timestamp) {
+    public ArticleItem(String id, String uid, String name, String title, String content, List<String> images, YouTubeItem youTube, String date, String replyCount, boolean auth, long timestamp) {
         super();
         this.id = id;
         this.uid = uid;
@@ -19,6 +20,7 @@ public class ArticleItem {
         this.title = title;
         this.content = content;
         this.images = images;
+        this.youtube = youTube;
         this.date = date;
         this.replyCount = replyCount;
         this.auth = auth;
@@ -71,6 +73,14 @@ public class ArticleItem {
 
     public void setImages(List<String> images) {
         this.images = images;
+    }
+
+    public YouTubeItem getYoutube() {
+        return youtube;
+    }
+
+    public void setYoutube(YouTubeItem youtube) {
+        this.youtube = youtube;
     }
 
     public String getDate() {
