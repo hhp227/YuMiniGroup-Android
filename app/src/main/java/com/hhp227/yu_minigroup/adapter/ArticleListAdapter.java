@@ -82,15 +82,24 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 ((ItemHolder) holder).content.setVisibility(View.GONE);
 
             ((ItemHolder) holder).contentMore.setVisibility(!TextUtils.isEmpty(articleItem.getContent()) && ((ItemHolder) holder).content.getLineCount() > CONTENT_MAX_LINE ? View.VISIBLE : View.GONE);
-            if (articleItem.getImages() != null && articleItem.getImages().size() > 0) {
-                ((ItemHolder) holder).articleImage.setVisibility(View.VISIBLE);
+            if (articleItem.getYoutube() != null) {
+                ((ItemHolder) holder).imageContainer.setVisibility(View.VISIBLE);
+                ((ItemHolder) holder).videoMark.setVisibility(View.VISIBLE);
+                Glide.with(mActivity)
+                        .load(articleItem.getYoutube().thumbnail)
+                        .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
+                        .transition(DrawableTransitionOptions.withCrossFade(150))
+                        .into(((ItemHolder) holder).articleImage);
+            } else if (articleItem.getImages() != null && articleItem.getImages().size() > 0) {
+                ((ItemHolder) holder).imageContainer.setVisibility(View.VISIBLE);
+                ((ItemHolder) holder).videoMark.setVisibility(View.INVISIBLE);
                 Glide.with(mActivity)
                         .load(articleItem.getImages().get(0))
                         .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
                         .transition(DrawableTransitionOptions.withCrossFade(150))
                         .into(((ItemHolder) holder).articleImage);
             } else
-                ((ItemHolder) holder).articleImage.setVisibility(View.GONE);
+                ((ItemHolder) holder).imageContainer.setVisibility(View.GONE);
             ((ItemHolder) holder).replyCount.setText(articleItem.getReplyCount());
 
             ((ItemHolder) holder).replyButton.setTag(position);
@@ -131,8 +140,9 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public static class ItemHolder extends RecyclerView.ViewHolder {
         private CardView article;
-        private ImageView profileImage, articleImage;
+        private ImageView profileImage, articleImage, videoMark;
         private LinearLayout replyButton, likeButton;
+        private RelativeLayout imageContainer;
         private TextView title, timestamp, content, contentMore, replyCount, likeCount;
 
         public ItemHolder(View itemView) {
@@ -143,7 +153,9 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             timestamp = itemView.findViewById(R.id.tv_timestamp);
             content = itemView.findViewById(R.id.tv_content);
             contentMore = itemView.findViewById(R.id.tv_content_more);
+            imageContainer = itemView.findViewById(R.id.rl_article_image);
             articleImage = itemView.findViewById(R.id.iv_article_image);
+            videoMark = itemView.findViewById(R.id.iv_video_preview);
             replyCount = itemView.findViewById(R.id.tv_replycount);
             replyButton = itemView.findViewById(R.id.ll_reply);
         }

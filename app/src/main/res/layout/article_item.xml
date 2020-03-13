@@ -89,14 +89,31 @@
                         android:textColor="@android:color/darker_gray"
                         android:visibility="gone"/>
 
-                <ImageView
-                        android:id="@+id/iv_article_image"
+                <RelativeLayout
+                        android:id="@+id/rl_article_image"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:scaleType="fitXY"
-                        android:visibility="invisible"
-                        android:adjustViewBounds="true"
-                        android:paddingTop="10dp"/>
+                        android:paddingTop="10dp">
+
+                    <ImageView
+                            android:id="@+id/iv_article_image"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scaleType="fitXY"
+                            android:visibility="visible"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/yu_minigroup"/>
+
+                    <ImageView
+                            android:id="@+id/iv_video_preview"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_centerInParent="true"
+                            android:visibility="visible"
+                            android:layout_marginTop="10dp"
+                            android:src="@drawable/video_mark"/>
+
+                </RelativeLayout>
 
             </LinearLayout>
 

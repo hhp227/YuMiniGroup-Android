@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -28,6 +29,7 @@ import com.hhp227.yu_minigroup.adapter.ArticleListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
+import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
@@ -46,7 +48,7 @@ public class Tab1Fragment extends Fragment {
 
     private static final String TAG = "소식";
     private boolean mHasRequestedMore;
-    private int mOffSet;
+    private int mOffSet, mMinId;
     private long mLastClickTime;
     private ArticleListAdapter mAdapter;
     private List<String> mArticleItemKeys;
@@ -60,6 +62,7 @@ public class Tab1Fragment extends Fragment {
     public static Tab1Fragment newInstance(boolean isAdmin, String grpId, String grpNm, String grpImg, String key) {
         Tab1Fragment fragment = new Tab1Fragment();
         Bundle args = new Bundle();
+
         args.putBoolean("admin", isAdmin);
         args.putString("grp_id", grpId);
         args.putString("grp_nm", grpNm);
@@ -107,6 +110,7 @@ public class Tab1Fragment extends Fragment {
                 if (!mHasRequestedMore && dy > 0 && layoutManager != null && layoutManager.findLastCompletelyVisibleItemPosition() >= layoutManager.getItemCount() - 1) {
                     mHasRequestedMore = true;
                     mOffSet += LIMIT;
+
                     mAdapter.setFooterProgressBarVisibility(View.VISIBLE);
                     mAdapter.notifyDataSetChanged();
                     fetchArticleList();
@@ -116,6 +120,7 @@ public class Tab1Fragment extends Fragment {
         mAdapter.setOnItemClickListener((v, position) -> {
             ArticleItem articleItem = mArticleItemValues.get(position);
             Intent intent = new Intent(getContext(), ArticleActivity.class);
+
             intent.putExtra("admin", mIsAdmin);
             intent.putExtra("grp_id", mGroupId);
             intent.putExtra("grp_nm", mGroupName);
@@ -133,6 +138,7 @@ public class Tab1Fragment extends Fragment {
                 return;
             mLastClickTime = SystemClock.elapsedRealtime();
             Intent intent = new Intent(getActivity(), WriteActivity.class);
+
             intent.putExtra("admin", mIsAdmin);
             intent.putExtra("grp_id", mGroupId);
             intent.putExtra("grp_nm", mGroupName);
@@ -141,7 +147,9 @@ public class Tab1Fragment extends Fragment {
             startActivity(intent);
         });
         swipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
+            mMinId = 0;
             mOffSet = 1;
+
             mArticleItemKeys.clear();
             mArticleItemValues.clear();
             mAdapter.addFooterView();
@@ -161,10 +169,12 @@ public class Tab1Fragment extends Fragment {
         if (requestCode == UPDATE_ARTICLE && resultCode == Activity.RESULT_OK) {
             int position = data.getIntExtra("position", 0) - 1;
             ArticleItem articleItem = mArticleItemValues.get(position);
+
             articleItem.setTitle(data.getStringExtra("sbjt"));
             articleItem.setContent(data.getStringExtra("txt"));
             articleItem.setImages(data.getStringArrayListExtra("img")); // firebase data
             articleItem.setReplyCount(data.getStringExtra("cmmt_cnt"));
+            articleItem.setYoutube(data.getParcelableExtra("youtube"));
             mArticleItemValues.set(position, articleItem);
             mAdapter.notifyItemChanged(position);
         }
@@ -174,11 +184,9 @@ public class Tab1Fragment extends Fragment {
         String params = "?CLUB_GRP_ID=" + mGroupId + "&startL=" + mOffSet + "&displayL=" + LIMIT;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.GROUP_ARTICLE_LIST + params, response -> {
             Source source = new Source(response);
+
             hideProgressBar();
             try {
-
-                // 페이징 처리
-                String page = source.getFirstElementByClass("paging").getFirstElement("title", "현재 선택 목록", false).getTextExtractor().toString();
                 List<Element> list = source.getAllElementsByClass("listbox2");
                 for (Element element : list) {
                     Element viewArt = element.getFirstElementByClass("view_art");
@@ -192,19 +200,21 @@ public class Tab1Fragment extends Fragment {
                     String date = viewArt.getFirstElement(HTMLElementName.TD).getTextExtractor().toString();
                     List<Element> images = viewArt.getAllElements(HTMLElementName.IMG);
                     List<String> imageList = new ArrayList<>();
-                    //
-                    // 유튜브 추가
-                    List<Element> youtube = viewArt.getAllElementsByClass("youtube-player");
-                    Log.e(TAG, youtube.toString());
-                    //
+
                     if (images.size() > 0)
                         images.forEach(image -> imageList.add(!image.getAttributeValue("src").contains("http") ? EndPoint.BASE_URL + image.getAttributeValue("src") : image.getAttributeValue("src")));
                     StringBuilder content = new StringBuilder();
                     viewArt.getFirstElementByClass("list_cont").getChildElements().forEach(childElement -> content.append(childElement.getTextExtractor().toString().concat("\n")));
 
                     String replyCnt = commentWrap.getContent().getFirstElement(HTMLElementName.P).getTextExtractor().toString();
-
+                    mMinId = mMinId == 0 ? Integer.parseInt(id) : Math.min(mMinId, Integer.parseInt(id));
+                    if (Integer.parseInt(id) > mMinId) {
+                        mHasRequestedMore = true;
+                        break;
+                    } else
+                        mHasRequestedMore = false;
                     ArticleItem articleItem = new ArticleItem();
+
                     articleItem.setId(id);
                     articleItem.setTitle(title.trim());
                     articleItem.setName(name.trim());
@@ -213,11 +223,18 @@ public class Tab1Fragment extends Fragment {
                     articleItem.setImages(imageList);
                     articleItem.setReplyCount(replyCnt);
                     articleItem.setAuth(auth);
+                    if (viewArt.getFirstElementByClass("youtube-player") != null) {
+                        String youtubeUrl = viewArt.getFirstElementByClass("youtube-player").getAttributeValue("src");
+                        String youtubeId = youtubeUrl.substring(youtubeUrl.lastIndexOf("/") + 1, youtubeUrl.lastIndexOf("?"));
+                        String thumbnail = "https://i.ytimg.com/vi/" + youtubeId + "/mqdefault.jpg";
+                        YouTubeItem youTubeItem = new YouTubeItem(youtubeId, null, null, thumbnail, null);
+
+                        articleItem.setYoutube(youTubeItem);
+                    }
 
                     mArticleItemKeys.add(mArticleItemKeys.size() - 1, id);
                     mArticleItemValues.add(mArticleItemValues.size() - 1, articleItem);
                 }
-                mHasRequestedMore = false;
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
             } finally {

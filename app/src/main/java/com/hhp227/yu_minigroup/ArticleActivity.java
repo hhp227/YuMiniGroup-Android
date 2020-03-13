@@ -370,7 +370,6 @@ public class ArticleActivity extends AppCompatActivity {
                     mArticleContent.setVisibility(View.GONE);
 
                 if (images.size() > 0) {
-                    mArticleImages.removeAllViews(); // 임시방편
                     for (Element image : images) {
                         if (mArticleImages.getChildCount() > images.size() - 1)
                             break;
@@ -395,7 +394,7 @@ public class ArticleActivity extends AppCompatActivity {
                     mArticleImages.setVisibility(View.GONE);
                 fetchReplyData(commentList);
                 if (mIsUpdate)
-                    deliveryUpdate(title, contentExtractor(viewArt.getFirstElementByClass("list_cont"), true), mImageList, replyCnt);
+                    deliveryUpdate(title, contentExtractor(viewArt.getFirstElementByClass("list_cont"), true), replyCnt);
             } catch (Exception e) {
                 Toast.makeText(getApplicationContext(), "값이 없습니다.", Toast.LENGTH_LONG).show();
             } finally {
@@ -500,19 +499,22 @@ public class ArticleActivity extends AppCompatActivity {
         }, 300);
     }
 
-    private void deliveryUpdate(String title, String content, List<String> imageList, String replyCnt) {
+    private void deliveryUpdate(String title, String content, String replyCnt) {
         Intent intent = new Intent(getApplicationContext(), Tab1Fragment.class);
+
         intent.putExtra("position", mPosition);
         intent.putExtra("sbjt", title);
         intent.putExtra("txt", content);
-        intent.putStringArrayListExtra("img", (ArrayList<String>) imageList);
+        intent.putStringArrayListExtra("img", (ArrayList<String>) mImageList);
         intent.putExtra("cmmt_cnt", replyCnt);
-
+        //intent.putExtra("youtube", mYoutubeItem);
         setResult(RESULT_OK, intent);
     }
 
     private void refresh() {
         mIsUpdate = true;
+
+        mArticleImages.removeAllViews();
         mImageList.clear();
         mReplyItemKeys.clear();
         mReplyItemValues.clear();
