@@ -15,31 +15,27 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.youtube.player.YouTubePlayerView;
 import com.google.firebase.database.*;
-import com.hhp227.yu_minigroup.adapter.ArticleListAdapter;
 import com.hhp227.yu_minigroup.adapter.ReplyListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.ReplyItem;
+import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import com.hhp227.yu_minigroup.fragment.Tab1Fragment;
+import com.hhp227.yu_minigroup.helper.MyYouTubeBaseActivity;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
@@ -55,7 +51,7 @@ import java.util.Map;
 
 import static com.hhp227.yu_minigroup.fragment.Tab1Fragment.UPDATE_ARTICLE;
 
-public class ArticleActivity extends AppCompatActivity {
+public class ArticleActivity extends MyYouTubeBaseActivity {
     private static final int UPDATE_REPLY = 10;
     private static final String TAG = ArticleActivity.class.getSimpleName();
     private boolean mIsBottom, mIsUpdate, mIsAuthorized;
@@ -75,6 +71,8 @@ public class ArticleActivity extends AppCompatActivity {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private TextView mArticleTitle, mArticleTimeStamp, mArticleContent, mSendText;
     private View mArticleDetail;
+    private YouTubeItem mYouTubeItem;
+    private YouTubePlayerView mYouTubePlayerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,26 +171,26 @@ public class ArticleActivity extends AppCompatActivity {
                 return true;
             case 1:
                 Intent modifyIntent = new Intent(this, ModifyActivity.class);
+
                 modifyIntent.putExtra("grp_id", mGroupId);
                 modifyIntent.putExtra("artl_num", mArticleId);
                 modifyIntent.putExtra("sbjt", mArticleTitle.getText().toString().substring(0, mArticleTitle.getText().toString().lastIndexOf("-")).trim());
                 modifyIntent.putExtra("txt", mArticleContent.getText().toString());
                 modifyIntent.putStringArrayListExtra("img", (ArrayList<String>) mImageList);
+                modifyIntent.putExtra("vid", mYouTubeItem);
                 modifyIntent.putExtra("grp_key", mGroupKey);
                 modifyIntent.putExtra("artl_key", mArticleKey);
                 startActivityForResult(modifyIntent, UPDATE_ARTICLE);
                 return true;
             case 2:
                 String tag_string_req = "req_delete";
-
-                showProgressBar();
-
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.DELETE_ARTICLE, response -> {
                     try {
                         JSONObject jsonObject = new JSONObject(response);
                         boolean error = jsonObject.getBoolean("isError");
                         if (!error) {
                             Intent groupIntent = new Intent(ArticleActivity.this, GroupActivity.class);
+
                             groupIntent.putExtra("admin", getIntent().getBooleanExtra("admin", false));
                             groupIntent.putExtra("grp_id", mGroupId);
                             groupIntent.putExtra("grp_nm", mGroupName);
@@ -220,6 +218,7 @@ public class ArticleActivity extends AppCompatActivity {
                     @Override
                     public Map<String, String> getHeaders() {
                         Map<String, String> headers = new HashMap<>();
+
                         headers.put("Cookie", mPreferenceManager.getCookie());
                         return headers;
                     }
@@ -227,11 +226,14 @@ public class ArticleActivity extends AppCompatActivity {
                     @Override
                     protected Map<String, String> getParams() {
                         Map<String, String> params = new HashMap<>();
+
                         params.put("CLUB_GRP_ID", mGroupId);
                         params.put("ARTL_NUM", mArticleId);
                         return params;
                     }
                 };
+
+                showProgressBar();
                 AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
                 return true;
         }
@@ -243,12 +245,14 @@ public class ArticleActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == UPDATE_ARTICLE && resultCode == RESULT_OK) {
             mIsUpdate = true;
+
             refresh();
         } else if (requestCode == UPDATE_REPLY && resultCode == RESULT_OK && data != null) {
             mSource = new Source(data.getStringExtra("update_reply"));
+            List<Element> commentList = mSource.getAllElementsByClass("comment-list");
+
             mReplyItemKeys.clear();
             mReplyItemValues.clear();
-            List<Element> commentList = mSource.getAllElementsByClass("comment-list");
             fetchReplyData(commentList);
         }
     }
@@ -260,8 +264,9 @@ public class ArticleActivity extends AppCompatActivity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         int position = ((AdapterView.AdapterContextMenuInfo) menuInfo).position;
-        menu.setHeaderTitle("작업선택");
         boolean auth = !mReplyItemValues.isEmpty() && position != 0 && mReplyItemValues.get((position - 1)).isAuth();
+
+        menu.setHeaderTitle("작업선택");
         menu.add(Menu.NONE, 1, Menu.NONE, "내용 복사");
         if (position != 0 && auth) {
             menu.add(Menu.NONE, 2, Menu.NONE, "댓글 수정");
@@ -284,6 +289,7 @@ public class ArticleActivity extends AppCompatActivity {
             case 2:
                 Intent intent = new Intent(getBaseContext(), ReplyModifyActivity.class);
                 String reply = replyItem.getReply();
+
                 intent.putExtra("grp_id", mGroupId);
                 intent.putExtra("artl_num", mArticleId);
                 intent.putExtra("cmt", reply);
@@ -294,16 +300,15 @@ public class ArticleActivity extends AppCompatActivity {
                 return true;
             case 3:
                 String tag_string_req = "req_delete";
-
-                showProgressBar();
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.DELETE_REPLY, response -> {
                     mSource = new Source(response);
                     hideProgressBar();
                     try {
                         if (!response.contains("처리를 실패했습니다")) {
+                            List<Element> commentList = mSource.getAllElementsByClass("comment-list");
+
                             mReplyItemKeys.clear();
                             mReplyItemValues.clear();
-                            List<Element> commentList = mSource.getAllElementsByClass("comment-list");
                             fetchReplyData(commentList);
                         }
                     } catch (Exception e) {
@@ -318,6 +323,7 @@ public class ArticleActivity extends AppCompatActivity {
                     @Override
                     public Map<String, String> getHeaders() {
                         Map<String, String> headers = new HashMap<>();
+
                         headers.put("Cookie", mPreferenceManager.getCookie());
                         return headers;
                     }
@@ -325,12 +331,15 @@ public class ArticleActivity extends AppCompatActivity {
                     @Override
                     protected Map<String, String> getParams() {
                         Map<String, String> params = new HashMap<>();
+
                         params.put("CLUB_GRP_ID", mGroupId);
                         params.put("CMMT_NUM", replyId);
                         params.put("ARTL_NUM", mArticleId);
                         return params;
                     }
                 };
+
+                showProgressBar();
                 AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
                 return true;
         }
@@ -353,8 +362,7 @@ public class ArticleActivity extends AppCompatActivity {
                 String title = listTitle.substring(0, listTitle.lastIndexOf("-")).trim();
                 String name = listTitle.substring(listTitle.lastIndexOf("-") + 1).trim();
                 String timeStamp = viewArt.getFirstElement(HTMLElementName.TD).getTextExtractor().toString();
-                String content = contentExtractor(viewArt.getFirstElementByClass("list_cont"), true);
-                List<Element> images = viewArt.getAllElements(HTMLElementName.IMG);
+                String content = contentExtractor(viewArt.getFirstElementByClass("list_cont"));
                 String replyCnt = commentWrap.getContent().getFirstElement(HTMLElementName.P).getTextExtractor().toString();
 
                 Glide.with(getApplicationContext())
@@ -368,33 +376,43 @@ public class ArticleActivity extends AppCompatActivity {
                     mArticleContent.setVisibility(View.VISIBLE);
                 } else
                     mArticleContent.setVisibility(View.GONE);
-
-                if (images.size() > 0) {
-                    for (Element image : images) {
-                        if (mArticleImages.getChildCount() > images.size() - 1)
+                if (!mImageList.isEmpty() || mYouTubeItem != null) {
+                    for (int i = 0; i < mImageList.size(); i++) {
+                        if (mArticleImages.getChildCount() > mImageList.size() - 1)
                             break;
-                        int position = mImageList.size();
-                        String imageUrl = !image.getAttributeValue("src").contains("http") ? EndPoint.BASE_URL + image.getAttributeValue("src") : image.getAttributeValue("src");
-                        ImageView articleImage = new ImageView(getApplicationContext());
+                        int position = i;
+                        ImageView articleImage = new ImageView(this);
+
                         articleImage.setAdjustViewBounds(true);
                         articleImage.setPadding(0, 0, 0, 30);
                         articleImage.setScaleType(ImageView.ScaleType.FIT_XY);
                         articleImage.setOnClickListener(v -> {
-                            Intent intent = new Intent(getApplicationContext(), PictureActivity.class);
+                            Intent intent = new Intent(this, PictureActivity.class);
+
                             intent.putStringArrayListExtra("images", (ArrayList<String>) mImageList);
                             intent.putExtra("position", position);
                             startActivity(intent);
                         });
-                        Glide.with(getApplicationContext()).load(imageUrl).apply(RequestOptions.errorOf(R.drawable.ic_launcher_background)).into(articleImage);
+                        Glide.with(this)
+                                .load(mImageList.get(i))
+                                .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
+                                .into(articleImage);
                         mArticleImages.addView(articleImage);
-                        mImageList.add(imageUrl);
+                    }
+                    if (mYouTubeItem != null) {
+                        LinearLayout youtubeContainer = new LinearLayout(this);
+                        mYouTubePlayerView = new YouTubePlayerView(this);
+
+                        youtubeContainer.addView(mYouTubePlayerView);
+                        youtubeContainer.setPadding(0, 0, 0, 30);
+                        mArticleImages.addView(youtubeContainer, mYouTubeItem.position);
                     }
                     mArticleImages.setVisibility(View.VISIBLE);
                 } else
                     mArticleImages.setVisibility(View.GONE);
                 fetchReplyData(commentList);
                 if (mIsUpdate)
-                    deliveryUpdate(title, contentExtractor(viewArt.getFirstElementByClass("list_cont"), true), replyCnt);
+                    deliveryUpdate(title, content, replyCnt);//
             } catch (Exception e) {
                 Toast.makeText(getApplicationContext(), "값이 없습니다.", Toast.LENGTH_LONG).show();
             } finally {
@@ -407,10 +425,12 @@ public class ArticleActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Cookie", mPreferenceManager.getCookie());
                 return headers;
             }
         };
+
         AppController.getInstance().addToRequestQueue(stringRequest);
     }
 
@@ -424,8 +444,8 @@ public class ArticleActivity extends AppCompatActivity {
                 String timeStamp = commentName.getFirstElement(HTMLElementName.SPAN).getContent().toString().trim();
                 String replyContent = commentAddr.getContent().toString().trim();
                 boolean authorization = commentName.getAllElements(HTMLElementName.INPUT).size() > 0;
-
                 ReplyItem replyItem = new ReplyItem();
+
                 replyItem.setId(replyId);
                 replyItem.setName(name.substring(0, name.lastIndexOf("(")));
                 replyItem.setReply(Html.fromHtml(replyContent).toString());
@@ -446,13 +466,12 @@ public class ArticleActivity extends AppCompatActivity {
 
     private void actionSend(final String text) {
         String tag_string_req = "req_send";
-
-        showProgressBar();
         StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.INSERT_REPLY, response -> {
             mSource = new Source(response);
+            List<Element> commentList = mSource.getAllElementsByClass("comment-list");
+
             mReplyItemKeys.clear();
             mReplyItemValues.clear();
-            List<Element> commentList = mSource.getAllElementsByClass("comment-list");
             try {
                 fetchReplyData(commentList);
                 hideProgressBar();
@@ -472,6 +491,7 @@ public class ArticleActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Cookie", mPreferenceManager.getCookie());
                 return headers;
             }
@@ -479,12 +499,15 @@ public class ArticleActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
+
                 params.put("CLUB_GRP_ID", mGroupId);
                 params.put("ARTL_NUM", mArticleId);
                 params.put("CMT", text);
                 return params;
             }
         };
+
+        showProgressBar();
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
 
@@ -495,6 +518,7 @@ public class ArticleActivity extends AppCompatActivity {
         new Handler().postDelayed(() -> {
             int articleHeight = mArticleDetail.getMeasuredHeight();
             mIsBottom = false;
+
             mListView.setSelection(articleHeight);
         }, 300);
     }
@@ -507,12 +531,13 @@ public class ArticleActivity extends AppCompatActivity {
         intent.putExtra("txt", content);
         intent.putStringArrayListExtra("img", (ArrayList<String>) mImageList);
         intent.putExtra("cmmt_cnt", replyCnt);
-        //intent.putExtra("youtube", mYoutubeItem);
+        intent.putExtra("youtube", mYouTubeItem);
         setResult(RESULT_OK, intent);
     }
 
     private void refresh() {
         mIsUpdate = true;
+        mYouTubeItem = null;
 
         mArticleImages.removeAllViews();
         mImageList.clear();
@@ -522,20 +547,42 @@ public class ArticleActivity extends AppCompatActivity {
         fetchArticleData();
     }
 
-    private String contentExtractor(Element listCont, boolean isFlag) {
+    private String contentExtractor(Element listCont) {
         StringBuilder sb = new StringBuilder();
-        for (Element childElement : isFlag ? listCont.getChildElements() : listCont.getAllElements(HTMLElementName.P))
+
+        for (Element childElement : listCont.getChildElements()) {
             sb.append(childElement.getTextExtractor().toString().concat("\n"));
+            try {
+                Element p = childElement.getFirstElement(HTMLElementName.P);
+                if (p.getFirstElement(HTMLElementName.IMG) != null) {
+                    Element image = p.getFirstElement(HTMLElementName.IMG);
+                    String imageUrl = !image.getAttributeValue("src").contains("http") ? EndPoint.BASE_URL + image.getAttributeValue("src") : image.getAttributeValue("src");
+
+                    mImageList.add(imageUrl);
+                } else if (p.getFirstElementByClass("youtube-player") != null) {
+                    Element youtube = p.getFirstElementByClass("youtube-player");
+                    String youtubeUrl = youtube.getAttributeValue("src");
+                    String youtubeId = youtubeUrl.substring(youtubeUrl.lastIndexOf("/") + 1, youtubeUrl.lastIndexOf("?"));
+                    String thumbnail = "https://i.ytimg.com/vi/" + youtubeId + "/mqdefault.jpg";
+                    mYouTubeItem = new YouTubeItem(youtubeId, null, null, thumbnail, null);
+                    mYouTubeItem.position = mImageList.size();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
         return sb.toString().trim();
     }
 
     private void fetchArticleDataFromFirebase() {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Articles");
+
         databaseReference.child(mGroupKey).child(mArticleKey).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
                     ArticleItem articleItem = dataSnapshot.getValue(ArticleItem.class);
+
                     Glide.with(getApplicationContext())
                             .load(articleItem.getUid() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", articleItem.getUid()), new LazyHeaders.Builder()
                                     .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
@@ -556,12 +603,14 @@ public class ArticleActivity extends AppCompatActivity {
     private void deleteArticleFromFirebase() {
         DatabaseReference articlesReference = FirebaseDatabase.getInstance().getReference("Articles");
         DatabaseReference replysReference = FirebaseDatabase.getInstance().getReference("Replys");
+
         articlesReference.child(mGroupKey).child(mArticleKey).removeValue();
         replysReference.child(mArticleKey).removeValue();
     }
 
     private void fetchReplyListFromFirebase() {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Replys");
+
         databaseReference.child(mArticleKey).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -572,6 +621,7 @@ public class ArticleActivity extends AppCompatActivity {
                         int index = mReplyItemKeys.indexOf(value.getId());
                         if (index > -1) {
                             ReplyItem replyItem = mReplyItemValues.get(index);
+
                             replyItem.setUid(value.getUid());
                             mReplyItemValues.set(index, replyItem);
                             mReplyItemKeys.set(index, key);
@@ -591,17 +641,18 @@ public class ArticleActivity extends AppCompatActivity {
     private void insertReplyToFirebase(String replyId, String text) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Replys");
         ReplyItem replyItem = new ReplyItem();
+
         replyItem.setId(replyId);
         replyItem.setUid(mPreferenceManager.getUser().getUid());
         replyItem.setName(mPreferenceManager.getUser().getName());
         replyItem.setTimestamp(System.currentTimeMillis());
         replyItem.setReply(text);
-
         databaseReference.child(mArticleKey).push().setValue(replyItem);
     }
 
     private void deleteReplyFromFirebase(String replyKey) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Replys");
+
         databaseReference.child(mArticleKey).child(replyKey).removeValue();
     }
 
@@ -615,319 +666,3 @@ public class ArticleActivity extends AppCompatActivity {
             mProgressBar.setVisibility(View.GONE);
     }
 }
-
-// 리사이클러뷰
-/*public class ArticleActivity extends AppCompatActivity {
-    private static final int UPDATE_REPLY = 10;
-    private static final String TAG = ArticleActivity.class.getSimpleName();
-    private boolean mIsBottom, mIsUpdate, mIsAuthorized;
-    private int mPosition;
-    private String mGroupId, mArticleId, mGroupName, mTitle, mContent, mGroupKey, mArticleKey;
-    private CardView mButtonSend;
-    private EditText mInputReply;
-    private List<String> mImageList, mReplyItemKeys;
-    private List<Object> mReplyItemValues;
-    private PreferenceManager mPreferenceManager;
-    private ProgressBar mProgressBar;
-    private RecyclerView mRecyclerView;
-    private ReplyListAdapter mAdapter;
-    private Source mSource;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private TextView mSendText;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_article);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        mButtonSend = findViewById(R.id.cv_btn_send);
-        mInputReply = findViewById(R.id.et_reply);
-        mSendText = findViewById(R.id.tv_btn_send);
-        mSwipeRefreshLayout = findViewById(R.id.srl_article);
-        mProgressBar = findViewById(R.id.pb_article);
-        mRecyclerView = findViewById(R.id.rv_article);
-        mPreferenceManager = AppController.getInstance().getPreferenceManager();
-        Intent intent = getIntent();
-        mGroupId = intent.getStringExtra("grp_id");
-        mGroupName = intent.getStringExtra("grp_nm");
-        mArticleId = intent.getStringExtra("artl_num");
-        mGroupKey = intent.getStringExtra("grp_key");
-        mArticleKey = intent.getStringExtra("artl_key");
-        mPosition = intent.getIntExtra("position", 0);
-        mIsAuthorized = intent.getBooleanExtra("auth", false);
-        mIsBottom = intent.getBooleanExtra("isbottom", false);
-        mImageList = new ArrayList<>();
-        mReplyItemKeys = new ArrayList<>();
-        mReplyItemValues = new ArrayList<>();
-        mAdapter = new ReplyListAdapter(this, mReplyItemKeys, mReplyItemValues);
-
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mButtonSend.setOnClickListener(v -> {
-            if (mInputReply.getText().toString().trim().length() > 0) {
-                actionSend(mInputReply.getText().toString());
-
-                // 전송하면 텍스트 초기화
-                mInputReply.setText("");
-                if (v != null) {
-                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                }
-            } else
-                Toast.makeText(getApplicationContext(), "댓글을 입력하세요.", Toast.LENGTH_LONG).show();
-        });
-        mInputReply.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mButtonSend.setCardBackgroundColor(getResources().getColor(s.length() > 0 ? R.color.colorAccent : androidx.cardview.R.color.cardview_light_background, null));
-                mSendText.setTextColor(getResources().getColor(s.length() > 0 ? android.R.color.white : android.R.color.darker_gray, null));
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-        mInputReply.setOnFocusChangeListener((v, hasFocus) -> {
-
-        });
-        mAdapter.setHasStableIds(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setAdapter(mAdapter);
-        mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(this::refresh, 1000));
-        showProgressBar();
-        fetchArticleData();
-
-        if (mIsBottom)
-            setListViewBottom();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (mIsAuthorized) {
-            menu.add(Menu.NONE, 1, Menu.NONE, "수정하기");
-            menu.add(Menu.NONE, 2, Menu.NONE, "삭제하기");
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            case 1:
-                Intent intent = new Intent(this, ModifyActivity.class);
-                intent.putExtra("grp_id", mGroupId);
-                intent.putExtra("artl_num", mArticleId);
-                intent.putExtra("sbjt", mTitle);
-                intent.putExtra("txt", mContent);
-                intent.putStringArrayListExtra("img", (ArrayList<String>) mImageList);
-                intent.putExtra("grp_key", mGroupKey);
-                intent.putExtra("artl_key", mArticleKey);
-                startActivityForResult(intent, UPDATE_ARTICLE);
-                return true;
-            case 2:
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == UPDATE_ARTICLE && resultCode == RESULT_OK) {
-            refresh();
-        } else if (requestCode == UPDATE_REPLY && resultCode == RESULT_OK && data != null) {
-
-        }
-    }
-
-    private void fetchArticleData() {
-        String params = "?CLUB_GRP_ID=" + mGroupId + "&startL=" + mPosition + "&displayL=1";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.GROUP_ARTICLE_LIST + params, response -> {
-            mSource = new Source(response.trim());
-            try {
-                Element element = mSource.getFirstElementByClass("listbox2");
-                Element viewArt = element.getFirstElementByClass("view_art");
-                Element commentWrap = element.getFirstElementByClass("comment_wrap");
-                List<Element> commentList = element.getAllElementsByClass("comment-list");
-
-                String listTitle = viewArt.getFirstElementByClass("list_title").getTextExtractor().toString();
-                String name = listTitle.substring(listTitle.lastIndexOf("-") + 1).trim();
-                String timeStamp = viewArt.getFirstElement(HTMLElementName.TD).getTextExtractor().toString();
-                mTitle = listTitle.substring(0, listTitle.lastIndexOf("-")).trim();
-                mContent = contentExtractor(viewArt.getFirstElementByClass("list_cont"), true);
-
-                List<Element> images = viewArt.getAllElements(HTMLElementName.IMG);
-                String replyCnt = commentWrap.getContent().getFirstElement(HTMLElementName.P).getTextExtractor().toString();
-
-                if (images.size() > 0)
-                    images.forEach(image -> mImageList.add(!image.getAttributeValue("src").contains("http") ? EndPoint.BASE_URL + image.getAttributeValue("src") : image.getAttributeValue("src")));
-
-                ArticleItem articleItem = new ArticleItem();
-                articleItem.setId(mArticleId);
-                articleItem.setTitle(mTitle);
-                articleItem.setName(name);
-                articleItem.setDate(timeStamp);
-                articleItem.setContent(mContent);
-                articleItem.setImages(mImageList);
-                articleItem.setReplyCount(replyCnt);
-                articleItem.setAuth(mIsAuthorized);
-
-                mReplyItemKeys.add(mArticleKey);
-                mReplyItemValues.add(articleItem);
-                mAdapter.notifyItemInserted(mReplyItemValues.size() - 1);
-                
-                fetchReplyData(commentList);
-                if (mIsUpdate)
-                    deliveryUpdate(mTitle, contentExtractor(viewArt.getFirstElementByClass("list_cont"), true), mImageList, replyCnt);
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
-            } finally {
-                fetchArticleDataFromFirebase();
-            }
-            hideProgressBar();
-        }, error -> {
-            VolleyLog.e(TAG, "에러 : " + error.getMessage());
-            hideProgressBar();
-        }) {
-            @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Cookie", mPreferenceManager.getCookie());
-                return headers;
-            }
-        };
-        AppController.getInstance().addToRequestQueue(stringRequest);
-    }
-
-    private void fetchReplyData(List<Element> commentList) {
-        try {
-            commentList.forEach(comment -> {
-                Element commentName = comment.getFirstElementByClass("comment-name");
-                Element commentAddr = comment.getFirstElementByClass("comment-addr");
-                String replyId = commentAddr.getAttributeValue("id").replace("cmt_txt_", "");
-                String name = commentName.getTextExtractor().toString().trim();
-                String timeStamp = commentName.getFirstElement(HTMLElementName.SPAN).getContent().toString().trim();
-                String replyContent = commentAddr.getContent().toString().trim();
-                boolean authorization = commentName.getAllElements(HTMLElementName.INPUT).size() > 0;
-
-                ReplyItem replyItem = new ReplyItem();
-                replyItem.setId(replyId);
-                replyItem.setName(name.substring(0, name.lastIndexOf("(")));
-                replyItem.setReply(Html.fromHtml(replyContent).toString());
-                replyItem.setDate(timeStamp.replaceAll("[(]|[)]", ""));
-                replyItem.setAuth(authorization);
-                mReplyItemKeys.add(replyId);
-                mReplyItemValues.add(replyItem);
-                mAdapter.notifyItemInserted(mReplyItemValues.size() - 1);
-            });
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        } finally {
-            fetchReplyListFromFirebase();
-        }
-    }
-
-    private void actionSend(String text) {
-    }
-
-    private void setListViewBottom() {
-        new Handler().postDelayed(() -> mRecyclerView.scrollToPosition(mReplyItemValues.size() - 1), 300);
-    }
-
-    private void deliveryUpdate(String title, String content, List<String> imageList, String replyCnt) {
-        Intent intent = new Intent(getApplicationContext(), Tab1Fragment.class);
-        intent.putExtra("position", mPosition);
-        intent.putExtra("sbjt", title);
-        intent.putExtra("txt", content);
-        intent.putStringArrayListExtra("img", (ArrayList<String>) imageList);
-        intent.putExtra("cmmt_cnt", replyCnt);
-
-        setResult(RESULT_OK, intent);
-    }
-
-    private void refresh() {
-        mIsUpdate = true;
-        mImageList.clear();
-        mReplyItemKeys.clear();
-        mReplyItemValues.clear();
-        mSwipeRefreshLayout.setRefreshing(false);
-        fetchArticleData();
-    }
-
-    private String contentExtractor(Element listCont, boolean isFlag) {
-        StringBuilder sb = new StringBuilder();
-        for (Element childElement : isFlag ? listCont.getChildElements() : listCont.getAllElements(HTMLElementName.P))
-            sb.append(childElement.getTextExtractor().toString().concat("\n"));
-        return sb.toString().trim();
-    }
-
-    private void fetchArticleDataFromFirebase() {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Articles");
-        databaseReference.child(mGroupKey).child(mArticleKey).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null) {
-                    int headerPosition = 0;
-                    ArticleItem articleItem = dataSnapshot.getValue(ArticleItem.class);
-                    ArticleItem headerItem = (ArticleItem) mReplyItemValues.get(headerPosition);
-                    headerItem.setUid(articleItem.getUid());
-                    headerItem.setDate(new SimpleDateFormat("yyyy.MM.dd a h:mm:ss").format(articleItem.getTimestamp()));
-                    mReplyItemValues.set(headerPosition, headerItem);
-                    //mAdapter.notifyItemChanged(headerPosition);
-                    mAdapter.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
-            }
-        });
-    }
-
-    private void fetchReplyListFromFirebase() {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Replys");
-        databaseReference.child(mArticleKey).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        String key = snapshot.getKey();
-                        ReplyItem value = snapshot.getValue(ReplyItem.class);
-                        int index = mReplyItemKeys.indexOf(value.getId());
-                        if (index > -1) {
-                            ReplyItem replyItem = (ReplyItem) mReplyItemValues.get(index);
-                            replyItem.setUid(value.getUid());
-                            mReplyItemValues.set(index, replyItem);
-                            mReplyItemKeys.set(index, key);
-                        }
-                        mAdapter.notifyItemChanged(index);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
-            }
-        });
-    }
-
-    private void showProgressBar() {
-        if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE)
-            mProgressBar.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressBar() {
-        if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE)
-            mProgressBar.setVisibility(View.GONE);
-    }
-}
-*/

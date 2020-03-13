@@ -145,7 +145,7 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         private RelativeLayout imageContainer;
         private TextView title, timestamp, content, contentMore, replyCount, likeCount;
 
-        public ItemHolder(View itemView) {
+        ItemHolder(View itemView) {
             super(itemView);
             article = itemView.findViewById(R.id.cv_article);
             profileImage = itemView.findViewById(R.id.iv_profile_image);
@@ -164,7 +164,7 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public static class FooterHolder extends RecyclerView.ViewHolder {
         private ProgressBar progressBar;
 
-        public FooterHolder(View itemView) {
+        FooterHolder(View itemView) {
             super(itemView);
             progressBar = itemView.findViewById(R.id.pb_more);
         }
