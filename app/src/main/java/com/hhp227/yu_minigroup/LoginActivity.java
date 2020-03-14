@@ -269,7 +269,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void getUserUniqueId(final User user) {
+    private void getUserUniqueId(User user) {
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.GET, EndPoint.GET_USER_IMAGE, response -> {
             Source source = new Source(response);
             String imageUrl = source.getElementById("photo").getAttributeValue("src");
