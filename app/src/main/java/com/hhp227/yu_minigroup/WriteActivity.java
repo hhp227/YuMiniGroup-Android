@@ -246,6 +246,7 @@ public class WriteActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Cookie", mCookie);
                 return headers;
             }
@@ -253,12 +254,14 @@ public class WriteActivity extends AppCompatActivity {
             @Override
             protected Map<String, DataPart> getByteData() {
                 Map<String, DataPart> params = new HashMap<>();
+
                 params.put("file", new DataPart(System.currentTimeMillis() + position + ".jpg", getFileDataFromDrawable(bitmap)));
                 return params;
             }
 
             private byte[] getFileDataFromDrawable(Bitmap bitmap) {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
                 bitmap.compress(Bitmap.CompressFormat.PNG, 80, byteArrayOutputStream);
                 return byteArrayOutputStream.toByteArray();
             }
@@ -365,6 +368,7 @@ public class WriteActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Cookie", mCookie);
                 return headers;
             }

@@ -63,8 +63,6 @@ public class LoginActivity extends AppCompatActivity {
             String password = mInputPassword.getText().toString();
 
             if (!id.isEmpty() && !password.isEmpty()) {
-                showProgressBar();
-
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.LOGIN, response -> {
                     VolleyLog.d(TAG, "로그인 응답 : " + response);
                     try {
@@ -88,6 +86,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public byte[] getBody() {
                         Map<String, String> params = new HashMap<>();
+
                         params.put("usr_id", id);
                         params.put("usr_pw", password);
                         if (params.size() > 0) {
@@ -111,6 +110,8 @@ public class LoginActivity extends AppCompatActivity {
                         throw new RuntimeException();
                     }
                 };
+
+                showProgressBar();
                 AppController.getInstance().addToRequestQueue(stringRequest);
             } else {
                 mInputId.setError(id.isEmpty() ? "아이디 또는 학번을 입력하세요." : null);
@@ -132,6 +133,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
                 List<Header> headers = response.allHeaders;
+
                 headers.stream()
                         .filter(header -> header.getName().equals("Set-Cookie") && header.getValue().contains("ssotoken"))
                         .forEach(header -> loginLMS(id, password, header.getValue(), cookie));
@@ -141,6 +143,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Referer", "http://portal.yu.ac.kr/sso/login.jsp"); // 필수
                 return headers;
             }
@@ -148,6 +151,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
+
                 params.put("cReturn_Url", EndPoint.LOGIN_LMS);
                 params.put("type", "lms"); // 필수
                 params.put("p", "20112030550005B055003090F570256534A010F47070C4556045E18020750110"); // 필수
@@ -182,6 +186,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 // 리퀘스트 헤더에 SESSION_IMAX값이 있음
                 headers.put("Cookie", lmsToken != null ? lmsToken + "; " + ssoToken : null);
                 return headers;
@@ -213,6 +218,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
+
                 params.put("name", user.getName());
                 params.put("user_id", user.getUserId());
                 params.put("password", user.getPassword());
@@ -233,8 +239,8 @@ public class LoginActivity extends AppCompatActivity {
                     String number = param.getString("session.stu_id");
                     String grade = param.getString("session.grade");
                     String email = param.getString("session.email");
-
                     User user = new User();
+
                     user.setUserId(id);
                     user.setPassword(password);
                     user.setName(name);
@@ -242,7 +248,6 @@ public class LoginActivity extends AppCompatActivity {
                     user.setNumber(number);
                     user.setGrade(grade);
                     user.setEmail(email);
-
                     createLog(user);
                     getUserUniqueId(user);
                 } else
@@ -257,6 +262,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Cookie", mPreferenceManager.getCookie());
                 return headers;
             }
@@ -268,12 +274,12 @@ public class LoginActivity extends AppCompatActivity {
             Source source = new Source(response);
             String imageUrl = source.getElementById("photo").getAttributeValue("src");
             String uid = imageUrl.substring(imageUrl.indexOf("id=") + "id=".length(), imageUrl.lastIndexOf("&size"));
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 
             user.setUid(uid);
-
             mPreferenceManager.storeUser(user);
+
             // 화면이동
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
             hideProgressBar();
@@ -284,6 +290,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Cookie", mPreferenceManager.getCookie());
                 return headers;
             }
