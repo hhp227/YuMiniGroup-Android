@@ -12,6 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
 import com.hhp227.yu_minigroup.ChatActivity;
 import com.hhp227.yu_minigroup.R;
@@ -35,11 +38,16 @@ public class UserFragment extends DialogFragment {
             getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
             getDialog().getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         }
-        View rootView = inflater.inflate(R.layout.fragment_user, container, false);
-        ImageView profileImage = rootView.findViewById(R.id.iv_profile_image);
-        TextView userName = rootView.findViewById(R.id.tv_name);
-        Button send = rootView.findViewById(R.id.b_send);
-        Button close = rootView.findViewById(R.id.b_close);
+        return inflater.inflate(R.layout.fragment_user, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ImageView profileImage = view.findViewById(R.id.iv_profile_image);
+        TextView userName = view.findViewById(R.id.tv_name);
+        Button send = view.findViewById(R.id.b_send);
+        Button close = view.findViewById(R.id.b_close);
         Bundle bundle = getArguments();
         if (bundle != null) {
             mUid = bundle.getString("uid");
@@ -47,7 +55,13 @@ public class UserFragment extends DialogFragment {
             mValue = bundle.getString("value");
         }
 
-        Glide.with(getActivity()).load(EndPoint.USER_IMAGE.replace("{UID}", mUid)).apply(RequestOptions.errorOf(R.drawable.profile_img_circle).circleCrop()).into(profileImage);
+        Glide.with(this)
+                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mUid), new LazyHeaders.Builder().addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie()).build()))
+                .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle)
+                        .circleCrop()
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE))
+                .into(profileImage);
         userName.setText(mName);
         if (mUid.equals(AppController.getInstance().getPreferenceManager().getUser().getUid()))
             send.setVisibility(View.GONE);
@@ -63,7 +77,5 @@ public class UserFragment extends DialogFragment {
             });
         }
         close.setOnClickListener(v -> dismiss());
-        return rootView;
     }
-
 }

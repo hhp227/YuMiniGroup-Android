@@ -47,13 +47,18 @@ public class SeatFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_seat, container, false);
-        CollapsingToolbarLayout toolbarLayout = rootView.findViewById(R.id.collapsing_toolbar);
-        RecyclerView recyclerView = rootView.findViewById(R.id.rv_seat);
+        return inflater.inflate(R.layout.fragment_seat, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        CollapsingToolbarLayout toolbarLayout = view.findViewById(R.id.collapsing_toolbar);
+        RecyclerView recyclerView = view.findViewById(R.id.rv_seat);
         mActivity = (AppCompatActivity) getActivity();
-        mProgressBar = rootView.findViewById(R.id.pb_seat);
-        mSwipeRefreshLayout = rootView.findViewById(R.id.srl_seat);
-        mToolbar = rootView.findViewById(R.id.toolbar);
+        mProgressBar = view.findViewById(R.id.pb_seat);
+        mSwipeRefreshLayout = view.findViewById(R.id.srl_seat);
+        mToolbar = view.findViewById(R.id.toolbar);
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
         mSeatItemList = new ArrayList<>();
         mAdapter = new SeatListAdapter(getActivity(), mSeatItemList);
@@ -67,8 +72,6 @@ public class SeatFragment extends Fragment {
         setDrawerToggle();
         showProgressBar();
         fetchDataTask();
-
-        return rootView;
     }
 
     private void fetchDataTask() {

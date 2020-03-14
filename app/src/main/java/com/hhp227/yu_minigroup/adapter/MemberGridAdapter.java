@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
@@ -42,7 +43,10 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
                 .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", memberItem.uid), new LazyHeaders.Builder()
                         .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
                         .build()))
-                .apply(new RequestOptions().centerCrop().error(R.drawable.profile_img_square))
+                .apply(new RequestOptions().centerCrop()
+                        .error(R.drawable.user_image_view)
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE))
                 .into(holder.profileImage);
         holder.itemView.setOnClickListener(v -> {
             if (mOnItemClickListener != null)

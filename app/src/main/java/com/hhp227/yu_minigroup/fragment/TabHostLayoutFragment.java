@@ -7,19 +7,14 @@ import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TabHost;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.viewpager.widget.ViewPager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -28,7 +23,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.WriteActivity;
-import com.hhp227.yu_minigroup.adapter.GroupGridAdapter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +41,6 @@ public class TabHostLayoutFragment extends Fragment {
     private int mPosition;
     private String mGroupId, mGroupName, mGroupImage, mKey;
     private TabLayout mTabLayout;
-    private Toolbar mToolbar;
     private ViewPager mViewPager;
 
     public TabHostLayoutFragment() {
@@ -81,12 +74,17 @@ public class TabHostLayoutFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_tab_host_layout, container, false);
-        CollapsingToolbarLayout toolbarLayout = rootView.findViewById(R.id.collapsing_toolbar);
-        FloatingActionButton floatingActionButton = rootView.findViewById(R.id.fab);
-        ImageView headerImage = rootView.findViewById(R.id.iv_header);
-        ImageView titleImage = rootView.findViewById(R.id.iv_title);
-        View gradient = rootView.findViewById(R.id.gradient);
+        return inflater.inflate(R.layout.fragment_tab_host_layout, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        CollapsingToolbarLayout toolbarLayout = view.findViewById(R.id.collapsing_toolbar);
+        FloatingActionButton floatingActionButton = view.findViewById(R.id.fab);
+        ImageView headerImage = view.findViewById(R.id.iv_header);
+        ImageView titleImage = view.findViewById(R.id.iv_title);
+        View gradient = view.findViewById(R.id.gradient);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         List<Fragment> fragmentList = Stream.<Fragment>builder()
                 .add(Tab1Fragment.newInstance(mIsAdmin, mGroupId, mGroupName, mGroupImage, mKey))
@@ -106,11 +104,11 @@ public class TabHostLayoutFragment extends Fragment {
                 return fragmentList.size();
             }
         };
-        mTabLayout = rootView.findViewById(R.id.tab_layout);
-        mToolbar = rootView.findViewById(R.id.toolbar);
-        mViewPager = rootView.findViewById(R.id.view_pager);
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        mTabLayout = view.findViewById(R.id.tab_layout);
+        mViewPager = view.findViewById(R.id.view_pager);
 
-        activity.setSupportActionBar(mToolbar);
+        activity.setSupportActionBar(toolbar);
         activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         activity.getSupportActionBar().setTitle(mGroupName);
         toolbarLayout.setTitleEnabled(false);
@@ -158,10 +156,10 @@ public class TabHostLayoutFragment extends Fragment {
             getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             getActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
             getActivity().getWindow().setStatusBarColor(Color.TRANSPARENT);
-            ViewGroup.LayoutParams toolbarLayoutParams = mToolbar.getLayoutParams();
+            ViewGroup.LayoutParams toolbarLayoutParams = toolbar.getLayoutParams();
             toolbarLayoutParams.height = toolbarLayoutParams.height + getStatusBarHeight();
-            mToolbar.setPadding(0, getStatusBarHeight(), 0, 0);
-            mToolbar.setLayoutParams(toolbarLayoutParams);
+            toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
+            toolbar.setLayoutParams(toolbarLayoutParams);
             LinearLayout.LayoutParams toolbarLayoutLayoutParams = (LinearLayout.LayoutParams) toolbarLayout.getLayoutParams();
             toolbarLayoutLayoutParams.height = toolbarLayoutLayoutParams.height + getStatusBarHeight();
             toolbarLayout.setLayoutParams(toolbarLayoutLayoutParams);
@@ -169,8 +167,6 @@ public class TabHostLayoutFragment extends Fragment {
             titleImage.setVisibility(View.VISIBLE);
             gradient.setVisibility(View.INVISIBLE);
         }
-
-        return rootView;
     }
 
     @Override

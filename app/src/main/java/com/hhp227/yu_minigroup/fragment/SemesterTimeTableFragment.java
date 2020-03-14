@@ -42,9 +42,14 @@ public class SemesterTimeTableFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_timetable, container, false);
-        LinearLayout cardView = rootView.findViewById(R.id.ll_timetable);
-        mProgressBar = rootView.findViewById(R.id.pb_group);
+        return inflater.inflate(R.layout.fragment_timetable, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        LinearLayout cardView = view.findViewById(R.id.ll_timetable);
+        mProgressBar = view.findViewById(R.id.pb_group);
 
         showProgressBar();
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.GET, EndPoint.TIMETABLE, response -> {
@@ -98,7 +103,6 @@ public class SemesterTimeTableFragment extends Fragment {
                 return headers;
             }
         });
-        return rootView;
     }
 
     public int getLcdSizeWidth() {

@@ -3,12 +3,12 @@ package com.hhp227.yu_minigroup.dto;
 import java.io.Serializable;
 
 public class User implements Serializable {
-    String userId, password, name, department, number, grade, email, uid;
+    String userId, password, name, department, number, grade, email, uid, phoneNumber;
 
     public User() {
     }
 
-    public User(String userId, String password, String name, String department, String number, String grade, String email, String uid) {
+    public User(String userId, String password, String name, String department, String number, String grade, String email, String uid, String phoneNumber) {
         this.userId = userId;
         this.password = password;
         this.name = name;
@@ -17,6 +17,7 @@ public class User implements Serializable {
         this.grade = grade;
         this.email = email;
         this.uid = uid;
+        this.phoneNumber = phoneNumber;
     }
 
     public String getUserId() {
@@ -81,5 +82,13 @@ public class User implements Serializable {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

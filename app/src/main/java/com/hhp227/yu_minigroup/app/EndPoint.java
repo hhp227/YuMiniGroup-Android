@@ -28,6 +28,9 @@ public interface EndPoint {
     String TIMETABLE = BASE_URL + "/ilos/st/main/pop_academic_timetable_form.acl";
     String NEW_MESSAGE = BASE_URL + "/ilos/message/received_new_message_check.acl";
     String SEND_MESSAGE = BASE_URL + "/ilos/co/club_send_msg_insert.acl";
+    String SYNC_PROFILE = BASE_URL + "/ilos/mp/myinfo_sync.acl";
+    String PROFILE_IMAGE_PREVIEW = BASE_URL + "/ilos/mp/myinfo_file_update.acl";
+    String PROFILE_IMAGE_UPDATE = BASE_URL + "/ilos/mp/myinfo_insert.acl";
 
     // 로그기록
     String CREATE_LOG = "http://knu.dothome.co.kr/knu/v1/register";

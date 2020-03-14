@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -73,13 +75,18 @@ public class GroupInfoFragment extends DialogFragment {
             getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
             getDialog().getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         }
-        View rootView = inflater.inflate(R.layout.fragment_group_info, container, false);
-        Button button = rootView.findViewById(R.id.b_request);
-        Button close = rootView.findViewById(R.id.b_close);
-        ImageView image = rootView.findViewById(R.id.iv_group_image);
-        TextView name = rootView.findViewById(R.id.tv_name);
-        TextView info = rootView.findViewById(R.id.tv_info);
-        TextView desc = rootView.findViewById(R.id.tv_desciption);
+        return inflater.inflate(R.layout.fragment_group_info, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Button button = view.findViewById(R.id.b_request);
+        Button close = view.findViewById(R.id.b_close);
+        ImageView image = view.findViewById(R.id.iv_group_image);
+        TextView name = view.findViewById(R.id.tv_name);
+        TextView info = view.findViewById(R.id.tv_info);
+        TextView desc = view.findViewById(R.id.tv_desciption);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
 
         button.setOnClickListener(v -> {
@@ -152,8 +159,6 @@ public class GroupInfoFragment extends DialogFragment {
                 .apply(RequestOptions.placeholderOf(R.drawable.ic_launcher_background).error(R.drawable.ic_launcher_background))
                 .transition(DrawableTransitionOptions.withCrossFade(150))
                 .into(image);
-
-        return rootView;
     }
 
     private void insertGroupToFirebase() {

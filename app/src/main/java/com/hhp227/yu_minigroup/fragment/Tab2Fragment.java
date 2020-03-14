@@ -3,7 +3,6 @@ package com.hhp227.yu_minigroup.fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,15 +29,19 @@ public class Tab2Fragment extends Fragment {
     private Calendar mCalendar;
     private RecyclerView.Adapter mAdapter;
     private List<Map<String, String>> mList;
-    private RecyclerView mRecyclerView;
 
     public Tab2Fragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_tab2, container, false);
-        mRecyclerView = rootView.findViewById(R.id.rv_cal);
+        return inflater.inflate(R.layout.fragment_tab2, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        RecyclerView recyclerView = view.findViewById(R.id.rv_cal);
         mList = new ArrayList<>();
         mCalendar = Calendar.getInstance();
         mAdapter = new RecyclerView.Adapter() {
@@ -90,10 +93,10 @@ public class Tab2Fragment extends Fragment {
                 return position == 0 ? TYPE_CALENDAR : TYPE_ITEM;
             }
         };
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.setAdapter(mAdapter);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(mAdapter);
         fetchDataTask();
-        return rootView;
     }
 
     private void fetchDataTask() {

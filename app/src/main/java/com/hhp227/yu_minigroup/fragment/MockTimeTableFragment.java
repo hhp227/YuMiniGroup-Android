@@ -2,7 +2,6 @@ package com.hhp227.yu_minigroup.fragment;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -52,7 +51,12 @@ public class MockTimeTableFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_mock_timetable, container, false);
+        return inflater.inflate(R.layout.fragment_mock_timetable, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         String dbPath = getContext().getDatabasePath(dbName).getPath();
         Log.i("my db path=", "" + dbPath);
 
@@ -80,17 +84,17 @@ public class MockTimeTableFragment extends Fragment {
         params2.setMargins(1, 1, 1, 1);
 
         // 레이아웃 배열로 선언
-        layTime = rootView.findViewById(R.id.lay_time);
-        lay[0] = rootView.findViewById(R.id.lay_0);
-        lay[1] = rootView.findViewById(R.id.lay_1);
-        lay[2] = rootView.findViewById(R.id.lay_2);
-        lay[3] = rootView.findViewById(R.id.lay_3);
-        lay[4] = rootView.findViewById(R.id.lay_4);
-        lay[5] = rootView.findViewById(R.id.lay_5);
-        lay[6] = rootView.findViewById(R.id.lay_6);
-        lay[7] = rootView.findViewById(R.id.lay_7);
-        lay[8] = rootView.findViewById(R.id.lay_8);
-        lay[9] = rootView.findViewById(R.id.lay_9);
+        layTime = view.findViewById(R.id.lay_time);
+        lay[0] = view.findViewById(R.id.lay_0);
+        lay[1] = view.findViewById(R.id.lay_1);
+        lay[2] = view.findViewById(R.id.lay_2);
+        lay[3] = view.findViewById(R.id.lay_3);
+        lay[4] = view.findViewById(R.id.lay_4);
+        lay[5] = view.findViewById(R.id.lay_5);
+        lay[6] = view.findViewById(R.id.lay_6);
+        lay[7] = view.findViewById(R.id.lay_7);
+        lay[8] = view.findViewById(R.id.lay_8);
+        lay[9] = view.findViewById(R.id.lay_9);
 
         // 요일 생성
         for (int i = 0; i < day.length; i++) {
@@ -121,7 +125,7 @@ public class MockTimeTableFragment extends Fragment {
                 data[id].setId(id);//data[0]  =  0
                 data[id].setTextSize(10);
                 // 시간표를 입력하기 위한 곳을 클릭하면 클릭이벤트를 처리하기위해 동작처리함수
-                data[id].setOnClickListener(view -> {
+                data[id].setOnClickListener(v -> {
                     Cursor cursor = null;
                     cursor = helper.getAll(); // 테이블의 모든 데이터를 커서로 리턴.
                     int get[] = new int[50];
@@ -171,8 +175,6 @@ public class MockTimeTableFragment extends Fragment {
                 id++;
             }
         }
-
-        return rootView;
     }
 
     /*데이터가 없는 곳을 클릭했을 때 띄어주는 다이얼로그*/

@@ -10,6 +10,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
@@ -23,14 +24,15 @@ import com.hhp227.yu_minigroup.helper.PreferenceManager;
 public class MainActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private PreferenceManager mPreferenceManager;
+    private ImageView mProfileImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        ImageView profileImage = navigationView.getHeaderView(0).findViewById(R.id.iv_profile_image);
         TextView name = navigationView.getHeaderView(0).findViewById(R.id.tv_name);
+        mProfileImage = navigationView.getHeaderView(0).findViewById(R.id.iv_profile_image);
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
 
@@ -70,12 +72,29 @@ public class MainActivity extends AppCompatActivity {
             mDrawerLayout.closeDrawer(GravityCompat.START);
             return true;
         });
+        Glide.with(this)
+                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mPreferenceManager.getUser().getUid()), new LazyHeaders.Builder()
+                        .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
+                        .build()))
+                .apply(new RequestOptions().centerCrop()
+                        .error(R.drawable.user_image_view)
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE))
+                .into(mProfileImage);
+        mProfileImage.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), ProfileActivity.class)));
+        name.setText(mPreferenceManager.getUser().getName());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         Glide.with(getApplicationContext())
                 .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mPreferenceManager.getUser().getUid()), new LazyHeaders.Builder().addHeader("Cookie", mPreferenceManager.getCookie()).build()))
-                .apply(new RequestOptions().circleCrop())
-                .into(profileImage);
-        profileImage.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), ProfileActivity.class)));
-        name.setText(mPreferenceManager.getUser().getName());
+                .apply(new RequestOptions().circleCrop()
+                        .error(R.drawable.user_image_view_circle)
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE))
+                .into(mProfileImage);
     }
 
     @Override

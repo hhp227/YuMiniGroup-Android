@@ -10,6 +10,7 @@ import android.widget.*;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
@@ -70,7 +71,10 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     .load(articleItem.getUid() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", articleItem.getUid()), new LazyHeaders.Builder()
                             .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
                             .build()) : null)
-                    .apply(RequestOptions.errorOf(R.drawable.profile_img_circle).circleCrop())
+                    .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle)
+                            .circleCrop()
+                            .skipMemoryCache(true)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE))
                     .into(((ItemHolder) holder).profileImage);
             ((ItemHolder) holder).title.setText(articleItem.getName() != null ? articleItem.getTitle() + " - " + articleItem.getName() : articleItem.getTitle());
             ((ItemHolder) holder).timestamp.setText(articleItem.getDate() != null ? articleItem.getDate() : new SimpleDateFormat("yyyy.MM.dd a h:mm:ss").format(articleItem.getTimestamp()));

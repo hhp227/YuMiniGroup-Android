@@ -21,6 +21,7 @@ public class PreferenceManager {
     private static final String KEY_USER_GRADE = "usr_grade";
     private static final String KEY_USER_EMAIL = "usr_mail";
     private static final String KEY_USER_UNIQUE_ID = "usr_uid";
+    private static final String KEY_USER_HP = "usr_hp";
     private static final String KEY_COOKIE = "cookie";
     private static final String KEY_SSO_TOKEN = "ssotoken";
     private SharedPreferences mSharedPreferences;
@@ -42,6 +43,7 @@ public class PreferenceManager {
         mEditor.putString(KEY_USER_GRADE, user.getGrade());
         mEditor.putString(KEY_USER_EMAIL, user.getEmail());
         mEditor.putString(KEY_USER_UNIQUE_ID, user.getUid());
+        mEditor.putString(KEY_USER_HP, user.getPhoneNumber());
         mEditor.commit();
 
         Log.i(TAG, "사용자 Session 저장 : " + user.getUserId());
@@ -57,7 +59,8 @@ public class PreferenceManager {
             String grade = mSharedPreferences.getString(KEY_USER_GRADE, null);
             String email = mSharedPreferences.getString(KEY_USER_EMAIL, null);
             String uid = mSharedPreferences.getString(KEY_USER_UNIQUE_ID, null);
-            User user = new User(yuId, password, name, deptName, number, grade, email, uid);
+            String hp = mSharedPreferences.getString(KEY_USER_HP, null);
+            User user = new User(yuId, password, name, deptName, number, grade, email, uid, hp);
 
             return user;
         }

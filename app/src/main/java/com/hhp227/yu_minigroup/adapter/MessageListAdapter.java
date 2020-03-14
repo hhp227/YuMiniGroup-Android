@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
@@ -64,7 +65,11 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                     .load(messageItem.getFrom() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", messageItem.getFrom()), new LazyHeaders.Builder()
                             .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
                             .build()) : null)
-                    .apply(RequestOptions.errorOf(R.drawable.profile_img_circle).circleCrop())
+                    .apply(RequestOptions
+                            .errorOf(R.drawable.user_image_view_circle)
+                            .circleCrop()
+                            .skipMemoryCache(true)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE))
                     .into(holder.profileImage);
         }
         // 경북대 소모임에도 반영할것

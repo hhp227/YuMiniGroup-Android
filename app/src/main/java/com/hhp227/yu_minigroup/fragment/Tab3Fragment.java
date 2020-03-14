@@ -32,9 +32,9 @@ public class Tab3Fragment extends Fragment {
     private boolean mHasRequestedMore;
     private int mOffSet;
     private String mGroupId;
-    private ProgressBar mProgressBar;
-    private MemberGridAdapter mAdapter;
     private List<MemberItem> mMemberItems;
+    private MemberGridAdapter mAdapter;
+    private ProgressBar mProgressBar;
 
     public Tab3Fragment() {
     }
@@ -57,17 +57,22 @@ public class Tab3Fragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_tab3, container, false);
-        RecyclerView recyclerView = rootView.findViewById(R.id.rv_member);
-        SwipeRefreshLayout swipeRefreshLayout = rootView.findViewById(R.id.srl_member);
+        return inflater.inflate(R.layout.fragment_tab3, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.srl_member);
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
-        mProgressBar = rootView.findViewById(R.id.pb_member);
+        RecyclerView recyclerView = view.findViewById(R.id.rv_member);
+        mProgressBar = view.findViewById(R.id.pb_member);
         mMemberItems = new ArrayList<>();
         mAdapter = new MemberGridAdapter(getActivity(), mMemberItems);
         mOffSet = 1;
 
         mAdapter.setHasStableIds(true);
-        mAdapter.setOnItemClickListener((view, position) -> {
+        mAdapter.setOnItemClickListener((v, position) -> {
             MemberItem memberItem = mMemberItems.get(position);
             String uid = memberItem.uid;
             String name = memberItem.name;
@@ -108,8 +113,12 @@ public class Tab3Fragment extends Fragment {
         }, 1000));
         showProgressBar();
         fetchMemberList();
+    }
 
-        return rootView;
+    @Override
+    public void onResume() {
+        super.onResume();
+        mAdapter.notifyDataSetChanged();
     }
 
     private void fetchMemberList() {

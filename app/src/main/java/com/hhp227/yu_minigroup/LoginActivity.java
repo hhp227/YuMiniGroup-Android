@@ -239,6 +239,7 @@ public class LoginActivity extends AppCompatActivity {
                     String number = param.getString("session.stu_id");
                     String grade = param.getString("session.grade");
                     String email = param.getString("session.email");
+                    String hp = param.getString("session.hp_no");
                     User user = new User();
 
                     user.setUserId(id);
@@ -248,6 +249,7 @@ public class LoginActivity extends AppCompatActivity {
                     user.setNumber(number);
                     user.setGrade(grade);
                     user.setEmail(email);
+                    user.setPhoneNumber(hp);
                     createLog(user);
                     getUserUniqueId(user);
                 } else

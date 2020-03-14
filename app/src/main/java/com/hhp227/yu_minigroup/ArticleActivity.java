@@ -23,6 +23,7 @@ import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
@@ -370,7 +371,11 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
 
                 Glide.with(getApplicationContext())
                         .load(profileImg)
-                        .apply(RequestOptions.errorOf(R.drawable.profile_img_circle).circleCrop())
+                        .apply(RequestOptions
+                                .errorOf(R.drawable.user_image_view_circle)
+                                .circleCrop()
+                                .skipMemoryCache(true)
+                                .diskCacheStrategy(DiskCacheStrategy.NONE))
                         .into(mArticleProfile);
                 mArticleTitle.setText(title + " - " + name);
                 mArticleTimeStamp.setText(timeStamp);
@@ -613,7 +618,11 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                             .load(articleItem.getUid() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", articleItem.getUid()), new LazyHeaders.Builder()
                                     .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
                                     .build()) : null)
-                            .apply(RequestOptions.errorOf(R.drawable.profile_img_circle).circleCrop())
+                            .apply(RequestOptions
+                                    .errorOf(R.drawable.user_image_view_circle)
+                                    .circleCrop()
+                                    .skipMemoryCache(true)
+                                    .diskCacheStrategy(DiskCacheStrategy.NONE))
                             .into(mArticleProfile);
                     mArticleTimeStamp.setText(new SimpleDateFormat("yyyy.MM.dd a h:mm:ss").format(articleItem.getTimestamp()));
                 }

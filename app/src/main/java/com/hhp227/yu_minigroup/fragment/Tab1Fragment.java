@@ -5,11 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,7 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class Tab1Fragment extends Fragment {
     public static final int LIMIT = 10;
@@ -54,6 +51,7 @@ public class Tab1Fragment extends Fragment {
     private List<String> mArticleItemKeys;
     private List<ArticleItem> mArticleItemValues;
     private ProgressBar mProgressBar;
+    private RecyclerView mRecyclerView;
     private RelativeLayout mRelativeLayout;
 
     public Tab1Fragment() {
@@ -86,23 +84,28 @@ public class Tab1Fragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_tab1, container, false);
-        RecyclerView recyclerView = rootView.findViewById(R.id.rv_article);
-        SwipeRefreshLayout swipeRefreshLayout = rootView.findViewById(R.id.srl_article_list);
-        mProgressBar = rootView.findViewById(R.id.pb_article);
-        mRelativeLayout = rootView.findViewById(R.id.rl_write);
+        return inflater.inflate(R.layout.fragment_tab1, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.srl_article_list);
+        mRecyclerView = view.findViewById(R.id.rv_article);
+        mProgressBar = view.findViewById(R.id.pb_article);
+        mRelativeLayout = view.findViewById(R.id.rl_write);
         mArticleItemKeys = new ArrayList<>();
         mArticleItemValues = new ArrayList<>();
         mAdapter = new ArticleListAdapter(getActivity(), mArticleItemKeys, mArticleItemValues, mKey);
         mOffSet = 1;
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.post(() -> {
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.post(() -> {
             mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             mAdapter.addFooterView();
         });
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -159,8 +162,12 @@ public class Tab1Fragment extends Fragment {
         swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_red_light, android.R.color.holo_orange_light, android.R.color.holo_green_light, android.R.color.holo_blue_bright);
         showProgressBar();
         fetchArticleList();
+    }
 
-        return rootView;
+    @Override
+    public void onResume() {
+        super.onResume();
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override

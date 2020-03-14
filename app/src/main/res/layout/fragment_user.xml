@@ -40,7 +40,7 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:paddingTop="3dp"
-                android:src="@drawable/profile_img_circle"
+                android:src="@drawable/user_image_view_circle"
                 android:scaleType="fitCenter"/>
 
         <LinearLayout

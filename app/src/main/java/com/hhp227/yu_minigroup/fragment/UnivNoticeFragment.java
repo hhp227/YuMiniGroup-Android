@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.ProgressBar;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -52,14 +54,19 @@ public class UnivNoticeFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_list, container, false);
+        return inflater.inflate(R.layout.fragment_list, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity);
-        mRecyclerView = rootView.findViewById(R.id.recycler_view);
+        mRecyclerView = view.findViewById(R.id.recycler_view);
         mActivity = (AppCompatActivity) getActivity();
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
-        mProgressBar = rootView.findViewById(R.id.progress_circular);
-        mToolbar = rootView.findViewById(R.id.toolbar);
-        mSwipeRefreshLayout = rootView.findViewById(R.id.srl);
+        mProgressBar = view.findViewById(R.id.progress_circular);
+        mToolbar = view.findViewById(R.id.toolbar);
+        mSwipeRefreshLayout = view.findViewById(R.id.srl);
         mBbsItemArrayList = new ArrayList<>();
         mAdapter = new BbsListAdapter(mActivity, mBbsItemArrayList);
         mOnScrollListener = new RecyclerView.OnScrollListener() {
@@ -100,8 +107,6 @@ public class UnivNoticeFragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);
         showProgressBar();
         fetchDataList();
-
-        return rootView;
     }
 
     @Override

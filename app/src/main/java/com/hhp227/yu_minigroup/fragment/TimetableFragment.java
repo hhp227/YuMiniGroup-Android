@@ -1,6 +1,5 @@
 package com.hhp227.yu_minigroup.fragment;
 
-
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,7 +34,12 @@ public class TimetableFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_tabs, container, false);
+        return inflater.inflate(R.layout.fragment_tabs, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         List<Fragment> fragmentList = new ArrayList<>();
         FragmentPagerAdapter adapter = new FragmentPagerAdapter(getChildFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
             @Override
@@ -50,9 +54,9 @@ public class TimetableFragment extends Fragment {
         };
         mActivity = (AppCompatActivity) getActivity();
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
-        mToolbar = rootView.findViewById(R.id.toolbar);
-        mTabLayout = rootView.findViewById(R.id.tab_layout);
-        mViewPager = rootView.findViewById(R.id.view_pager);
+        mToolbar = view.findViewById(R.id.toolbar);
+        mTabLayout = view.findViewById(R.id.tab_layout);
+        mViewPager = view.findViewById(R.id.view_pager);
 
         mActivity.setTitle(getString(R.string.timetable));
         mActivity.setSupportActionBar(mToolbar);
@@ -63,8 +67,6 @@ public class TimetableFragment extends Fragment {
         mTabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
         mViewPager.setAdapter(adapter);
-
-        return rootView;
     }
 
     @Override

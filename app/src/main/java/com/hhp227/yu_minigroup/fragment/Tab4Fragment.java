@@ -21,6 +21,7 @@ import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
@@ -47,17 +48,19 @@ public class Tab4Fragment extends Fragment {
     private static String mGroupId, mKey;
     private long mLastClickTime;
     private User mUser;
+    private RecyclerView mRecyclerView;
 
     public Tab4Fragment() {
     }
 
     public static Tab4Fragment newInstance(boolean isAdmin, String grpId, int position, String key) {
+        Tab4Fragment fragment = new Tab4Fragment();
         Bundle args = new Bundle();
+
         args.putBoolean("admin", isAdmin);
         args.putString("grp_id", grpId);
         args.putInt("pos", position);
         args.putString("key", key);
-        Tab4Fragment fragment = new Tab4Fragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -75,15 +78,21 @@ public class Tab4Fragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_tab4, container, false);
-        RecyclerView recyclerView = rootView.findViewById(R.id.recycler_view);
+        return inflater.inflate(R.layout.fragment_tab4, container, false);
+    }
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(new RecyclerView.Adapter<Tab4Holder>() {
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mRecyclerView = view.findViewById(R.id.recycler_view);
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView.setAdapter(new RecyclerView.Adapter<Tab4Holder>() {
 
             @Override
             public Tab4Holder onCreateViewHolder(ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(getContext()).inflate(R.layout.content_tab4, parent, false);
+
                 return new Tab4Holder(view);
             }
 
@@ -93,9 +102,13 @@ public class Tab4Fragment extends Fragment {
                 String stuYuId = mUser.getUserId();
                 String userName = mUser.getName();
 
-                Glide.with(getContext())
+                Glide.with(getActivity())
                         .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mUser.getUid()), new LazyHeaders.Builder().addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie()).build()))
-                        .apply(RequestOptions.circleCropTransform())
+                        .apply(RequestOptions
+                                .circleCropTransform()
+                                .error(R.drawable.user_image_view_circle)
+                                .skipMemoryCache(true)
+                                .diskCacheStrategy(DiskCacheStrategy.NONE))
                         .into(holder.profileImage);
                 holder.name.setText(userName);
                 holder.yuId.setText(stuYuId);
@@ -129,15 +142,17 @@ public class Tab4Fragment extends Fragment {
                         break;
                     case R.id.ll_withdrawal:
                         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
                         builder.setMessage((mIsAdmin ? "폐쇄" : "탈퇴") + "하시겠습니까?");
                         builder.setPositiveButton("예", (dialog, which) -> {
                             AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.POST, mIsAdmin ? EndPoint.DELETE_GROUP : EndPoint.WITHDRAWAL_GROUP, null, response -> {
                                 try {
                                     if (!response.getBoolean("isError")) {
-                                        Toast.makeText(getContext(), "소모임 " + (mIsAdmin ? "폐쇄" : "탈퇴") + " 완료", Toast.LENGTH_LONG).show();
                                         Intent intent = new Intent(getContext(), MainActivity.class);
+
                                         intent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                         startActivity(intent);
+                                        Toast.makeText(getContext(), "소모임 " + (mIsAdmin ? "폐쇄" : "탈퇴") + " 완료", Toast.LENGTH_LONG).show();
                                     }
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -152,6 +167,7 @@ public class Tab4Fragment extends Fragment {
                                 @Override
                                 public Map<String, String> getHeaders() {
                                     Map<String, String> headers = new HashMap<>();
+
                                     headers.put("Cookie", AppController.getInstance().getPreferenceManager().getCookie());
                                     return headers;
                                 }
@@ -164,6 +180,7 @@ public class Tab4Fragment extends Fragment {
                                 @Override
                                 public byte[] getBody() {
                                     Map<String, String> params = new HashMap<>();
+
                                     params.put("CLUB_GRP_ID", mGroupId);
                                     if (params.size() > 0) {
                                         StringBuilder encodedParams = new StringBuilder();
@@ -192,6 +209,7 @@ public class Tab4Fragment extends Fragment {
                         break;
                     case R.id.ll_settings:
                         Intent intent = new Intent(getContext(), SettingsActivity.class);
+
                         intent.putExtra("grp_id", mGroupId);
                         intent.putExtra("key", mKey);
                         startActivityForResult(intent, GroupFragment.UPDATE_GROUP);
@@ -201,6 +219,7 @@ public class Tab4Fragment extends Fragment {
                         break;
                     case R.id.ll_feedback:
                         Intent email = new Intent(Intent.ACTION_SEND);
+
                         email.setType("plain/Text");
                         email.putExtra(Intent.EXTRA_EMAIL, new String[] {"hong227@naver.com"});
                         email.putExtra(Intent.EXTRA_SUBJECT, "영남대소모임 건의사항");
@@ -210,10 +229,12 @@ public class Tab4Fragment extends Fragment {
                         break;
                     case R.id.ll_appstore:
                         String appUrl = "https://play.google.com/store/apps/details?id=" + getContext().getPackageName();
+
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(appUrl)));
                         break;
                     case R.id.ll_share:
                         Intent share = new Intent(Intent.ACTION_SEND);
+
                         share.setType("text/plain");
                         share.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         share.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name));
@@ -228,8 +249,12 @@ public class Tab4Fragment extends Fragment {
                 }
             }
         });
+    }
 
-        return rootView;
+    @Override
+    public void onResume() {
+        super.onResume();
+        mRecyclerView.getAdapter().notifyDataSetChanged();
     }
 
     private void deleteGroupFromFirebase() {
@@ -252,6 +277,7 @@ public class Tab4Fragment extends Fragment {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     DatabaseReference replysReference = FirebaseDatabase.getInstance().getReference("Replys");
+
                     dataSnapshot.getChildren().forEach(snapshot -> replysReference.child(snapshot.getKey()).removeValue());
                     articlesReference.child(mKey).removeValue();
                     groupsReference.child(mKey).removeValue();
@@ -271,6 +297,7 @@ public class Tab4Fragment extends Fragment {
                     GroupItem groupItem = dataSnapshot.getValue(GroupItem.class);
                     if (groupItem.getMembers() != null && groupItem.getMembers().containsKey(mUser.getUid())) {
                         Map<String, Boolean> members = groupItem.getMembers();
+
                         members.remove(mUser.getUid());
                         groupItem.setMembers(members);
                         groupItem.setMemberCount(members.size());

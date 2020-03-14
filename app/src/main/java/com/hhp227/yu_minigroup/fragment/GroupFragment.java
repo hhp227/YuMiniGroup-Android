@@ -69,18 +69,23 @@ public class GroupFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_group, container, false);
-        BottomNavigationView bottomNavigationView = rootView.findViewById(R.id.bnv_group_button);
-        RecyclerView recyclerView = rootView.findViewById(R.id.rv_group);
+        return inflater.inflate(R.layout.fragment_group, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        BottomNavigationView bottomNavigationView = view.findViewById(R.id.bnv_group_button);
+        RecyclerView recyclerView = view.findViewById(R.id.rv_group);
         mActivity = (AppCompatActivity) getActivity();
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
-        mToolbar = rootView.findViewById(R.id.toolbar);
-        mSwipeRefreshLayout = rootView.findViewById(R.id.srl_group);
-        mProgressBar = rootView.findViewById(R.id.pb_group);
-        mRelativeLayout = rootView.findViewById(R.id.rl_group);
+        mToolbar = view.findViewById(R.id.toolbar);
+        mSwipeRefreshLayout = view.findViewById(R.id.srl_group);
+        mProgressBar = view.findViewById(R.id.pb_group);
+        mRelativeLayout = view.findViewById(R.id.rl_group);
         mSpanCount = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? PORTAIT_SPAN_COUNT :
-                     getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? LANDSCAPE_SPAN_COUNT :
-                     0;
+                getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? LANDSCAPE_SPAN_COUNT :
+                        0;
         mGridLayoutManager = new GridLayoutManager(getContext(), mSpanCount);
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
@@ -141,8 +146,6 @@ public class GroupFragment extends Fragment {
             logout();
         showProgressBar();
         fetchDataTask();
-
-        return rootView;
     }
 
     @Override
@@ -283,7 +286,8 @@ public class GroupFragment extends Fragment {
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage());
                     } finally {
-                        getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        if (getActivity() != null)
+                            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     }
                 } else {
                     if (dataSnapshot.hasChildren()) {

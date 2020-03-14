@@ -25,12 +25,17 @@ public class BusFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_bus, container, false);
-        WebView webView = rootView.findViewById(R.id.wv_bus);
+        return inflater.inflate(R.layout.fragment_bus, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        WebView webView = view.findViewById(R.id.wv_bus);
         WebSettings webSettings = webView.getSettings();
         mActivity = (AppCompatActivity) getActivity();
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
-        mToolbar = rootView.findViewById(R.id.toolbar);
+        mToolbar = view.findViewById(R.id.toolbar);
 
         mActivity.setTitle(getString(R.string.shuttle_bus));
         mActivity.setSupportActionBar(mToolbar);
@@ -41,8 +46,6 @@ public class BusFragment extends Fragment {
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setJavaScriptEnabled(true);
-
-        return rootView;
     }
 
     private void setDrawerToggle() {
