@@ -26,6 +26,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.adapter.ReplyListAdapter;
@@ -49,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.hhp227.yu_minigroup.YouTubeSearchActivity.API_KEY;
 import static com.hhp227.yu_minigroup.fragment.Tab1Fragment.UPDATE_ARTICLE;
 
 public class ArticleActivity extends MyYouTubeBaseActivity {
@@ -403,6 +406,29 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                         LinearLayout youtubeContainer = new LinearLayout(this);
                         mYouTubePlayerView = new YouTubePlayerView(this);
 
+                        mYouTubePlayerView.initialize(API_KEY, new YouTubePlayer.OnInitializedListener() {
+                            @Override
+                            public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
+                                youTubePlayer.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT);
+                                youTubePlayer.setShowFullscreenButton(true);
+
+                                if (b) {
+                                    youTubePlayer.play();
+                                } else {
+                                    try {
+                                        youTubePlayer.cueVideo(mYouTubeItem.videoId);
+                                    } catch (IllegalStateException e) {
+                                        mYouTubePlayerView.initialize(API_KEY, this);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
+                                if (youTubeInitializationResult.isUserRecoverableError())
+                                    youTubeInitializationResult.getErrorDialog(getParent(), 0).show();
+                            }
+                        });
                         youtubeContainer.addView(mYouTubePlayerView);
                         youtubeContainer.setPadding(0, 0, 0, 30);
                         mArticleImages.addView(youtubeContainer, mYouTubeItem.position);
