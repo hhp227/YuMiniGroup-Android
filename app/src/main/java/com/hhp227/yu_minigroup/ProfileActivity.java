@@ -87,6 +87,7 @@ public class ProfileActivity extends AppCompatActivity {
                                         .skipMemoryCache(true)
                                         .diskCacheStrategy(DiskCacheStrategy.NONE))
                                 .into(mProfileImage);
+                        setResult(RESULT_OK);
                         Snackbar.make(findViewById(android.R.id.content), response.getString("message"), Snackbar.LENGTH_LONG).show();
                     } else
                         Snackbar.make(findViewById(android.R.id.content), "동기화 실패", Snackbar.LENGTH_LONG).show();
@@ -197,6 +198,7 @@ public class ProfileActivity extends AppCompatActivity {
         MultipartRequest multipartRequest = new MultipartRequest(Request.Method.POST, isUpdate ? EndPoint.PROFILE_IMAGE_UPDATE : EndPoint.PROFILE_IMAGE_PREVIEW, response -> {
             if (isUpdate) {
                 hideProgressBar();
+                setResult(RESULT_OK);
                 Snackbar.make(findViewById(android.R.id.content), new String(response.data).contains("성공") ? "수정되었습니다." : "실패했습니다.", Snackbar.LENGTH_LONG).show();
             } else
                 uploadImage(true);

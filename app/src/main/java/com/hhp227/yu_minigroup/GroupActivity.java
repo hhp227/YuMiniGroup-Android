@@ -17,6 +17,7 @@ public class GroupActivity extends AppCompatActivity {
     private boolean mIsAdmin;
     private int mPosition;
     private String mGroupId, mGroupName, mGroupImage, mKey;
+    private TabHostLayoutFragment mFragMain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,9 +30,9 @@ public class GroupActivity extends AppCompatActivity {
         mGroupImage = intent.getStringExtra("grp_img");
         mPosition = intent.getIntExtra("pos", 0);
         mKey = intent.getStringExtra("key");
-        TabHostLayoutFragment fragMain = TabHostLayoutFragment.newInstance(mIsAdmin, mGroupId, mGroupName, mGroupImage, mPosition, mKey);
+        mFragMain = TabHostLayoutFragment.newInstance(mIsAdmin, mGroupId, mGroupName, mGroupImage, mPosition, mKey);
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragMain).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, mFragMain).commit();
     }
 
     @Override
@@ -53,5 +54,11 @@ public class GroupActivity extends AppCompatActivity {
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mFragMain.onActivityResult(requestCode, resultCode, data);
     }
 }

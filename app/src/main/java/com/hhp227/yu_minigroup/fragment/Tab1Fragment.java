@@ -45,13 +45,12 @@ public class Tab1Fragment extends Fragment {
 
     private static final String TAG = "소식";
     private boolean mHasRequestedMore;
-    private int mOffSet, mMinId;
-    private long mLastClickTime;
+    private int mOffSet;
+    private long  mMinId, mLastClickTime;
     private ArticleListAdapter mAdapter;
     private List<String> mArticleItemKeys;
     private List<ArticleItem> mArticleItemValues;
     private ProgressBar mProgressBar;
-    private RecyclerView mRecyclerView;
     private RelativeLayout mRelativeLayout;
 
     public Tab1Fragment() {
@@ -91,7 +90,7 @@ public class Tab1Fragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.srl_article_list);
-        mRecyclerView = view.findViewById(R.id.rv_article);
+        RecyclerView recyclerView = view.findViewById(R.id.rv_article);
         mProgressBar = view.findViewById(R.id.pb_article);
         mRelativeLayout = view.findViewById(R.id.rl_write);
         mArticleItemKeys = new ArrayList<>();
@@ -99,13 +98,13 @@ public class Tab1Fragment extends Fragment {
         mAdapter = new ArticleListAdapter(getActivity(), mArticleItemKeys, mArticleItemValues, mKey);
         mOffSet = 1;
 
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.post(() -> {
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(mAdapter);
+        recyclerView.post(() -> {
             mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             mAdapter.addFooterView();
         });
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -165,12 +164,6 @@ public class Tab1Fragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        mAdapter.notifyDataSetChanged();
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == UPDATE_ARTICLE && resultCode == Activity.RESULT_OK) {
@@ -184,7 +177,8 @@ public class Tab1Fragment extends Fragment {
             articleItem.setYoutube(data.getParcelableExtra("youtube"));
             mArticleItemValues.set(position, articleItem);
             mAdapter.notifyItemChanged(position);
-        }
+        } else if (resultCode == Activity.RESULT_OK)
+            mAdapter.notifyDataSetChanged();
     }
 
     private void fetchArticleList() {
@@ -198,7 +192,6 @@ public class Tab1Fragment extends Fragment {
                 for (Element element : list) {
                     Element viewArt = element.getFirstElementByClass("view_art");
                     Element commentWrap = element.getFirstElementByClass("comment_wrap");
-
                     boolean auth = viewArt.getAllElementsByClass("btn-small-gray").size() > 0;
                     String id = commentWrap.getAttributeValue("num");
                     String listTitle = viewArt.getFirstElementByClass("list_title").getTextExtractor().toString();
@@ -206,16 +199,16 @@ public class Tab1Fragment extends Fragment {
                     String name = listTitle.substring(listTitle.lastIndexOf("-") + 1);
                     String date = viewArt.getFirstElement(HTMLElementName.TD).getTextExtractor().toString();
                     List<Element> images = viewArt.getAllElements(HTMLElementName.IMG);
+                    StringBuilder content = new StringBuilder();
                     List<String> imageList = new ArrayList<>();
+                    String replyCnt = commentWrap.getContent().getFirstElement(HTMLElementName.P).getTextExtractor().toString();
 
                     if (images.size() > 0)
                         images.forEach(image -> imageList.add(!image.getAttributeValue("src").contains("http") ? EndPoint.BASE_URL + image.getAttributeValue("src") : image.getAttributeValue("src")));
-                    StringBuilder content = new StringBuilder();
                     viewArt.getFirstElementByClass("list_cont").getChildElements().forEach(childElement -> content.append(childElement.getTextExtractor().toString().concat("\n")));
 
-                    String replyCnt = commentWrap.getContent().getFirstElement(HTMLElementName.P).getTextExtractor().toString();
-                    mMinId = mMinId == 0 ? Integer.parseInt(id) : Math.min(mMinId, Integer.parseInt(id));
-                    if (Integer.parseInt(id) > mMinId) {
+                    mMinId = mMinId == 0 ? Long.parseLong(id) : Math.min(mMinId, Long.parseLong(id));
+                    if (Long.parseLong(id) > mMinId) {
                         mHasRequestedMore = true;
                         break;
                     } else
@@ -257,6 +250,7 @@ public class Tab1Fragment extends Fragment {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Cookie", AppController.getInstance().getPreferenceManager().getCookie());
                 return headers;
             }
@@ -266,6 +260,7 @@ public class Tab1Fragment extends Fragment {
 
     private void initFirebaseData() {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Articles");
+
         fetchArticleListFromFirebase(databaseReference.child(mKey));
     }
 
@@ -279,6 +274,7 @@ public class Tab1Fragment extends Fragment {
                     int index = mArticleItemKeys.indexOf(value.getId());
                     if (index > -1) {
                         ArticleItem articleItem = mArticleItemValues.get(index);
+
                         articleItem.setUid(value.getUid());
                         mArticleItemValues.set(index, articleItem);
                         mArticleItemKeys.set(index, key);

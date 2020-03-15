@@ -1,5 +1,6 @@
 package com.hhp227.yu_minigroup.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -42,6 +43,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Tab4Fragment extends Fragment {
+    public static final int UPDATE_PROFILE = 0;
+
     private static final String TAG = "설정";
     private static boolean mIsAdmin;
     private static int mPosition;
@@ -138,7 +141,7 @@ public class Tab4Fragment extends Fragment {
             private void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.ll_profile:
-                        startActivity(new Intent(getContext(), ProfileActivity.class));
+                        startActivityForResult(new Intent(getContext(), ProfileActivity.class), UPDATE_PROFILE);
                         break;
                     case R.id.ll_withdrawal:
                         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -252,9 +255,24 @@ public class Tab4Fragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        mRecyclerView.getAdapter().notifyDataSetChanged();
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == GroupFragment.UPDATE_GROUP && resultCode == Activity.RESULT_OK) {
+            String groupName = data.getStringExtra("grp_nm");
+            String groupDescription = data.getStringExtra("grp_desc");
+            String joinType = data.getStringExtra("join_div");
+            Intent intent = new Intent(getContext(), GroupFragment.class);
+
+            intent.putExtra("grp_nm", groupName);
+            intent.putExtra("grp_desc", groupDescription);
+            intent.putExtra("join_div", joinType);
+            intent.putExtra("pos", mPosition);
+            getActivity().setResult(Activity.RESULT_OK, intent);
+            getActivity().getActionBar().setTitle(groupName);
+        } else if (requestCode == UPDATE_PROFILE && resultCode == Activity.RESULT_OK) {
+            mRecyclerView.getAdapter().notifyDataSetChanged();
+            getActivity().setResult(Activity.RESULT_OK);
+        }
     }
 
     private void deleteGroupFromFirebase() {

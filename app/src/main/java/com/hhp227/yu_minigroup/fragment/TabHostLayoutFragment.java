@@ -49,6 +49,7 @@ public class TabHostLayoutFragment extends Fragment {
     public static TabHostLayoutFragment newInstance(boolean isAdmin, String groupId, String groupName, String groupImage, int position, String key) {
         TabHostLayoutFragment fragment = new TabHostLayoutFragment();
         Bundle args = new Bundle();
+
         args.putBoolean(IS_ADMIN, isAdmin);
         args.putString(GROUP_ID, groupId);
         args.putString(GROUP_NAME, groupName);
@@ -117,6 +118,7 @@ public class TabHostLayoutFragment extends Fragment {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 int position = tab.getPosition();
+
                 mViewPager.setCurrentItem(position);
                 floatingActionButton.setVisibility(position != 0 ? View.GONE : View.VISIBLE);
             }
@@ -135,6 +137,7 @@ public class TabHostLayoutFragment extends Fragment {
         floatingActionButton.setOnClickListener(v -> {
             if (mTabLayout.getSelectedTabPosition() == 0) {
                 Intent intent = new Intent(getActivity(), WriteActivity.class);
+
                 intent.putExtra("admin", mIsAdmin);
                 intent.putExtra("grp_id", mGroupId);
                 intent.putExtra("grp_nm", mGroupName);
@@ -158,10 +161,12 @@ public class TabHostLayoutFragment extends Fragment {
             getActivity().getWindow().setStatusBarColor(Color.TRANSPARENT);
             ViewGroup.LayoutParams toolbarLayoutParams = toolbar.getLayoutParams();
             toolbarLayoutParams.height = toolbarLayoutParams.height + getStatusBarHeight();
+
             toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
             toolbar.setLayoutParams(toolbarLayoutParams);
             LinearLayout.LayoutParams toolbarLayoutLayoutParams = (LinearLayout.LayoutParams) toolbarLayout.getLayoutParams();
             toolbarLayoutLayoutParams.height = toolbarLayoutLayoutParams.height + getStatusBarHeight();
+
             toolbarLayout.setLayoutParams(toolbarLayoutLayoutParams);
         } else {
             titleImage.setVisibility(View.VISIBLE);
@@ -175,6 +180,13 @@ public class TabHostLayoutFragment extends Fragment {
         mViewPager.clearOnPageChangeListeners();
         mTabLayout.clearOnTabSelectedListeners();
         mTabLayout.removeAllTabs();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        for (Fragment fragment : getChildFragmentManager().getFragments())
+            fragment.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

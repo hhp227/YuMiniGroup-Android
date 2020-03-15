@@ -1,5 +1,7 @@
 package com.hhp227.yu_minigroup.fragment;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ProgressBar;
@@ -77,13 +79,12 @@ public class Tab3Fragment extends Fragment {
             String uid = memberItem.uid;
             String name = memberItem.name;
             String value = memberItem.value;
-
             Bundle args = new Bundle();
+            UserFragment newFragment = UserFragment.newInstance();
+
             args.putString("uid", uid);
             args.putString("name", name);
             args.putString("value", value);
-
-            UserFragment newFragment = UserFragment.newInstance();
             newFragment.setArguments(args);
             newFragment.show(getChildFragmentManager(), "dialog");
         });
@@ -96,6 +97,7 @@ public class Tab3Fragment extends Fragment {
                 if (!mHasRequestedMore && !recyclerView.canScrollVertically(1)) {
                     mHasRequestedMore = true;
                     mOffSet += LIMIT;
+
                     fetchMemberList();
                 }
             }
@@ -116,9 +118,10 @@ public class Tab3Fragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        mAdapter.notifyDataSetChanged();
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK)
+            mAdapter.notifyDataSetChanged();
     }
 
     private void fetchMemberList() {
@@ -138,6 +141,7 @@ public class Tab3Fragment extends Fragment {
                     String name = spanElements.get(i).getContent().toString();
                     String imageUrl = imgElements.get(i).getAttributeValue("src");
                     String value = inputElements.get(i).getAttributeValue("value");
+
                     mMemberItems.add(new MemberItem(imageUrl.substring(imageUrl.indexOf("id=") + "id=".length(), imageUrl.lastIndexOf("&ext")), name, value));
                 }
                 mAdapter.notifyDataSetChanged();

@@ -21,6 +21,8 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.fragment.*;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 
+import static com.hhp227.yu_minigroup.fragment.GroupFragment.UPDATE_GROUP;
+
 public class MainActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private PreferenceManager mPreferenceManager;
@@ -76,25 +78,33 @@ public class MainActivity extends AppCompatActivity {
                 .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mPreferenceManager.getUser().getUid()), new LazyHeaders.Builder()
                         .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
                         .build()))
-                .apply(new RequestOptions().centerCrop()
-                        .error(R.drawable.user_image_view)
-                        .skipMemoryCache(true)
-                        .diskCacheStrategy(DiskCacheStrategy.NONE))
-                .into(mProfileImage);
-        mProfileImage.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), ProfileActivity.class)));
-        name.setText(mPreferenceManager.getUser().getName());
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Glide.with(getApplicationContext())
-                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mPreferenceManager.getUser().getUid()), new LazyHeaders.Builder().addHeader("Cookie", mPreferenceManager.getCookie()).build()))
                 .apply(new RequestOptions().circleCrop()
                         .error(R.drawable.user_image_view_circle)
                         .skipMemoryCache(true)
                         .diskCacheStrategy(DiskCacheStrategy.NONE))
                 .into(mProfileImage);
+        mProfileImage.setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+
+            startActivityForResult(intent, UPDATE_GROUP);
+        });
+        name.setText(mPreferenceManager.getUser().getName());
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            Glide.with(getApplicationContext())
+                    .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mPreferenceManager.getUser().getUid()), new LazyHeaders.Builder()
+                            .addHeader("Cookie", mPreferenceManager.getCookie())
+                            .build()))
+                    .apply(new RequestOptions().circleCrop()
+                            .error(R.drawable.user_image_view_circle)
+                            .skipMemoryCache(true)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE))
+                    .into(mProfileImage);
+        }
     }
 
     @Override

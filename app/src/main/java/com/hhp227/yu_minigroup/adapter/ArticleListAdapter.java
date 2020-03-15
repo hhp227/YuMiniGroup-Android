@@ -1,7 +1,6 @@
 package com.hhp227.yu_minigroup.adapter;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,17 +14,13 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
-import com.hhp227.yu_minigroup.ArticleActivity;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
-import com.hhp227.yu_minigroup.fragment.Tab1Fragment;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
-
-import static com.hhp227.yu_minigroup.fragment.Tab1Fragment.UPDATE_ARTICLE;
 
 public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_ARTICLE = 0;
