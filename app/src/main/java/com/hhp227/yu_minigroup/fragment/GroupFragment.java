@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.view.WindowManager;
@@ -30,9 +31,12 @@ import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.*;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.GroupGridAdapter;
+import com.hhp227.yu_minigroup.adapter.LoopPagerAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.GroupItem;
+import com.hhp227.yu_minigroup.helper.ui.CirclePageIndicator;
+import com.hhp227.yu_minigroup.helper.ui.LoopViewPager;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
@@ -42,6 +46,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GroupFragment extends Fragment {
     public static final int CREATE_CODE = 10;
@@ -53,16 +59,21 @@ public class GroupFragment extends Fragment {
     private static final String TAG = GroupFragment.class.getSimpleName();
     private int mSpanCount;
     private AppCompatActivity mActivity;
+    private CirclePageIndicator mCirclePageIndicator;
     private DrawerLayout mDrawerLayout;
     private GridLayoutManager mGridLayoutManager;
     private GroupGridAdapter mAdapter;
     private List<String> mGroupItemKeys;
     private List<Object> mGroupItemValues;
+    private LoopViewPager mLoopViewPager;
     private PreferenceManager mPreferenceManager;
     private ProgressBar mProgressBar;
     private RelativeLayout mRelativeLayout;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private Toolbar mToolbar;
+
+    private LoopPagerAdapter mLoopPagerAdapter;
+    private CountDownTimer mCountDownTimer;
 
     public GroupFragment() {
     }
@@ -79,18 +90,32 @@ public class GroupFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.rv_group);
         mActivity = (AppCompatActivity) getActivity();
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
+        mCirclePageIndicator = view.findViewById(R.id.cpi_theme_slider_indicator);
         mToolbar = view.findViewById(R.id.toolbar);
         mSwipeRefreshLayout = view.findViewById(R.id.srl_group);
         mProgressBar = view.findViewById(R.id.pb_group);
         mRelativeLayout = view.findViewById(R.id.rl_group);
+        mLoopViewPager = view.findViewById(R.id.lvp_theme_slider_pager);
         mSpanCount = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? PORTAIT_SPAN_COUNT :
-                getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? LANDSCAPE_SPAN_COUNT :
-                        0;
+                     getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? LANDSCAPE_SPAN_COUNT :
+                     0;
         mGridLayoutManager = new GridLayoutManager(getContext(), mSpanCount);
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
         mAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
+        mLoopPagerAdapter = new LoopPagerAdapter(getActivity(), Stream.<String>builder().add("이미지2").add("메인").add("이미지1").build().collect(Collectors.toList()));
+        mCountDownTimer = new CountDownTimer(80000, 8000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                moveSliderPager();
+            }
+
+            @Override
+            public void onFinish() {
+                start();
+            }
+        };
 
         mActivity.setTitle(getString(R.string.main));
         mActivity.setSupportActionBar(mToolbar);
@@ -143,10 +168,36 @@ public class GroupFragment extends Fragment {
             }
             return false;
         });
+        mLoopPagerAdapter.setOnClickListener(v -> {
+            switch (v.getId()) {
+                case R.id.b_find:
+                    startActivityForResult(new Intent(getContext(), FindActivity.class), REGISTER_CODE);
+                    return;
+                case R.id.b_create:
+                    startActivityForResult(new Intent(getContext(), CreateActivity.class), CREATE_CODE);
+            }
+        });
+        mLoopViewPager.setAdapter(mLoopPagerAdapter);
+        //mCirclePageIndicator.setViewPager(mLoopViewPager);
         if (AppController.getInstance().getPreferenceManager().getUser() == null)
             logout();
         showProgressBar();
         fetchDataTask();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mCountDownTimer.start();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        CountDownTimer countDownTimer = mCountDownTimer;
+        if (countDownTimer != null)
+            countDownTimer.cancel();
     }
 
     @Override
@@ -270,9 +321,26 @@ public class GroupFragment extends Fragment {
                 ad.setName("광고");
                 mGroupItemValues.add(ad);
             }
-        } else
+        } else {
             mRelativeLayout.setVisibility(View.VISIBLE);
+            setMainPageView();
+        }
         hideProgressBar();
+    }
+
+    private boolean moveSliderPager() {
+        if (mLoopViewPager == null || mLoopPagerAdapter.getCount() <= 0) {
+            return false;
+        }
+
+        LoopViewPager loopViewPager = mLoopViewPager;
+        loopViewPager.setCurrentItem(loopViewPager.getCurrentItem() + 1);
+        return true;
+    }
+
+    private void setMainPageView() {
+
+
     }
 
     private void initFirebaseData() {

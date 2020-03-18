@@ -2,8 +2,9 @@
 <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" xmlns:tools="http://schemas.android.com/tools">
+        android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/app_bar_layout"
@@ -52,30 +53,42 @@
                 android:id="@+id/rl_group"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone">
+                android:visibility="visible">
 
-            <ImageView
-                    android:layout_width="186dp"
-                    android:layout_height="110dp"
-                    android:src="@drawable/yu_minigroup"
-                    android:layout_above="@id/tv_nogroups"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginBottom="20dp"/>
+            <com.hhp227.yu_minigroup.helper.ui.LoopViewPager
+                    android:id="@+id/lvp_theme_slider_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="285dp"/>
 
-            <TextView
-                    android:text="가입한 그룹이 없습니다."
+            <com.hhp227.yu_minigroup.helper.ui.CirclePageIndicator
+                    android:id="@+id/cpi_theme_slider_indicator"
+                    android:padding="10dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:layout_alignBottom="@+id/lvp_theme_slider_pager"
                     android:layout_centerHorizontal="true"
-                    android:layout_above="@id/tv_nogroups"/>
+                    tools:extraSpacing="9.2dp"
+                    tools:fillColor="#ffffff"
+                    tools:pageColor="@android:color/transparent"
+                    tools:radius="2.5dp"
+                    tools:snap="true"
+                    tools:strokeColor="#fafafa"
+                    tools:strokeWidth="1dp"/>
 
             <TextView
-                    android:id="@+id/tv_nogroups"
-                    android:text="그룹찾기를 통해 가입하거나 새로운 모임을 생성하세요."
+                    android:id="@+id/tv_title2"
+                    android:layout_below="@id/lvp_theme_slider_pager"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_marginTop="20dp"/>
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginStart="15dp"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold"
+                    tools:text="인기 모임"/>
 
         </RelativeLayout>
 

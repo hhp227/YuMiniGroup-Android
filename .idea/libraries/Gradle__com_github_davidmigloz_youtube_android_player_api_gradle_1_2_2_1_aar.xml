@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.github.davidmigloz:youtube-android-player-api-gradle:1.2.2.1@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/0ea0cb43bf60d323f344ceefac5acd64/jetified-youtube-android-player-api-gradle-1.2.2.1/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/0ea0cb43bf60d323f344ceefac5acd64/jetified-youtube-android-player-api-gradle-1.2.2.1/jars/libs/YouTubeAndroidPlayerApi.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/0ea0cb43bf60d323f344ceefac5acd64/jetified-youtube-android-player-api-gradle-1.2.2.1/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
