@@ -3,9 +3,9 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:paddingBottom="3dp"
-        android:paddingTop="3dp">
+        android:layout_height="35dp"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp">
 
     <TextView
             android:id="@+id/tv_title"
@@ -16,6 +16,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginLeft="15dp"
             android:layout_marginStart="15dp"
+            android:textSize="16dp"
             android:textColor="@color/colorPrimary"
             android:textStyle="bold"
             tools:text="Title test text"/>

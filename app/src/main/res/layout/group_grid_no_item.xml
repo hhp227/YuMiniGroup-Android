@@ -9,14 +9,14 @@
     <com.hhp227.yu_minigroup.helper.ui.LoopViewPager
             android:id="@+id/lvp_theme_slider_pager"
             android:layout_width="match_parent"
-            android:layout_height="285dp"/>
+            android:layout_height="290dp"/>
 
-    <com.hhp227.yu_minigroup.helper.ui.CirclePageIndicator
+    <com.hhp227.yu_minigroup.helper.ui.LoopingCirclePageIndicator
             android:id="@+id/cpi_theme_slider_indicator"
             android:padding="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
+            android:layout_marginBottom="3dp"
             android:layout_alignBottom="@+id/lvp_theme_slider_pager"
             android:layout_centerHorizontal="true"
             tools:extraSpacing="9.2dp"

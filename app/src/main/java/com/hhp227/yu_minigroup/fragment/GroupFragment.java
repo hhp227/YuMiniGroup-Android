@@ -33,7 +33,6 @@ import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.GroupGridAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.dto.AdItem;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import net.htmlparser.jericho.Element;
@@ -96,7 +95,9 @@ public class GroupFragment extends Fragment {
         mSpanSizeLookup = new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT || mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_BANNER ? mSpanCount : 1;
+                return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT
+                        || mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_BANNER
+                        || mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_VIEW_PAGER ? mSpanCount : 1;
             }
         };
         mGridLayoutManager = new GridLayoutManager(getContext(), mSpanCount);
@@ -324,11 +325,13 @@ public class GroupFragment extends Fragment {
 
     private void insertAdvertisement() {
         if (!mGroupItemValues.isEmpty()) {
-            mAdapter.addHeaderView("가입중인 그룹");
+            mAdapter.addHeaderView("가입중인 그룹", 0);
             if (mGroupItemValues.size() % 2 == 0)
-                mGroupItemValues.add(new AdItem("광고"));
+                mGroupItemValues.add("광고");
         } else {
             mGroupItemValues.add("없음");
+            mAdapter.addHeaderView("인기 모임");
+            mGroupItemValues.add("뷰페이져");
         }
         hideProgressBar();
     }
