@@ -43,54 +43,9 @@
             <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_group"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingLeft="7dp"
-                    android:paddingRight="7dp"/>
+                    android:layout_height="match_parent"/>
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-        <RelativeLayout
-                android:id="@+id/rl_group"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="visible">
-
-            <com.hhp227.yu_minigroup.helper.ui.LoopViewPager
-                    android:id="@+id/lvp_theme_slider_pager"
-                    android:layout_width="match_parent"
-                    android:layout_height="285dp"/>
-
-            <com.hhp227.yu_minigroup.helper.ui.CirclePageIndicator
-                    android:id="@+id/cpi_theme_slider_indicator"
-                    android:padding="10dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:layout_alignBottom="@+id/lvp_theme_slider_pager"
-                    android:layout_centerHorizontal="true"
-                    tools:extraSpacing="9.2dp"
-                    tools:fillColor="#ffffff"
-                    tools:pageColor="@android:color/transparent"
-                    tools:radius="2.5dp"
-                    tools:snap="true"
-                    tools:strokeColor="#fafafa"
-                    tools:strokeWidth="1dp"/>
-
-            <TextView
-                    android:id="@+id/tv_title2"
-                    android:layout_below="@id/lvp_theme_slider_pager"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginStart="15dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold"
-                    tools:text="인기 모임"/>
-
-        </RelativeLayout>
 
         <ProgressBar
                 android:id="@+id/pb_group"

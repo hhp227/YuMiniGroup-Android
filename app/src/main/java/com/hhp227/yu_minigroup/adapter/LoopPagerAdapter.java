@@ -1,6 +1,5 @@
 package com.hhp227.yu_minigroup.adapter;
 
-import android.app.Activity;
 import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,12 +14,10 @@ import com.hhp227.yu_minigroup.R;
 import java.util.List;
 
 public class LoopPagerAdapter extends PagerAdapter {
-    private Activity mActivity;
     private List<String> mPagerItemList;
     private View.OnClickListener mOnClickListener;
 
-    public LoopPagerAdapter(Activity activity, List<String> pagerItemList) {
-        this.mActivity = activity;
+    LoopPagerAdapter(List<String> pagerItemList) {
         this.mPagerItemList = pagerItemList;
     }
 
@@ -30,7 +27,7 @@ public class LoopPagerAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup view, int position) {
-        View rootView = LayoutInflater.from(mActivity).inflate(R.layout.fragment_main_pager, null);
+        View rootView = LayoutInflater.from(view.getContext()).inflate(R.layout.fragment_main_pager, null);
         RelativeLayout rl_main = rootView.findViewById(R.id.rl_type_main);
         RelativeLayout rl_image = rootView.findViewById(R.id.rl_type_image);
         ImageView imageView = rootView.findViewById(R.id.iv_banner);

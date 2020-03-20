@@ -3,7 +3,7 @@ package com.hhp227.yu_minigroup.dto;
 import java.util.Map;
 
 public class GroupItem {
-    private boolean isAd, isAdmin;
+    private boolean isAdmin;
     private int memberCount;
     private long timestamp;
     private String id, author, authorUid, image, name, info, description, joinType;
@@ -12,9 +12,8 @@ public class GroupItem {
     public GroupItem() {
     }
 
-    public GroupItem(String id, boolean isAd, boolean isAdmin, long timestamp, String author, String authorUid, String image, String name, String info, String description, String joinType) {
+    public GroupItem(String id, boolean isAdmin, long timestamp, String author, String authorUid, String image, String name, String info, String description, String joinType) {
         this.id = id;
-        this.isAd = isAd;
         this.isAdmin = isAdmin;
         this.timestamp = timestamp;
         this.author = author;
@@ -32,14 +31,6 @@ public class GroupItem {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public boolean isAd() {
-        return isAd;
-    }
-
-    public void setAd(boolean ad) {
-        isAd = ad;
     }
 
     public boolean isAdmin() {

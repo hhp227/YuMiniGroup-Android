@@ -3,14 +3,14 @@ package com.hhp227.yu_minigroup.fragment;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.Toast;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -31,12 +31,10 @@ import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.*;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.GroupGridAdapter;
-import com.hhp227.yu_minigroup.adapter.LoopPagerAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.dto.AdItem;
 import com.hhp227.yu_minigroup.dto.GroupItem;
-import com.hhp227.yu_minigroup.helper.ui.CirclePageIndicator;
-import com.hhp227.yu_minigroup.helper.ui.LoopViewPager;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
@@ -46,8 +44,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_AD;
+import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_GROUP;
 
 public class GroupFragment extends Fragment {
     public static final int CREATE_CODE = 10;
@@ -59,21 +58,19 @@ public class GroupFragment extends Fragment {
     private static final String TAG = GroupFragment.class.getSimpleName();
     private int mSpanCount;
     private AppCompatActivity mActivity;
-    private CirclePageIndicator mCirclePageIndicator;
+    private CountDownTimer mCountDownTimer;
     private DrawerLayout mDrawerLayout;
     private GridLayoutManager mGridLayoutManager;
+    private GridLayoutManager.SpanSizeLookup mSpanSizeLookup;
     private GroupGridAdapter mAdapter;
     private List<String> mGroupItemKeys;
     private List<Object> mGroupItemValues;
-    private LoopViewPager mLoopViewPager;
     private PreferenceManager mPreferenceManager;
     private ProgressBar mProgressBar;
-    private RelativeLayout mRelativeLayout;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.ItemDecoration mItemDecoration;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private Toolbar mToolbar;
-
-    private LoopPagerAdapter mLoopPagerAdapter;
-    private CountDownTimer mCountDownTimer;
 
     public GroupFragment() {
     }
@@ -87,28 +84,50 @@ public class GroupFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         BottomNavigationView bottomNavigationView = view.findViewById(R.id.bnv_group_button);
-        RecyclerView recyclerView = view.findViewById(R.id.rv_group);
         mActivity = (AppCompatActivity) getActivity();
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
-        mCirclePageIndicator = view.findViewById(R.id.cpi_theme_slider_indicator);
         mToolbar = view.findViewById(R.id.toolbar);
         mSwipeRefreshLayout = view.findViewById(R.id.srl_group);
         mProgressBar = view.findViewById(R.id.pb_group);
-        mRelativeLayout = view.findViewById(R.id.rl_group);
-        mLoopViewPager = view.findViewById(R.id.lvp_theme_slider_pager);
+        mRecyclerView = view.findViewById(R.id.rv_group);
         mSpanCount = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? PORTAIT_SPAN_COUNT :
                      getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? LANDSCAPE_SPAN_COUNT :
                      0;
+        mSpanSizeLookup = new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT || mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_BANNER ? mSpanCount : 1;
+            }
+        };
         mGridLayoutManager = new GridLayoutManager(getContext(), mSpanCount);
+        mItemDecoration = new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+                super.getItemOffsets(outRect, view, parent, state);
+                if (parent.getAdapter().getItemViewType(parent.getChildAdapterPosition(view)) == TYPE_GROUP || parent.getAdapter().getItemViewType(parent.getChildAdapterPosition(view)) == TYPE_AD) {
+                    outRect.top = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
+                    outRect.bottom = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
+                    if (parent.getChildAdapterPosition(view) % mSpanCount == 0) {
+                        outRect.left = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7, getResources().getDisplayMetrics());
+                        outRect.right = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, getResources().getDisplayMetrics());
+                    } else if (parent.getChildAdapterPosition(view) % mSpanCount == 1) {
+                        outRect.left = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, getResources().getDisplayMetrics());
+                        outRect.right = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7, getResources().getDisplayMetrics());
+                    } else {
+                        outRect.left = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7, getResources().getDisplayMetrics());
+                        outRect.right = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7, getResources().getDisplayMetrics());
+                    }
+                }
+            }
+        };
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
         mAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
-        mLoopPagerAdapter = new LoopPagerAdapter(getActivity(), Stream.<String>builder().add("이미지2").add("메인").add("이미지1").build().collect(Collectors.toList()));
         mCountDownTimer = new CountDownTimer(80000, 8000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                moveSliderPager();
+                mAdapter.moveSliderPager();
             }
 
             @Override
@@ -122,10 +141,8 @@ public class GroupFragment extends Fragment {
         setDrawerToggle();
         mAdapter.setHasStableIds(true);
         mAdapter.setOnItemClickListener((v, position) -> {
-            GroupItem groupItem = (GroupItem) mGroupItemValues.get(position);
-            if (groupItem.isAd())
-                Toast.makeText(getContext(), "광고", Toast.LENGTH_LONG).show();
-            else {
+            if (mGroupItemValues.get(position) instanceof GroupItem) {
+                GroupItem groupItem = (GroupItem) mGroupItemValues.get(position);
                 Intent intent = new Intent(getContext(), GroupActivity.class);
 
                 intent.putExtra("admin", groupItem.isAdmin());
@@ -137,14 +154,19 @@ public class GroupFragment extends Fragment {
                 startActivityForResult(intent, UPDATE_GROUP);
             }
         });
-        mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(int position) {
-                return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT ? mSpanCount : 1;
+        mAdapter.setOnClickListener(v -> {
+            switch (v.getId()) {
+                case R.id.b_find:
+                    startActivityForResult(new Intent(getContext(), FindActivity.class), REGISTER_CODE);
+                    return;
+                case R.id.b_create:
+                    startActivityForResult(new Intent(getContext(), CreateActivity.class), CREATE_CODE);
             }
         });
-        recyclerView.setLayoutManager(mGridLayoutManager);
-        recyclerView.setAdapter(mAdapter);
+        mGridLayoutManager.setSpanSizeLookup(mSpanSizeLookup);
+        mRecyclerView.setLayoutManager(mGridLayoutManager);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addItemDecoration(mItemDecoration);
         mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
             mGroupItemKeys.clear();
             mGroupItemValues.clear();
@@ -168,22 +190,16 @@ public class GroupFragment extends Fragment {
             }
             return false;
         });
-        mLoopPagerAdapter.setOnClickListener(v -> {
-            switch (v.getId()) {
-                case R.id.b_find:
-                    startActivityForResult(new Intent(getContext(), FindActivity.class), REGISTER_CODE);
-                    return;
-                case R.id.b_create:
-                    startActivityForResult(new Intent(getContext(), CreateActivity.class), CREATE_CODE);
-            }
-        });
-        mLoopViewPager.setAdapter(mLoopPagerAdapter);
-        //mCirclePageIndicator.setViewPager(mLoopViewPager);
         if (AppController.getInstance().getPreferenceManager().getUser() == null)
             logout();
         showProgressBar();
         fetchDataTask();
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mRecyclerView.removeItemDecoration(mItemDecoration);
     }
 
     @Override
@@ -232,13 +248,9 @@ public class GroupFragment extends Fragment {
                 mSpanCount = LANDSCAPE_SPAN_COUNT;
                 break;
         }
-        mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(int position) {
-                return mAdapter.getItemViewType(position) == GroupGridAdapter.TYPE_TEXT ? mSpanCount : 1;
-            }
-        });
+        mGridLayoutManager.setSpanSizeLookup(mSpanSizeLookup);
         mGridLayoutManager.setSpanCount(mSpanCount);
+        mRecyclerView.invalidateItemDecorations();
     }
 
     private void setDrawerToggle() {
@@ -313,34 +325,12 @@ public class GroupFragment extends Fragment {
     private void insertAdvertisement() {
         if (!mGroupItemValues.isEmpty()) {
             mAdapter.addHeaderView("가입중인 그룹");
-            mRelativeLayout.setVisibility(View.GONE);
-            if (mGroupItemValues.size() % 2 == 0) {
-                GroupItem ad = new GroupItem();
-
-                ad.setAd(true);
-                ad.setName("광고");
-                mGroupItemValues.add(ad);
-            }
+            if (mGroupItemValues.size() % 2 == 0)
+                mGroupItemValues.add(new AdItem("광고"));
         } else {
-            mRelativeLayout.setVisibility(View.VISIBLE);
-            setMainPageView();
+            mGroupItemValues.add("없음");
         }
         hideProgressBar();
-    }
-
-    private boolean moveSliderPager() {
-        if (mLoopViewPager == null || mLoopPagerAdapter.getCount() <= 0) {
-            return false;
-        }
-
-        LoopViewPager loopViewPager = mLoopViewPager;
-        loopViewPager.setCurrentItem(loopViewPager.getCurrentItem() + 1);
-        return true;
-    }
-
-    private void setMainPageView() {
-
-
     }
 
     private void initFirebaseData() {
