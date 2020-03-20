@@ -1,4 +1,4 @@
-package com.hhp227.yu_minigroup.helper.ui;
+package com.hhp227.yu_minigroup.helper.ui.loopviewpager;
 
 import android.os.Parcelable;
 import android.util.SparseArray;

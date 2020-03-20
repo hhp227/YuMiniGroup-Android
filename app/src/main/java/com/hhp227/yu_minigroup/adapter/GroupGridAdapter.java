@@ -20,8 +20,8 @@ import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.GroupItem;
-import com.hhp227.yu_minigroup.helper.ui.LoopViewPager;
-import com.hhp227.yu_minigroup.helper.ui.LoopingCirclePageIndicator;
+import com.hhp227.yu_minigroup.helper.ui.loopviewpager.LoopViewPager;
+import com.hhp227.yu_minigroup.helper.ui.pageindicator.LoopingCirclePageIndicator;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
@@ -219,6 +219,7 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
                 @Override
                 public Map<String, String> getHeaders() {
                     Map<String, String> headers = new HashMap<>();
+
                     headers.put("Cookie", AppController.getInstance().getPreferenceManager().getCookie());
                     return headers;
                 }
@@ -231,6 +232,7 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
                 @Override
                 public byte[] getBody() {
                     Map<String, String> params = new HashMap<>();
+
                     params.put("panel_id", "3");
                     params.put("encoding", "utf-8");
                     if (params.size() > 0) {
@@ -319,14 +321,13 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
         return mGroupItemKeys.get(position);
     }
 
-    public boolean moveSliderPager() {
+    public void moveSliderPager() {
         if (mLoopViewPager == null || mLoopPagerAdapter.getCount() <= 0) {
-            return false;
+            return;
         }
 
         LoopViewPager loopViewPager = mLoopViewPager;
         loopViewPager.setCurrentItem(loopViewPager.getCurrentItem() + 1);
-        return true;
     }
 
     private int groupIdExtract(String onclick) {

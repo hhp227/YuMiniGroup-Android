@@ -1,4 +1,4 @@
-package com.hhp227.yu_minigroup.helper.ui;
+package com.hhp227.yu_minigroup.helper.ui.pageindicator;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -18,6 +18,7 @@ import androidx.core.view.ViewConfigurationCompat;
 import androidx.viewpager.widget.ViewPager;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.LoopPagerAdapter;
+import com.hhp227.yu_minigroup.helper.ui.pageindicator.PageIndicator;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.widget.LinearLayout.HORIZONTAL;
