@@ -121,7 +121,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void loginSSOyuPortal(String id, String password, String cookie) {
         String tagStringReq = "req_login_SSO";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, "https://portal.yu.ac.kr/sso/login_process.jsp", response -> {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.YU_PORTAL_LOGIN_URL, response -> {
             VolleyLog.d(TAG, "로그인 응답 : " + response);
             mPreferenceManager.storeCookie(cookie);
         }, error -> {

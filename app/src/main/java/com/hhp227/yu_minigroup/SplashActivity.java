@@ -3,7 +3,6 @@ package com.hhp227.yu_minigroup;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -18,12 +17,11 @@ import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SplashActivity extends AppCompatActivity {
+    private static final int SPLASH_TIME_OUT = 1250;
     private static final String TAG = SplashActivity.class.getSimpleName();
-    private static int SPLASH_TIME_OUT = 1250;
     private PreferenceManager mPreferenceManager;
 
     @Override
@@ -48,6 +46,7 @@ public class SplashActivity extends AppCompatActivity {
             if (ssoToken != null) {
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
                 finish();
+                overridePendingTransition(R.anim.splash_in, R.anim.splash_out);
             }
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
@@ -73,7 +72,7 @@ public class SplashActivity extends AppCompatActivity {
 
     private void loginSSOyuPortal(String id, String password, String cookie) {
         String tagStringReq = "req_login_SSO";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, "https://portal.yu.ac.kr/sso/login_process.jsp", response -> {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.YU_PORTAL_LOGIN_URL, response -> {
             VolleyLog.d(TAG, "로그인 응답 : " + response);
             mPreferenceManager.storeCookie(cookie);
         }, error -> {

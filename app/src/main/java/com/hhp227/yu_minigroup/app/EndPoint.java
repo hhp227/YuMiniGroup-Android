@@ -1,6 +1,7 @@
 package com.hhp227.yu_minigroup.app;
 
 public interface EndPoint {
+    String YU_PORTAL_LOGIN_URL = "https://portal.yu.ac.kr/sso/login_process.jsp";
     String SMS_URL = "http://sms.yu.ac.kr/module/index.php/api";
     String BASE_URL = "http://lms.yu.ac.kr";
     String LOGIN = SMS_URL + "/login";
