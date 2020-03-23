@@ -1,6 +1,9 @@
 package com.hhp227.yu_minigroup;
 
 import android.content.Intent;
+import android.util.Log;
+import android.webkit.CookieManager;
+import android.webkit.ValueCallback;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +27,8 @@ import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import static com.hhp227.yu_minigroup.fragment.GroupFragment.UPDATE_GROUP;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private CookieManager mCookieManager;
     private DrawerLayout mDrawerLayout;
     private PreferenceManager mPreferenceManager;
     private ImageView mProfileImage;
@@ -37,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         mProfileImage = navigationView.getHeaderView(0).findViewById(R.id.iv_profile_image);
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
+        mCookieManager = AppController.getInstance().getCookieManager();
 
         // Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713
         MobileAds.initialize(this, getString(R.string.admob_app_id));
@@ -61,8 +67,10 @@ public class MainActivity extends AppCompatActivity {
                     fragment = new BusFragment();
                     break;
                 case R.id.nav_menu6:
-                    mPreferenceManager.clear();
                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+
+                    mPreferenceManager.clear();
+                    mCookieManager.removeAllCookies(value -> Log.d(TAG, "onReceiveValue " + value));
                     startActivity(intent);
                     finish();
             }
@@ -76,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         });
         Glide.with(this)
                 .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mPreferenceManager.getUser().getUid()), new LazyHeaders.Builder()
-                        .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
+                        .addHeader("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS))
                         .build()))
                 .apply(new RequestOptions().circleCrop()
                         .error(R.drawable.user_image_view_circle)
@@ -97,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             Glide.with(getApplicationContext())
                     .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mPreferenceManager.getUser().getUid()), new LazyHeaders.Builder()
-                            .addHeader("Cookie", mPreferenceManager.getCookie())
+                            .addHeader("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS))
                             .build()))
                     .apply(new RequestOptions().circleCrop()
                             .error(R.drawable.user_image_view_circle)

@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.CookieManager;
 import android.widget.*;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
@@ -62,6 +63,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
     private int mPosition;
     private String mGroupId, mArticleId, mGroupName, mGroupImage, mGroupKey, mArticleKey;
     private CardView mButtonSend;
+    private CookieManager mCookieManager;
     private EditText mInputReply;
     private ImageView mArticleProfile;
     private LinearLayout mArticleImages;
@@ -96,6 +98,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
         mSwipeRefreshLayout = findViewById(R.id.srl_article);
         mProgressBar = findViewById(R.id.pb_article);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
+        mCookieManager = AppController.getInstance().getCookieManager();
         Intent intent = getIntent();
         mGroupId = intent.getStringExtra("grp_id");
         mGroupName = intent.getStringExtra("grp_nm");
@@ -223,7 +226,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                     public Map<String, String> getHeaders() {
                         Map<String, String> headers = new HashMap<>();
 
-                        headers.put("Cookie", mPreferenceManager.getCookie());
+                        headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                         return headers;
                     }
 
@@ -328,7 +331,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                     public Map<String, String> getHeaders() {
                         Map<String, String> headers = new HashMap<>();
 
-                        headers.put("Cookie", mPreferenceManager.getCookie());
+                        headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                         return headers;
                     }
 
@@ -457,7 +460,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
 
-                headers.put("Cookie", mPreferenceManager.getCookie());
+                headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                 return headers;
             }
         };
@@ -523,7 +526,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
 
-                headers.put("Cookie", mPreferenceManager.getCookie());
+                headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                 return headers;
             }
 
@@ -616,7 +619,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
 
                     Glide.with(getApplicationContext())
                             .load(articleItem.getUid() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", articleItem.getUid()), new LazyHeaders.Builder()
-                                    .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
+                                    .addHeader("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS))
                                     .build()) : null)
                             .apply(RequestOptions
                                     .errorOf(R.drawable.user_image_view_circle)

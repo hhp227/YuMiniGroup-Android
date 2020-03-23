@@ -59,7 +59,7 @@ public class CreateActivity extends AppCompatActivity {
         mJoinType = findViewById(R.id.rg_jointype);
         mProgressLayout = findViewById(R.id.rl_progress);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
-        mCookie = mPreferenceManager.getCookie();
+        mCookie = AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS);
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.webkit.CookieManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -50,6 +51,7 @@ public class Tab4Fragment extends Fragment {
     private static int mPosition;
     private static String mGroupId, mGroupImage, mKey;
     private long mLastClickTime;
+    private CookieManager mCookieManager;
     private User mUser;
     private RecyclerView mRecyclerView;
 
@@ -90,6 +92,7 @@ public class Tab4Fragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mRecyclerView = view.findViewById(R.id.recycler_view);
+        mCookieManager = AppController.getInstance().getCookieManager();
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(new RecyclerView.Adapter<Tab4Holder>() {
@@ -108,7 +111,9 @@ public class Tab4Fragment extends Fragment {
                 String userName = mUser.getName();
 
                 Glide.with(getActivity())
-                        .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mUser.getUid()), new LazyHeaders.Builder().addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie()).build()))
+                        .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mUser.getUid()), new LazyHeaders.Builder()
+                                .addHeader("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS))
+                                .build()))
                         .apply(RequestOptions
                                 .circleCropTransform()
                                 .error(R.drawable.user_image_view_circle)
@@ -173,7 +178,7 @@ public class Tab4Fragment extends Fragment {
                                 public Map<String, String> getHeaders() {
                                     Map<String, String> headers = new HashMap<>();
 
-                                    headers.put("Cookie", AppController.getInstance().getPreferenceManager().getCookie());
+                                    headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                                     return headers;
                                 }
 

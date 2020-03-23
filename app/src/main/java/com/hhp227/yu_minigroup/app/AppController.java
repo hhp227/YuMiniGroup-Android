@@ -2,6 +2,7 @@ package com.hhp227.yu_minigroup.app;
 
 import android.app.Application;
 import android.text.TextUtils;
+import android.webkit.CookieManager;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -10,8 +11,9 @@ import com.hhp227.yu_minigroup.helper.PreferenceManager;
 public class AppController extends Application {
     public static final String TAG = AppController.class.getSimpleName();
     private static AppController mInstance;
+    private CookieManager mCookieManager;
     private RequestQueue mRequestQueue;
-    private PreferenceManager preferenceManager;
+    private PreferenceManager mPreferenceManager;
 
     @Override
     public void onCreate() {
@@ -31,10 +33,20 @@ public class AppController extends Application {
     }
 
     public PreferenceManager getPreferenceManager() {
-        if (preferenceManager == null) {
-            preferenceManager = new PreferenceManager(this);
+        if (mPreferenceManager == null) {
+            mPreferenceManager = new PreferenceManager(this);
         }
-        return preferenceManager;
+        return mPreferenceManager;
+    }
+
+    public CookieManager getCookieManager() {
+        if (mCookieManager == null)
+            mCookieManager = CookieManager.getInstance();
+        return mCookieManager;
+    }
+
+    public void setCookieManager(CookieManager cookieManager) {
+        this.mCookieManager = cookieManager;
     }
 
     public <T> void addToRequestQueue(Request<T> request, String tag) {

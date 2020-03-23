@@ -41,7 +41,7 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
         holder.name.setText(memberItem.name);
         Glide.with(mActivity)
                 .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", memberItem.uid), new LazyHeaders.Builder()
-                        .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
+                        .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
                         .build()))
                 .apply(new RequestOptions().centerCrop()
                         .error(R.drawable.user_image_view)

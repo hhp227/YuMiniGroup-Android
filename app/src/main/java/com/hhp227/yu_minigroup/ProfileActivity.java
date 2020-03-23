@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.provider.MediaStore;
 import android.view.*;
+import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -39,8 +40,8 @@ public class ProfileActivity extends AppCompatActivity {
     private static final String TAG = "프로필";
     private boolean mIsVisible;
     private Bitmap mBitmap;
+    private CookieManager mCookieManager;
     private ImageView mProfileImage;
-    private PreferenceManager mPreferenceManager;
     private Snackbar mProgressSnackBar;
 
     @Override
@@ -55,14 +56,16 @@ public class ProfileActivity extends AppCompatActivity {
         TextView email = findViewById(R.id.tv_email);
         TextView hp = findViewById(R.id.tv_phone_num);
         Button sync = findViewById(R.id.b_sync);
-        mPreferenceManager = AppController.getInstance().getPreferenceManager();
-        User user = mPreferenceManager.getUser();
+        mCookieManager = AppController.getInstance().getCookieManager();
+        User user = AppController.getInstance().getPreferenceManager().getUser();
         mProfileImage = findViewById(R.id.iv_profile_image);
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Glide.with(getApplicationContext())
-                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", user.getUid()), new LazyHeaders.Builder().addHeader("Cookie", mPreferenceManager.getCookie()).build()))
+                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", user.getUid()), new LazyHeaders.Builder()
+                        .addHeader("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS))
+                        .build()))
                 .apply(RequestOptions
                         .errorOf(R.drawable.user_image_view)
                         .circleCrop()
@@ -80,7 +83,9 @@ public class ProfileActivity extends AppCompatActivity {
                 try {
                     if (!response.getBoolean("isError")) {
                         Glide.with(getApplicationContext())
-                                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", user.getUid()), new LazyHeaders.Builder().addHeader("Cookie", mPreferenceManager.getCookie()).build()))
+                                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", user.getUid()), new LazyHeaders.Builder()
+                                        .addHeader("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS))
+                                        .build()))
                                 .apply(RequestOptions
                                         .errorOf(R.drawable.user_image_view_circle)
                                         .circleCrop()
@@ -102,7 +107,7 @@ public class ProfileActivity extends AppCompatActivity {
                 public Map<String, String> getHeaders() {
                     Map<String, String> headers = new HashMap<>();
 
-                    headers.put("Cookie", mPreferenceManager.getCookie());
+                    headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                     return headers;
                 }
             };
@@ -210,7 +215,7 @@ public class ProfileActivity extends AppCompatActivity {
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
 
-                headers.put("Cookie", mPreferenceManager.getCookie());
+                headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                 return headers;
             }
 

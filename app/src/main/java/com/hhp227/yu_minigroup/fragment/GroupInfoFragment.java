@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -44,6 +45,7 @@ public class GroupInfoFragment extends DialogFragment {
     private static final String TAG = "정보창";
     private static int mButtonType;
     private static String mGroupId, mGroupName, mGroupImage, mGroupInfo, mGroupDesc, mJoinType, mKey;
+    private CookieManager mCookieManager;
     private PreferenceManager mPreferenceManager;
 
     public static GroupInfoFragment newInstance() {
@@ -88,6 +90,7 @@ public class GroupInfoFragment extends DialogFragment {
         TextView info = view.findViewById(R.id.tv_info);
         TextView desc = view.findViewById(R.id.tv_desciption);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
+        mCookieManager = AppController.getInstance().getCookieManager();
 
         button.setOnClickListener(v -> {
             String tag_json_req = "req_register";
@@ -112,7 +115,8 @@ public class GroupInfoFragment extends DialogFragment {
                 @Override
                 public Map<String, String> getHeaders() {
                     Map<String, String> headers = new HashMap<>();
-                    headers.put("Cookie", mPreferenceManager.getCookie());
+
+                    headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                     return headers;
                 }
 
@@ -124,6 +128,7 @@ public class GroupInfoFragment extends DialogFragment {
                 @Override
                 public byte[] getBody() {
                     Map<String, String> params = new HashMap<>();
+
                     params.put("CLUB_GRP_ID", mGroupId);
                     if (params.size() > 0) {
                         StringBuilder encodedParams = new StringBuilder();
@@ -164,6 +169,7 @@ public class GroupInfoFragment extends DialogFragment {
     private void insertGroupToFirebase() {
         DatabaseReference userGroupListReference = FirebaseDatabase.getInstance().getReference("UserGroupList");
         final DatabaseReference groupsReference = FirebaseDatabase.getInstance().getReference("Groups");
+
         groupsReference.child(mKey).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -171,6 +177,7 @@ public class GroupInfoFragment extends DialogFragment {
                     return;
                 GroupItem groupItem = dataSnapshot.getValue(GroupItem.class);
                 Map<String, Boolean> members = groupItem.getMembers() != null && !groupItem.getMembers().containsKey(mPreferenceManager.getUser().getUid()) ? groupItem.getMembers() : new HashMap<String, Boolean>();
+
                 members.put(mPreferenceManager.getUser().getUid(), mJoinType.equals("0"));
                 groupItem.setMembers(members);
                 groupItem.setMemberCount(members.size());
@@ -184,6 +191,7 @@ public class GroupInfoFragment extends DialogFragment {
         });
 
         Map<String, Object> childUpdates = new HashMap<>();
+
         childUpdates.put("/" + mPreferenceManager.getUser().getUid() + "/" + mKey, mJoinType.equals("0"));
         userGroupListReference.updateChildren(childUpdates);
     }
@@ -191,6 +199,7 @@ public class GroupInfoFragment extends DialogFragment {
     private void deleteUserInGroupFromFirebase() {
         DatabaseReference userGroupListReference = FirebaseDatabase.getInstance().getReference("UserGroupList");
         final DatabaseReference groupsReference = FirebaseDatabase.getInstance().getReference("Groups");
+
         groupsReference.child(mKey).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -199,6 +208,7 @@ public class GroupInfoFragment extends DialogFragment {
                 GroupItem groupItem = dataSnapshot.getValue(GroupItem.class);
                 if (groupItem.getMembers() != null && groupItem.getMembers().containsKey(mPreferenceManager.getUser().getUid())) {
                     Map<String, Boolean> members = groupItem.getMembers();
+
                     members.remove(mPreferenceManager.getUser().getUid());
                     groupItem.setMembers(members);
                     groupItem.setMemberCount(members.size());

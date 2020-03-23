@@ -72,7 +72,7 @@ public class WriteActivity extends AppCompatActivity {
         mContents = new ArrayList<>();
         mAdapter = new WriteListAdapter(this, mContents);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
-        mCookie = mPreferenceManager.getCookie();
+        mCookie = AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS);
         mProgressDialog = new ProgressDialog(this);
         mIsAdmin = getIntent().getBooleanExtra("admin", false);
         mGrpId = getIntent().getStringExtra("grp_id");

@@ -64,7 +64,7 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             });
             Glide.with(mActivity)
                     .load(articleItem.getUid() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", articleItem.getUid()), new LazyHeaders.Builder()
-                            .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
+                            .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
                             .build()) : null)
                     .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle)
                             .circleCrop()

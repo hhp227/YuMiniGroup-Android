@@ -10,6 +10,8 @@ import android.os.Handler;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.WindowManager;
+import android.webkit.CookieManager;
+import android.webkit.ValueCallback;
 import android.widget.ProgressBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -57,6 +59,7 @@ public class GroupFragment extends Fragment {
     private static final String TAG = GroupFragment.class.getSimpleName();
     private int mSpanCount;
     private AppCompatActivity mActivity;
+    private CookieManager mCookieManager;
     private CountDownTimer mCountDownTimer;
     private DrawerLayout mDrawerLayout;
     private GridLayoutManager mGridLayoutManager;
@@ -124,6 +127,7 @@ public class GroupFragment extends Fragment {
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
         mAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues);
+        mCookieManager = AppController.getInstance().getCookieManager();
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCountDownTimer = new CountDownTimer(80000, 8000) {
             @Override
@@ -300,7 +304,7 @@ public class GroupFragment extends Fragment {
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
 
-                headers.put("Cookie", mPreferenceManager.getCookie());
+                headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                 return headers;
             }
 
@@ -319,6 +323,7 @@ public class GroupFragment extends Fragment {
 
     private void logout() {
         mPreferenceManager.clear();
+        mCookieManager.removeAllCookies(value -> Log.d(TAG, "onReceiveValue " + value));
         startActivity(new Intent(getContext(), LoginActivity.class));
         getActivity().finish();
     }

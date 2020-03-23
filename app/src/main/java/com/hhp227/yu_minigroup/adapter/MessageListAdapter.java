@@ -63,7 +63,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             holder.messageBox.setPadding(holder.messageBox.getPaddingLeft(), 10, holder.messageBox.getPaddingRight(), 10); // 수정완료 경북대 소모임에도 반영할것
             Glide.with(mContext)
                     .load(messageItem.getFrom() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", messageItem.getFrom()), new LazyHeaders.Builder()
-                            .addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie())
+                            .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
                             .build()) : null)
                     .apply(RequestOptions
                             .errorOf(R.drawable.user_image_view_circle)

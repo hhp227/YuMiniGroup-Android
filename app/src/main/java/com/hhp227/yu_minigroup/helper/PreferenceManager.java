@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import com.hhp227.yu_minigroup.dto.User;
 
-import java.util.Set;
-
 public class PreferenceManager {
     private static final String TAG = "세션메니져";
 
@@ -22,7 +20,6 @@ public class PreferenceManager {
     private static final String KEY_USER_EMAIL = "usr_mail";
     private static final String KEY_USER_UNIQUE_ID = "usr_uid";
     private static final String KEY_USER_HP = "usr_hp";
-    private static final String KEY_COOKIE = "cookie";
     private static final String KEY_SSO_TOKEN = "ssotoken";
     private SharedPreferences mSharedPreferences;
     private SharedPreferences.Editor mEditor;
@@ -74,15 +71,6 @@ public class PreferenceManager {
 
     public String getToken() {
         return mSharedPreferences.getString(KEY_SSO_TOKEN, null);
-    }
-
-    public void storeCookie(String cookie) {
-        mEditor.putString(KEY_COOKIE, cookie);
-        mEditor.commit();
-    }
-
-    public String getCookie() {
-        return mSharedPreferences.getString(KEY_COOKIE, null);
     }
 
     public void clear() {

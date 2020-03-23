@@ -74,7 +74,7 @@ public class SplashActivity extends AppCompatActivity {
         String tagStringReq = "req_login_SSO";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.YU_PORTAL_LOGIN_URL, response -> {
             VolleyLog.d(TAG, "로그인 응답 : " + response);
-            mPreferenceManager.storeCookie(cookie);
+            AppController.getInstance().getCookieManager().setCookie(EndPoint.LOGIN_LMS, cookie);
         }, error -> {
             VolleyLog.e(TAG, "로그인 에러 : " + error.getMessage());
             Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();

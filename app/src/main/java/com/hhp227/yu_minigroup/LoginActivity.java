@@ -2,6 +2,7 @@ package com.hhp227.yu_minigroup;
 
 import android.content.Intent;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -36,6 +37,7 @@ import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "로그인화면";
+    private CookieManager mCookieManager;
     private EditText mInputId, mInputPassword;
     private PreferenceManager mPreferenceManager;
     private ProgressBar mProgressBar;
@@ -49,6 +51,7 @@ public class LoginActivity extends AppCompatActivity {
         mInputPassword = findViewById(R.id.et_password);
         mProgressBar = findViewById(R.id.pb_login);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
+        mCookieManager = AppController.getInstance().getCookieManager();
 
         // 사용자가 이미 로그인되어있는지 아닌지 확인
         if (mPreferenceManager.getUser() != null) {
@@ -123,7 +126,7 @@ public class LoginActivity extends AppCompatActivity {
         String tagStringReq = "req_login_SSO";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.YU_PORTAL_LOGIN_URL, response -> {
             VolleyLog.d(TAG, "로그인 응답 : " + response);
-            mPreferenceManager.storeCookie(cookie);
+            mCookieManager.setCookie(EndPoint.LOGIN_LMS, cookie);
         }, error -> {
             VolleyLog.e(TAG, "로그인 에러 : " + error.getMessage());
             Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
@@ -264,7 +267,7 @@ public class LoginActivity extends AppCompatActivity {
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
 
-                headers.put("Cookie", mPreferenceManager.getCookie());
+                headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                 return headers;
             }
         });
@@ -292,7 +295,7 @@ public class LoginActivity extends AppCompatActivity {
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
 
-                headers.put("Cookie", mPreferenceManager.getCookie());
+                headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                 return headers;
             }
         });

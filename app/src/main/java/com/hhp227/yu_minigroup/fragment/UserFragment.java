@@ -56,7 +56,9 @@ public class UserFragment extends DialogFragment {
         }
 
         Glide.with(this)
-                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mUid), new LazyHeaders.Builder().addHeader("Cookie", AppController.getInstance().getPreferenceManager().getCookie()).build()))
+                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mUid), new LazyHeaders.Builder()
+                        .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
+                        .build()))
                 .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle)
                         .circleCrop()
                         .skipMemoryCache(true)

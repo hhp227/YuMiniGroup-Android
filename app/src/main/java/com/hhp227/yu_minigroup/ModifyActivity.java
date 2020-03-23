@@ -63,7 +63,7 @@ public class ModifyActivity extends AppCompatActivity {
         Map<String, Object> headerMap = new HashMap<>();
         mContents = new ArrayList<>();
         mAdapter = new WriteListAdapter(this, mContents);
-        mCookie = AppController.getInstance().getPreferenceManager().getCookie();
+        mCookie = AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS);
         mProgressDialog = new ProgressDialog(this);
         mGrpId = intent.getStringExtra("grp_id");
         mArtlNum = intent.getStringExtra("artl_num");
