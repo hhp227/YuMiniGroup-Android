@@ -91,7 +91,7 @@ public class TabHostLayoutFragment extends Fragment {
                 .add(Tab1Fragment.newInstance(mIsAdmin, mGroupId, mGroupName, mGroupImage, mKey))
                 .add(new Tab2Fragment())
                 .add(Tab3Fragment.newInstance(mGroupId))
-                .add(Tab4Fragment.newInstance(mIsAdmin, mGroupId, mPosition, mKey))
+                .add(Tab4Fragment.newInstance(mIsAdmin, mGroupId, mGroupImage, mPosition, mKey))
                 .build()
                 .collect(Collectors.toList());
         FragmentPagerAdapter adapter = new FragmentPagerAdapter(getChildFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {

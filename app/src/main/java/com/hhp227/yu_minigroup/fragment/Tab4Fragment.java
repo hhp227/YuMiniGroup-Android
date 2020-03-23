@@ -48,7 +48,7 @@ public class Tab4Fragment extends Fragment {
     private static final String TAG = "설정";
     private static boolean mIsAdmin;
     private static int mPosition;
-    private static String mGroupId, mKey;
+    private static String mGroupId, mGroupImage, mKey;
     private long mLastClickTime;
     private User mUser;
     private RecyclerView mRecyclerView;
@@ -56,12 +56,13 @@ public class Tab4Fragment extends Fragment {
     public Tab4Fragment() {
     }
 
-    public static Tab4Fragment newInstance(boolean isAdmin, String grpId, int position, String key) {
+    public static Tab4Fragment newInstance(boolean isAdmin, String grpId, String grpImg, int position, String key) {
         Tab4Fragment fragment = new Tab4Fragment();
         Bundle args = new Bundle();
 
         args.putBoolean("admin", isAdmin);
         args.putString("grp_id", grpId);
+        args.putString("grp_img", grpImg);
         args.putInt("pos", position);
         args.putString("key", key);
         fragment.setArguments(args);
@@ -74,6 +75,7 @@ public class Tab4Fragment extends Fragment {
         if (getArguments() != null) {
             mIsAdmin = getArguments().getBoolean("admin");
             mGroupId = getArguments().getString("grp_id");
+            mGroupImage = getArguments().getString("grp_img");
             mPosition = getArguments().getInt("pos");
             mKey = getArguments().getString("key");
         }
@@ -214,6 +216,7 @@ public class Tab4Fragment extends Fragment {
                         Intent intent = new Intent(getContext(), SettingsActivity.class);
 
                         intent.putExtra("grp_id", mGroupId);
+                        intent.putExtra("grp_img", mGroupImage);
                         intent.putExtra("key", mKey);
                         startActivityForResult(intent, GroupFragment.UPDATE_GROUP);
                         break;
