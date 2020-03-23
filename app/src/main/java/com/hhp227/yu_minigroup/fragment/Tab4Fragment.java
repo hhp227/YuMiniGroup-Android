@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -276,7 +277,7 @@ public class Tab4Fragment extends Fragment {
             intent.putExtra("join_div", joinType);
             intent.putExtra("pos", mPosition);
             getActivity().setResult(Activity.RESULT_OK, intent);
-            getActivity().getActionBar().setTitle(groupName);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(groupName);
         } else if (requestCode == UPDATE_PROFILE && resultCode == Activity.RESULT_OK) {
             mRecyclerView.getAdapter().notifyDataSetChanged();
             getActivity().setResult(Activity.RESULT_OK);

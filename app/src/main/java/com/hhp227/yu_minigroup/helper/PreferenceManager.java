@@ -24,7 +24,7 @@ public class PreferenceManager {
     private SharedPreferences mSharedPreferences;
     private SharedPreferences.Editor mEditor;
 
-    final int PRIVATE_MOD = 0;
+    private final int PRIVATE_MOD = 0;
 
     public PreferenceManager(Context context) {
         mSharedPreferences = context.getSharedPreferences(PREF_NAME, PRIVATE_MOD);

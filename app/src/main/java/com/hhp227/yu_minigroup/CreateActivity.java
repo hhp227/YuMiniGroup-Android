@@ -44,26 +44,23 @@ public class CreateActivity extends AppCompatActivity {
     private EditText mGroupTitle, mGroupDescription;
     private ImageView mGroupImage, mResetTitle;
     private PreferenceManager mPreferenceManager;
-    private RadioGroup mJoinType;
     private RelativeLayout mProgressLayout;
+    private TextWatcher mTextWatcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        RadioGroup joinType = findViewById(R.id.rg_jointype);
         mGroupTitle = findViewById(R.id.et_title);
         mGroupDescription = findViewById(R.id.et_description);
         mResetTitle = findViewById(R.id.iv_reset);
         mGroupImage = findViewById(R.id.iv_group_image);
-        mJoinType = findViewById(R.id.rg_jointype);
         mProgressLayout = findViewById(R.id.rl_progress);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookie = AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS);
-
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mGroupTitle.addTextChangedListener(new TextWatcher() {
+        mTextWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -76,15 +73,25 @@ public class CreateActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
             }
-        });
+        };
+
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mGroupTitle.addTextChangedListener(mTextWatcher);
         mResetTitle.setOnClickListener(v -> mGroupTitle.setText(""));
         mGroupImage.setOnClickListener(v -> {
             registerForContextMenu(v);
             openContextMenu(v);
             unregisterForContextMenu(v);
         });
-        mJoinType.setOnCheckedChangeListener((group, checkedId) -> mJoinTypeCheck = checkedId != R.id.rb_auto);
-        mJoinType.check(R.id.rb_auto);
+        joinType.setOnCheckedChangeListener((group, checkedId) -> mJoinTypeCheck = checkedId != R.id.rb_auto);
+        joinType.check(R.id.rb_auto);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mGroupTitle.removeTextChangedListener(mTextWatcher);
     }
 
     @Override
