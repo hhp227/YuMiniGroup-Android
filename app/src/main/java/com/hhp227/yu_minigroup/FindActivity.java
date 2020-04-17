@@ -106,6 +106,8 @@ public class FindActivity extends AppCompatActivity {
         if (mOnScrollListener != null)
             mRecyclerView.removeOnScrollListener(mOnScrollListener);
         mOnScrollListener = null;
+        mShimmerFrameLayout.clearAnimation();
+        mShimmerFrameLayout.removeAllViews();
     }
 
     @Override

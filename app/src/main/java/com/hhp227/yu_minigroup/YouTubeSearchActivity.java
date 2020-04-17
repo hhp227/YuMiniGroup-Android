@@ -18,6 +18,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.hhp227.yu_minigroup.adapter.YouTubeListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
@@ -37,6 +38,7 @@ public class YouTubeSearchActivity extends AppCompatActivity {
     private YouTubeListAdapter mAdapter;
     private List<YouTubeItem> mYouTubeItemList;
     private ProgressBar mProgressBar;
+    private ShimmerFrameLayout mShimmerFrameLayout;
     private String mSearchText;
 
     @Override
@@ -47,6 +49,7 @@ public class YouTubeSearchActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.srl_list);
         mProgressBar = findViewById(R.id.pb_group);
+        mShimmerFrameLayout = findViewById(R.id.sfl_group);
         mYouTubeItemList = new ArrayList<>();
         mAdapter = new YouTubeListAdapter(this, mYouTubeItemList);
         mSearchText = "";
@@ -74,6 +77,13 @@ public class YouTubeSearchActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mShimmerFrameLayout.clearAnimation();
+        mShimmerFrameLayout.removeAllViews();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.search, menu);
@@ -96,7 +106,9 @@ public class YouTubeSearchActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 showProgressBar();
+                mShimmerFrameLayout.setVisibility(View.VISIBLE);
                 mYouTubeItemList.clear();
+                mAdapter.notifyDataSetChanged();
                 mSearchText = query;
                 fetchDataTask();
                 searchView.clearFocus();
@@ -127,8 +139,8 @@ public class YouTubeSearchActivity extends AppCompatActivity {
 
                     YouTubeItem youTubeItem = new YouTubeItem(id, publishedAt, title, thumbnail, channelTitle);
                     mYouTubeItemList.add(youTubeItem);
+                    mAdapter.notifyItemInserted(mYouTubeItemList.size() - 1);
                 }
-                mAdapter.notifyDataSetChanged();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -141,10 +153,13 @@ public class YouTubeSearchActivity extends AppCompatActivity {
     private void showProgressBar() {
         if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE)
             mProgressBar.setVisibility(View.VISIBLE);
+        mShimmerFrameLayout.startShimmer();
     }
 
     private void hideProgressBar() {
         if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE)
             mProgressBar.setVisibility(View.GONE);
+        mShimmerFrameLayout.stopShimmer();
+        mShimmerFrameLayout.setVisibility(View.GONE);
     }
 }
