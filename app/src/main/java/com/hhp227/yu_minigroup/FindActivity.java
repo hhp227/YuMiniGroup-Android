@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.android.volley.*;
 import com.android.volley.toolbox.StringRequest;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.adapter.GroupListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
@@ -43,6 +44,7 @@ public class FindActivity extends AppCompatActivity {
     private RelativeLayout mRelativeLayout;
     private RecyclerView mRecyclerView;
     private RecyclerView.OnScrollListener mOnScrollListener;
+    private ShimmerFrameLayout mShimmerFrameLayout;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
@@ -53,6 +55,7 @@ public class FindActivity extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.recycler_view);
         mProgressBar = findViewById(R.id.pb_group);
         mRelativeLayout = findViewById(R.id.rl_group);
+        mShimmerFrameLayout = findViewById(R.id.sfl_group);
         mSwipeRefreshLayout = findViewById(R.id.srl_list);
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
@@ -241,10 +244,13 @@ public class FindActivity extends AppCompatActivity {
     private void showProgressBar() {
         if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE)
             mProgressBar.setVisibility(View.VISIBLE);
+        mShimmerFrameLayout.startShimmer();
     }
 
     private void hideProgressBar() {
         if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE)
             mProgressBar.setVisibility(View.GONE);
+        mShimmerFrameLayout.stopShimmer();
+        mShimmerFrameLayout.setVisibility(View.GONE);
     }
 }

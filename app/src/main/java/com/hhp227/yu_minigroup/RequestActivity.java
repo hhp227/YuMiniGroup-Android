@@ -15,6 +15,7 @@ import com.android.volley.toolbox.StringRequest;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.view.View;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.adapter.GroupListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
@@ -43,6 +44,7 @@ public class RequestActivity extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private RelativeLayout mRelativeLayout;
+    private ShimmerFrameLayout mShimmerFrameLayout;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
@@ -53,6 +55,7 @@ public class RequestActivity extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.recycler_view);
         mProgressBar = findViewById(R.id.pb_group);
         mRelativeLayout = findViewById(R.id.rl_group);
+        mShimmerFrameLayout = findViewById(R.id.sfl_group);
         mSwipeRefreshLayout = findViewById(R.id.srl_list);
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
@@ -248,10 +251,13 @@ public class RequestActivity extends AppCompatActivity {
     private void showProgressBar() {
         if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE)
             mProgressBar.setVisibility(View.VISIBLE);
+        mShimmerFrameLayout.startShimmer();
     }
 
     private void hideProgressBar() {
         if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE)
             mProgressBar.setVisibility(View.GONE);
+        mShimmerFrameLayout.stopShimmer();
+        mShimmerFrameLayout.setVisibility(View.GONE);
     }
 }
