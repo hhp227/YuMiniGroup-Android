@@ -67,6 +67,7 @@ public class YouTubeSearchActivity extends AppCompatActivity {
         mAdapter.setHasStableIds(true);
         swipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
             mYouTubeItemList.clear();
+            mAdapter.notifyDataSetChanged();
             fetchDataTask();
             swipeRefreshLayout.setRefreshing(false);
         }, 1000));
@@ -153,13 +154,18 @@ public class YouTubeSearchActivity extends AppCompatActivity {
     private void showProgressBar() {
         if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE)
             mProgressBar.setVisibility(View.VISIBLE);
-        mShimmerFrameLayout.startShimmer();
+        if (!mShimmerFrameLayout.isShimmerStarted())
+            mShimmerFrameLayout.startShimmer();
+        if (!mShimmerFrameLayout.isShimmerVisible())
+            mShimmerFrameLayout.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressBar() {
         if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE)
             mProgressBar.setVisibility(View.GONE);
-        mShimmerFrameLayout.stopShimmer();
-        mShimmerFrameLayout.setVisibility(View.GONE);
+        if (mShimmerFrameLayout.isShimmerStarted())
+            mShimmerFrameLayout.stopShimmer();
+        if (mShimmerFrameLayout.isShimmerVisible())
+            mShimmerFrameLayout.setVisibility(View.GONE);
     }
 }

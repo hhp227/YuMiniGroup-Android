@@ -246,13 +246,18 @@ public class FindActivity extends AppCompatActivity {
     private void showProgressBar() {
         if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE)
             mProgressBar.setVisibility(View.VISIBLE);
-        mShimmerFrameLayout.startShimmer();
+        if (!mShimmerFrameLayout.isShimmerStarted())
+            mShimmerFrameLayout.startShimmer();
+        if (!mShimmerFrameLayout.isShimmerVisible())
+            mShimmerFrameLayout.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressBar() {
         if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE)
             mProgressBar.setVisibility(View.GONE);
-        mShimmerFrameLayout.stopShimmer();
-        mShimmerFrameLayout.setVisibility(View.GONE);
+        if (mShimmerFrameLayout.isShimmerStarted())
+            mShimmerFrameLayout.stopShimmer();
+        if (mShimmerFrameLayout.isShimmerVisible())
+            mShimmerFrameLayout.setVisibility(View.GONE);
     }
 }
