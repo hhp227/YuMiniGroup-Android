@@ -70,14 +70,14 @@ public class MockTimeTableFragment extends Fragment {
         helper.search_data();
 
         // 레이아웃을 어떻게 그릴지 설정
-        LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
+        LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         params1.weight = 1; // 레이아웃의 weight를 동적으로 설정 (칸의 비율)
         params1.width = getLcdSizeWidth() / 6;
         params1.height = getLcdSizeHeight() / 14;
         params1.setMargins(1, 1, 1, 1);
         params1.gravity = 1; // 표가 뒤틀리는 것을 방지
 
-        LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
+        LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         params2.weight = 1; // 레이아웃의 weight를 동적으로 설정 (칸의 비율)
         params2.width = getLcdSizeWidth() / 6;
         params2.height = getLcdSizeHeight() / 20;
@@ -126,7 +126,7 @@ public class MockTimeTableFragment extends Fragment {
                 data[id].setTextSize(10);
                 // 시간표를 입력하기 위한 곳을 클릭하면 클릭이벤트를 처리하기위해 동작처리함수
                 data[id].setOnClickListener(v -> {
-                    Cursor cursor = null;
+                    Cursor cursor;
                     cursor = helper.getAll(); // 테이블의 모든 데이터를 커서로 리턴.
                     int get[] = new int[50];
                     if (cursor != null) {
