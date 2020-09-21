@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.view.View;
@@ -77,7 +78,8 @@ public class FindActivity extends AppCompatActivity {
         };
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mAdapter);
@@ -156,7 +158,7 @@ public class FindActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
                 } finally {
-                    initFirebaseData();
+                    initFireBaseData();
                 }
             }
             mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
@@ -210,20 +212,22 @@ public class FindActivity extends AppCompatActivity {
         });
     }
 
-    private void initFirebaseData() {
+    private void initFireBaseData() {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Groups");
-        fetchGroupListFromFirebase(databaseReference.orderByKey());
+
+        fetchGroupListFromFireBase(databaseReference.orderByKey());
     }
 
-    private void fetchGroupListFromFirebase(Query query) {
+    private void fetchGroupListFromFireBase(Query query) {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     String key = snapshot.getKey();
                     GroupItem value = snapshot.getValue(GroupItem.class);
                     assert value != null;
                     int index = mGroupItemKeys.indexOf(value.getId());
+
                     if (index > -1) {
                         //mGroupItemValues.set(index, value); //getInfo 구현이 덜되어 주석처리
                         mGroupItemKeys.set(index, key);
@@ -233,7 +237,7 @@ public class FindActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e(TAG, "가져오기 실패", databaseError.toException());
             }
         });

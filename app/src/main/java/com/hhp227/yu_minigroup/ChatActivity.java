@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
@@ -89,8 +90,10 @@ public class ChatActivity extends AppCompatActivity {
         };
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(intent.getStringExtra("chat_nm") + (mIsGroupChat ? " 그룹채팅방" : ""));
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle(intent.getStringExtra("chat_nm") + (mIsGroupChat ? " 그룹채팅방" : ""));
+        }
         mButtonSend.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(mInputMessage.getText().toString().trim())) {
                 sendMessage();
@@ -105,7 +108,7 @@ public class ChatActivity extends AppCompatActivity {
         layoutManager.setStackFromEnd(true);
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (!mRecyclerView.canScrollVertically(-1) && !mHasRequestedMore && mCursor != null) {
                     mHasRequestedMore = true;
@@ -115,7 +118,7 @@ public class ChatActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 mHasSelection = layoutManager.findFirstCompletelyVisibleItemPosition() + layoutManager.getChildCount() > layoutManager.getItemCount() - 2;
             }
@@ -151,7 +154,7 @@ public class ChatActivity extends AppCompatActivity {
     private void fetchMessageList(Query query, int prevCnt, String prevCursor) {
         query.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
                 if (mFirstMessageKey != null && mFirstMessageKey.equals(dataSnapshot.getKey()))
                     return;
                 else if (s == null)
@@ -174,19 +177,19 @@ public class ChatActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, String s) {
             }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
             }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, String s) {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
     }
@@ -205,11 +208,12 @@ public class ChatActivity extends AppCompatActivity {
             String receiverPath = mReceiver + "/" + mSender + "/";
             String senderPath = mSender + "/" + mReceiver + "/";
             String pushId = mDatabaseReference.child(mSender).child(mReceiver).push().getKey();
-
             Map<String, Object> messageMap = new HashMap<>();
-            messageMap.put(receiverPath.concat(pushId), map);
-            messageMap.put(senderPath.concat(pushId), map);
 
+            if (pushId != null) {
+                messageMap.put(receiverPath.concat(pushId), map);
+                messageMap.put(senderPath.concat(pushId), map);
+            }
             mDatabaseReference.updateChildren(messageMap);
         }
     }
