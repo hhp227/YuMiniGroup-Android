@@ -28,9 +28,13 @@ import static com.hhp227.yu_minigroup.fragment.GroupFragment.UPDATE_GROUP;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
+
     private CookieManager mCookieManager;
+
     private DrawerLayout mDrawerLayout;
+
     private PreferenceManager mPreferenceManager;
+
     private ImageView mProfileImage;
 
     @Override

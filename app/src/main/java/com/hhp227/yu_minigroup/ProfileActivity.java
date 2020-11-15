@@ -38,10 +38,15 @@ import static com.hhp227.yu_minigroup.CreateActivity.CAMERA_PICK_IMAGE_REQUEST_C
 
 public class ProfileActivity extends AppCompatActivity {
     private static final String TAG = "프로필";
+
     private boolean mIsVisible;
+
     private Bitmap mBitmap;
+
     private CookieManager mCookieManager;
+
     private ImageView mProfileImage;
+
     private Snackbar mProgressSnackBar;
 
     @Override
@@ -156,6 +161,7 @@ public class ProfileActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && data != null) {
             mIsVisible = true;
+
             switch (requestCode) {
                 case CAMERA_CAPTURE_IMAGE_REQUEST_CODE:
                     mBitmap = (Bitmap) data.getExtras().get("data");

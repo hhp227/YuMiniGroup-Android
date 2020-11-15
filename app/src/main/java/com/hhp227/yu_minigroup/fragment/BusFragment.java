@@ -3,6 +3,7 @@ package com.hhp227.yu_minigroup.fragment;
 import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -17,7 +18,9 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 
 public class BusFragment extends Fragment {
     private AppCompatActivity mActivity;
+
     private DrawerLayout mDrawerLayout;
+
     private Toolbar mToolbar;
 
     public BusFragment() {
@@ -29,7 +32,7 @@ public class BusFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         WebView webView = view.findViewById(R.id.wv_bus);
         WebSettings webSettings = webView.getSettings();
@@ -50,6 +53,7 @@ public class BusFragment extends Fragment {
 
     private void setDrawerToggle() {
         ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(mActivity, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
         mDrawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
     }

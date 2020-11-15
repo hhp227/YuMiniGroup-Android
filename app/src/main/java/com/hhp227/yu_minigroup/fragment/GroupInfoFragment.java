@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -39,13 +38,19 @@ import static android.app.Activity.RESULT_OK;
 
 public class GroupInfoFragment extends DialogFragment {
     public static final int TYPE_REQUEST = 0;
+
     public static final int TYPE_CANCEL = 1;
 
     private static final int DESC_MAX_LINE = 6;
+
     private static final String TAG = "정보창";
+
     private static int mButtonType;
+
     private static String mGroupId, mGroupName, mGroupImage, mGroupInfo, mGroupDesc, mJoinType, mKey;
+
     private CookieManager mCookieManager;
+
     private PreferenceManager mPreferenceManager;
 
     public static GroupInfoFragment newInstance() {
@@ -72,7 +77,7 @@ public class GroupInfoFragment extends DialogFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (getDialog() != null) {
             getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
             getDialog().getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -81,7 +86,7 @@ public class GroupInfoFragment extends DialogFragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Button button = view.findViewById(R.id.b_request);
         Button close = view.findViewById(R.id.b_close);
@@ -99,6 +104,7 @@ public class GroupInfoFragment extends DialogFragment {
                     if (mButtonType == TYPE_REQUEST && !response.getBoolean("isError")) {
                         Toast.makeText(getContext(), "신청완료", Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(getContext(), MainActivity.class);
+
                         getActivity().setResult(RESULT_OK, intent);
                         getActivity().finish();
                         insertGroupToFirebase();
@@ -132,6 +138,7 @@ public class GroupInfoFragment extends DialogFragment {
                     params.put("CLUB_GRP_ID", mGroupId);
                     if (params.size() > 0) {
                         StringBuilder encodedParams = new StringBuilder();
+
                         try {
                             params.forEach((k, v) -> {
                                 try {
@@ -172,7 +179,7 @@ public class GroupInfoFragment extends DialogFragment {
 
         groupsReference.child(mKey).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() == null)
                     return;
                 GroupItem groupItem = dataSnapshot.getValue(GroupItem.class);
@@ -185,11 +192,10 @@ public class GroupInfoFragment extends DialogFragment {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
             }
         });
-
         Map<String, Object> childUpdates = new HashMap<>();
 
         childUpdates.put("/" + mPreferenceManager.getUser().getUid() + "/" + mKey, mJoinType.equals("0"));
@@ -202,10 +208,11 @@ public class GroupInfoFragment extends DialogFragment {
 
         groupsReference.child(mKey).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() == null)
                     return;
                 GroupItem groupItem = dataSnapshot.getValue(GroupItem.class);
+
                 if (groupItem.getMembers() != null && groupItem.getMembers().containsKey(mPreferenceManager.getUser().getUid())) {
                     Map<String, Boolean> members = groupItem.getMembers();
 
@@ -217,7 +224,7 @@ public class GroupInfoFragment extends DialogFragment {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
             }
         });

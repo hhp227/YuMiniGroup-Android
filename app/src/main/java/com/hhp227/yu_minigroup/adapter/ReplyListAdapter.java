@@ -1,6 +1,5 @@
 package com.hhp227.yu_minigroup.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,13 +18,13 @@ import com.hhp227.yu_minigroup.dto.ReplyItem;
 import java.util.List;
 
 public class ReplyListAdapter extends BaseAdapter {
-    private Activity mActivity;
-    private LayoutInflater mInflater;
-    private List<String> mReplyItemKeys;
-    private List<ReplyItem> mReplyItemValues;
+    private final List<String> mReplyItemKeys;
 
-    public ReplyListAdapter(Activity activity, List<String> replyItemKeys, List<ReplyItem> replyItemValues) {
-        this.mActivity = activity;
+    private final List<ReplyItem> mReplyItemValues;
+
+    private LayoutInflater mInflater;
+
+    public ReplyListAdapter(List<String> replyItemKeys, List<ReplyItem> replyItemValues) {
         this.mReplyItemKeys = replyItemKeys;
         this.mReplyItemValues = replyItemValues;
     }
@@ -48,8 +47,9 @@ public class ReplyListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
+
         if (mInflater == null)
-            mInflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mInflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.reply_item, null);
             viewHolder = new ViewHolder(convertView);
@@ -60,8 +60,7 @@ public class ReplyListAdapter extends BaseAdapter {
         // 댓글 데이터 얻기
         ReplyItem replyItem = mReplyItemValues.get(position);
 
-
-        Glide.with(mActivity)
+        Glide.with(convertView.getContext())
                 .load(replyItem.getUid() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", replyItem.getUid()), new LazyHeaders.Builder()
                         .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
                         .build()) : null)
@@ -74,7 +73,6 @@ public class ReplyListAdapter extends BaseAdapter {
         viewHolder.name.setText(replyItem.getName());
         viewHolder.reply.setText(replyItem.getReply());
         viewHolder.timeStamp.setText(replyItem.getDate());
-
         return convertView;
     }
 
@@ -83,8 +81,9 @@ public class ReplyListAdapter extends BaseAdapter {
     }
 
     private static class ViewHolder {
-        private ImageView profileImage;
-        private TextView name, reply, timeStamp;
+        private final ImageView profileImage;
+
+        private final TextView name, reply, timeStamp;
 
         public ViewHolder(View itemView) {
             profileImage = itemView.findViewById(R.id.iv_profile_image);

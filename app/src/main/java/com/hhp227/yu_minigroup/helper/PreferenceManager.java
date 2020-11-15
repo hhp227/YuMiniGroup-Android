@@ -12,17 +12,28 @@ public class PreferenceManager {
     private static final String PREF_NAME = "ApplicationLogin";
 
     private static final String KEY_USER_ID = "usr_id";
+
     private static final String KEY_USER_PASSWORD = "usr_pwd";
+
     private static final String KEY_USER_NAME = "usr_nm";
+
     private static final String KEY_USER_DEPT_NAME = "usr_dept_nm";
+
     private static final String KEY_USER_NUMBER = "usr_stu_id";
+
     private static final String KEY_USER_GRADE = "usr_grade";
+
     private static final String KEY_USER_EMAIL = "usr_mail";
+
     private static final String KEY_USER_UNIQUE_ID = "usr_uid";
+
     private static final String KEY_USER_HP = "usr_hp";
+
     private static final String KEY_SSO_TOKEN = "ssotoken";
-    private SharedPreferences mSharedPreferences;
-    private SharedPreferences.Editor mEditor;
+
+    private final SharedPreferences mSharedPreferences;
+
+    private final SharedPreferences.Editor mEditor;
 
     private final int PRIVATE_MOD = 0;
 
@@ -57,9 +68,7 @@ public class PreferenceManager {
             String email = mSharedPreferences.getString(KEY_USER_EMAIL, null);
             String uid = mSharedPreferences.getString(KEY_USER_UNIQUE_ID, null);
             String hp = mSharedPreferences.getString(KEY_USER_HP, null);
-            User user = new User(yuId, password, name, deptName, number, grade, email, uid, hp);
-
-            return user;
+            return new User(yuId, password, name, deptName, number, grade, email, uid, hp);
         }
         return null;
     }

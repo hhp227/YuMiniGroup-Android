@@ -1,6 +1,7 @@
 package com.hhp227.yu_minigroup.fragment;
 
 import android.os.Bundle;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -23,10 +24,15 @@ public class TimetableFragment extends Fragment {
     public static final String TAG = "시간표";
 
     private static final String[] TAB_NAMES = {"학기시간표", "모의시간표 작성"};
+
     private AppCompatActivity mActivity;
+
     private DrawerLayout mDrawerLayout;
+
     private TabLayout mTabLayout;
+
     private Toolbar mToolbar;
+
     private ViewPager mViewPager;
 
     public TimetableFragment() {
@@ -38,7 +44,7 @@ public class TimetableFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         List<Fragment> fragmentList = new ArrayList<>();
         FragmentPagerAdapter adapter = new FragmentPagerAdapter(getChildFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
@@ -47,6 +53,7 @@ public class TimetableFragment extends Fragment {
                 return fragmentList.size();
             }
 
+            @NonNull
             @Override
             public Fragment getItem(int position) {
                 return fragmentList.get(position);
@@ -79,6 +86,7 @@ public class TimetableFragment extends Fragment {
 
     private void setDrawerToggle() {
         ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(mActivity, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
         mDrawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
     }

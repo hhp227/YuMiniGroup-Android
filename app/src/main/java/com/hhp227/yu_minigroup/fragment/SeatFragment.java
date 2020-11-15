@@ -3,6 +3,7 @@ package com.hhp227.yu_minigroup.fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ProgressBar;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -35,11 +36,17 @@ public class SeatFragment extends Fragment {
     public static final String TAG = "도서관 좌석";
 
     private AppCompatActivity mActivity;
+
     private DrawerLayout mDrawerLayout;
+
     private List<SeatItem> mSeatItemList;
+
     private ProgressBar mProgressBar;
+
     private SeatListAdapter mAdapter;
+
     private SwipeRefreshLayout mSwipeRefreshLayout;
+
     private Toolbar mToolbar;
 
     public SeatFragment() {
@@ -51,7 +58,7 @@ public class SeatFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         CollapsingToolbarLayout toolbarLayout = view.findViewById(R.id.collapsing_toolbar);
         RecyclerView recyclerView = view.findViewById(R.id.rv_seat);
@@ -61,7 +68,7 @@ public class SeatFragment extends Fragment {
         mToolbar = view.findViewById(R.id.toolbar);
         mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
         mSeatItemList = new ArrayList<>();
-        mAdapter = new SeatListAdapter(getActivity(), mSeatItemList);
+        mAdapter = new SeatListAdapter(mSeatItemList);
 
         mActivity.setTitle(getString(R.string.library_seat));
         mActivity.setSupportActionBar(mToolbar);
@@ -79,6 +86,7 @@ public class SeatFragment extends Fragment {
             hideProgressBar();
             try {
                 JSONArray jsonArray = response.getJSONArray("_Model_lg_clicker_reading_room_brief_list");
+
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     String id = jsonObject.getString("l_id");
@@ -105,6 +113,7 @@ public class SeatFragment extends Fragment {
 
     private void setDrawerToggle() {
         ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(mActivity, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
         mDrawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
     }

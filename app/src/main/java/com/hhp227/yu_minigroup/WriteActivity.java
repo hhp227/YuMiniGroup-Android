@@ -46,19 +46,31 @@ import java.util.*;
 
 public class WriteActivity extends AppCompatActivity {
     public static final int CAMERA_PICK_IMAGE_REQUEST_CODE = 100;
+
     public static final int REQUEST_IMAGE_CAPTURE = 200;
+
     public static final int REQUEST_YOUTUBE_PICK = 300;
 
     private static final String TAG = WriteActivity.class.getSimpleName();
+
     private boolean mIsAdmin;
+
     private String mGrpId, mGrpNm, mGrpImg, mCurrentPhotoPath, mCookie, mKey;
+
     private List<String> mImageList;
+
     private List<Object> mContents;
+
     private PreferenceManager mPreferenceManager;
+
     private ProgressDialog mProgressDialog;
+
     private StringBuilder mMakeHtmlContents;
+
     private Uri mPhotoUri;
+
     private WriteListAdapter mAdapter;
+
     private YouTubeItem mYouTubeItem;
 
     @Override
@@ -70,7 +82,7 @@ public class WriteActivity extends AppCompatActivity {
         LinearLayout buttonVideo = findViewById(R.id.ll_video);
         RecyclerView recyclerView = findViewById(R.id.rv_write);
         mContents = new ArrayList<>();
-        mAdapter = new WriteListAdapter(this, mContents);
+        mAdapter = new WriteListAdapter(mContents);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookie = AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS);
         mProgressDialog = new ProgressDialog(this);
@@ -105,6 +117,7 @@ public class WriteActivity extends AppCompatActivity {
             case R.id.action_send:
                 String title = (String) mAdapter.getTextMap().get("title");
                 String content = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N ? Html.toHtml((Spanned) mAdapter.getTextMap().get("content"), Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL) : Html.toHtml((Spanned) mAdapter.getTextMap().get("content"));
+
                 if (!title.isEmpty() && !(TextUtils.isEmpty(content) && mContents.size() < 2)) {
                     mMakeHtmlContents = new StringBuilder();
                     mImageList = new ArrayList<>();
@@ -114,6 +127,7 @@ public class WriteActivity extends AppCompatActivity {
                     showProgressDialog();
                     if (mContents.size() > 1) {
                         int position = 1;
+
                         if (mContents.get(position) instanceof Bitmap) {////////////// 리팩토링 요망
                             Bitmap bitmap = (Bitmap) mContents.get(position);// 수정
 
@@ -151,11 +165,11 @@ public class WriteActivity extends AppCompatActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         Intent intent;
+
         switch (item.getGroupId()) {
             case 0:
                 if (mContents.get(item.getItemId()) instanceof YouTubeItem)
                     mYouTubeItem = null;
-
                 mContents.remove(item.getItemId());
                 mAdapter.notifyItemRemoved(item.getItemId());
                 return true;
@@ -168,8 +182,10 @@ public class WriteActivity extends AppCompatActivity {
                 return true;
             case 2:
                 intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
                 if (intent.resolveActivity(getPackageManager()) != null) {
                     File photoFile = null;
+
                     try {
                         photoFile = createImageFile();
                     } catch (IOException ex) {
@@ -201,6 +217,7 @@ public class WriteActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Bitmap bitmap;
+
         if (requestCode == CAMERA_PICK_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             Uri fileUri = data.getData();
             bitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
@@ -210,6 +227,7 @@ public class WriteActivity extends AppCompatActivity {
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             try {
                 bitmap = new BitmapUtil(this).bitmapResize(mPhotoUri, 200);
+
                 if (bitmap != null) {
                     ExifInterface ei = new ExifInterface(mCurrentPhotoPath);
                     int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
@@ -312,6 +330,7 @@ public class WriteActivity extends AppCompatActivity {
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 boolean error = jsonObject.getBoolean("isError");
+
                 if (!error) {
                     Intent intent = new Intent(WriteActivity.this, GroupActivity.class);
 
@@ -359,6 +378,7 @@ public class WriteActivity extends AppCompatActivity {
 
     private void getArticleId() {
         String params = "?CLUB_GRP_ID=" + mGrpId + "&displayL=1";
+
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.GET, EndPoint.GROUP_ARTICLE_LIST + params, response -> {
             Source source = new Source(response);
             String artlNum = source.getFirstElementByClass("comment_wrap").getAttributeValue("num");
@@ -385,7 +405,6 @@ public class WriteActivity extends AppCompatActivity {
                 storageDir      /* directory */
         );
         mCurrentPhotoPath = image.getAbsolutePath();
-
         return image;
     }
 

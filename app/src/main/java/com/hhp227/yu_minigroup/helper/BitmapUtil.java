@@ -9,7 +9,7 @@ import android.net.Uri;
 import java.io.FileNotFoundException;
 
 public class BitmapUtil {
-    private Context mContext;
+    private final Context mContext;
 
     public BitmapUtil(Context context) {
         this.mContext = context;
@@ -31,8 +31,7 @@ public class BitmapUtil {
                 sampleSize *= 2;
             }
             options.inSampleSize = sampleSize;
-            Bitmap bitmap = BitmapFactory.decodeStream(mContext.getContentResolver().openInputStream(uri), null, options);
-            result = bitmap;
+            result = BitmapFactory.decodeStream(mContext.getContentResolver().openInputStream(uri), null, options);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -41,6 +40,7 @@ public class BitmapUtil {
 
     public Bitmap rotateImage(Bitmap bitmap, float angle) {
         Matrix matrix = new Matrix();
+
         matrix.postRotate(angle);
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }

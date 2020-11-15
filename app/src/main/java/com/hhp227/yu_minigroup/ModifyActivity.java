@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.*;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
@@ -42,13 +43,21 @@ import static com.hhp227.yu_minigroup.WriteActivity.*;
 
 public class ModifyActivity extends AppCompatActivity {
     private static final String TAG = ModifyActivity.class.getSimpleName();
+
     private String mGrpId, mArtlNum, mCurrentPhotoPath, mCookie, mTitle, mContent, mGrpKey, mArtlKey;
+
     private List<String> mImageList;
+
     private List<Object> mContents;
+
     private ProgressDialog mProgressDialog;
+
     private StringBuilder mMakeHtmlContents;
+
     private Uri mPhotoUri;
+
     private WriteListAdapter mAdapter;
+
     private YouTubeItem mYouTubeItem;
 
     @Override
@@ -62,7 +71,7 @@ public class ModifyActivity extends AppCompatActivity {
         Intent intent = getIntent();
         Map<String, Object> headerMap = new HashMap<>();
         mContents = new ArrayList<>();
-        mAdapter = new WriteListAdapter(this, mContents);
+        mAdapter = new WriteListAdapter(mContents);
         mCookie = AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS);
         mProgressDialog = new ProgressDialog(this);
         mGrpId = intent.getStringExtra("grp_id");
@@ -78,7 +87,6 @@ public class ModifyActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         buttonImage.setOnClickListener(this::showContextMenu);
         buttonVideo.setOnClickListener(this::showContextMenu);
-
         headerMap.put("title", mTitle);
         headerMap.put("content", mContent);
         mAdapter.addHeaderView(headerMap);
@@ -108,6 +116,7 @@ public class ModifyActivity extends AppCompatActivity {
             case R.id.action_send:
                 String title = (String) mAdapter.getTextMap().get("title");
                 String content = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N ? Html.toHtml((Spanned) mAdapter.getTextMap().get("content"), Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL) : Html.toHtml((Spanned) mAdapter.getTextMap().get("content"));
+
                 if (!title.isEmpty() && !(TextUtils.isEmpty(content) && mContents.size() < 2)) {
                     mMakeHtmlContents = new StringBuilder();
 
@@ -117,6 +126,7 @@ public class ModifyActivity extends AppCompatActivity {
                     showProgressDialog();
                     if (mContents.size() > 1) {
                         int position = 1;
+
                         if (mContents.get(position) instanceof String) {
                             String image = (String) mContents.get(position);
 
@@ -158,12 +168,13 @@ public class ModifyActivity extends AppCompatActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         Intent intent;
+
         switch (item.getGroupId()) {
             case 0:
                 int position = item.getItemId();
+
                 if (mContents.get(position) instanceof YouTubeItem)
                     mYouTubeItem = null;
-
                 mContents.remove(position);
                 mAdapter.notifyItemRemoved(position);
                 return true;
@@ -176,8 +187,10 @@ public class ModifyActivity extends AppCompatActivity {
                 return true;
             case 2:
                 intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
                 if (intent.resolveActivity(getPackageManager()) != null) {
                     File photoFile = null;
+
                     try {
                         photoFile = createImageFile();
                     } catch (IOException ex) {
@@ -209,6 +222,7 @@ public class ModifyActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Bitmap bitmap;
+
         if (requestCode == CAMERA_PICK_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             Uri fileUri = data.getData();
             bitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
@@ -218,6 +232,7 @@ public class ModifyActivity extends AppCompatActivity {
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             try {
                 bitmap = new BitmapUtil(this).bitmapResize(mPhotoUri, 200);
+
                 if (bitmap != null) {
                     ExifInterface ei = new ExifInterface(mCurrentPhotoPath);
                     int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
@@ -388,7 +403,7 @@ public class ModifyActivity extends AppCompatActivity {
     private void updateArticleDataToFirebase(DatabaseReference query) {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 ArticleItem articleItem = dataSnapshot.getValue(ArticleItem.class);
 
                 if (articleItem != null) {
@@ -401,7 +416,7 @@ public class ModifyActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e("파이어베이스", databaseError.getMessage());
             }
         });

@@ -19,19 +19,33 @@ import java.util.Locale;
 
 public class ExtendedCalendarView extends RelativeLayout implements OnItemClickListener {
     public static final int NO_GESTURE = 0;
+
     public static final int LEFT_RIGHT_GESTURE = 1;
+
     public static final int UP_DOWN_GESTURE = 2;
+
     private static final int SWIPE_MIN_DISTANCE = 120;
+
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+
     public ImageView next,prev;
+
     private Context context;
+
     private OnDayClickListener dayListener;
+
     private GridView calendar;
+
     private CalendarAdapter mAdapter;
+
     private Calendar cal;
+
     private TextView month;
+
     private RelativeLayout base;
+
     private int gestureType = 0;
+
     private final GestureDetector calendarGesture = new GestureDetector(context, new GestureListener());
 
     public interface OnDayClickListener {

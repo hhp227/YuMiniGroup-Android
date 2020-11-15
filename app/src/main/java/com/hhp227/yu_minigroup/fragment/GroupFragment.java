@@ -13,6 +13,7 @@ import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
 import android.widget.ProgressBar;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -51,27 +52,47 @@ import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_GROUP;
 
 public class GroupFragment extends Fragment {
     public static final int CREATE_CODE = 10;
+
     public static final int REGISTER_CODE = 20;
+
     public static final int UPDATE_GROUP = 30;
 
     private static final int PORTAIT_SPAN_COUNT = 2;
+
     private static final int LANDSCAPE_SPAN_COUNT = 4;
+
     private static final String TAG = GroupFragment.class.getSimpleName();
+
     private int mSpanCount;
+
     private AppCompatActivity mActivity;
+
     private CookieManager mCookieManager;
+
     private CountDownTimer mCountDownTimer;
+
     private DrawerLayout mDrawerLayout;
+
     private GridLayoutManager mGridLayoutManager;
+
     private GridLayoutManager.SpanSizeLookup mSpanSizeLookup;
+
     private GroupGridAdapter mAdapter;
+
     private List<String> mGroupItemKeys;
+
     private List<Object> mGroupItemValues;
+
     private PreferenceManager mPreferenceManager;
+
     private ProgressBar mProgressBar;
+
     private RecyclerView mRecyclerView;
+
     private RecyclerView.ItemDecoration mItemDecoration;
+
     private SwipeRefreshLayout mSwipeRefreshLayout;
+
     private Toolbar mToolbar;
 
     public GroupFragment() {
@@ -83,7 +104,7 @@ public class GroupFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         BottomNavigationView bottomNavigationView = view.findViewById(R.id.bnv_group_button);
         mActivity = (AppCompatActivity) getActivity();
@@ -126,7 +147,7 @@ public class GroupFragment extends Fragment {
         };
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
-        mAdapter = new GroupGridAdapter(mActivity, mGroupItemKeys, mGroupItemValues);
+        mAdapter = new GroupGridAdapter(mGroupItemKeys, mGroupItemValues);
         mCookieManager = AppController.getInstance().getCookieManager();
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCountDownTimer = new CountDownTimer(80000, 8000) {
@@ -217,6 +238,7 @@ public class GroupFragment extends Fragment {
     public void onPause() {
         super.onPause();
         CountDownTimer countDownTimer = mCountDownTimer;
+
         if (countDownTimer != null)
             countDownTimer.cancel();
     }
@@ -230,6 +252,7 @@ public class GroupFragment extends Fragment {
             fetchDataTask();
         } else if (requestCode == UPDATE_GROUP && resultCode == Activity.RESULT_OK && data != null) {//
             int position = data.getIntExtra("position", 0);
+
             if (mGroupItemValues.get(position) instanceof GroupItem) {
                 GroupItem groupItem = (GroupItem) mGroupItemValues.get(position);
 
@@ -269,8 +292,10 @@ public class GroupFragment extends Fragment {
         mActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.GROUP_LIST, response -> {
             Source source = new Source(response);
+
             try {
                 List<Element> listElementA = source.getAllElements(HTMLElementName.A);
+
                 for (Element elementA : listElementA) {
                     try {
                         String id = groupIdExtract(elementA.getAttributeValue("onclick"));
@@ -350,13 +375,14 @@ public class GroupFragment extends Fragment {
     private void fetchDataTaskFromFirebase(Query query, final boolean isRecursion) {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (isRecursion) {
                     try {
                         String key = dataSnapshot.getKey();
                         GroupItem value = dataSnapshot.getValue(GroupItem.class);
                         assert value != null;
                         int index = mGroupItemKeys.indexOf(value.getId());
+
                         if (index > -1) {
                             //mGroupItemValues.set(index, value); //isAdmin값때문에 주석처리
                             mGroupItemKeys.set(index, key);
@@ -381,7 +407,7 @@ public class GroupFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
             }
         });

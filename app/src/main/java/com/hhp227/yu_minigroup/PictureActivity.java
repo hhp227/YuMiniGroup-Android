@@ -13,7 +13,9 @@ import java.util.List;
 
 public class PictureActivity extends AppCompatActivity {
     private List<String> mImages;
+
     private TextView mCount;
+
     private ViewPager mViewPager;
 
     @Override
@@ -25,12 +27,12 @@ public class PictureActivity extends AppCompatActivity {
         mCount = findViewById(R.id.tv_count);
         int position = 0;
         Bundle b = getIntent().getExtras();
+        PicturePagerAdapter pagerAdapter = new PicturePagerAdapter(mImages);
+
         if (b != null) {
             mImages = b.getStringArrayList("images");
             position = b.getInt("position");
         }
-        PicturePagerAdapter pagerAdapter = new PicturePagerAdapter(this, mImages);
-
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mViewPager.setAdapter(pagerAdapter);

@@ -21,7 +21,9 @@ import java.util.Map;
 
 public class SplashActivity extends AppCompatActivity {
     private static final int SPLASH_TIME_OUT = 1250;
+
     private static final String TAG = SplashActivity.class.getSimpleName();
+
     private PreferenceManager mPreferenceManager;
 
     @Override
@@ -37,6 +39,7 @@ public class SplashActivity extends AppCompatActivity {
         window.setStatusBarColor(Color.TRANSPARENT);
         handler.postDelayed(() -> {
             User user = mPreferenceManager.getUser();
+
             loginLMS(user.getUserId(), user.getPassword(), null, null);
         }, SPLASH_TIME_OUT);
     }
@@ -63,6 +66,7 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 // 리퀘스트 헤더에 SESSION_IMAX값이 있음
                 headers.put("Cookie", lmsToken != null ? lmsToken + "; " + ssoToken : null);
                 return headers;
@@ -90,6 +94,7 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Referer", "http://portal.yu.ac.kr/sso/login.jsp"); // 필수
                 return headers;
             }
@@ -97,6 +102,7 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
+
                 params.put("cReturn_Url", EndPoint.LOGIN_LMS);
                 params.put("type", "lms"); // 필수
                 params.put("p", "20112030550005B055003090F570256534A010F47070C4556045E18020750110"); // 필수

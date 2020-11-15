@@ -8,6 +8,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,18 +40,29 @@ import java.util.Map;
 
 public class Tab1Fragment extends Fragment {
     public static final int LIMIT = 10;
+
     public static final int UPDATE_ARTICLE = 20;
+
     public static boolean mIsAdmin;
+
     public static String mGroupId, mGroupName, mGroupImage, mKey;
 
     private static final String TAG = "소식";
+
     private boolean mHasRequestedMore;
+
     private int mOffSet;
+
     private long  mMinId, mLastClickTime;
+
     private ArticleListAdapter mAdapter;
+
     private List<String> mArticleItemKeys;
+
     private List<ArticleItem> mArticleItemValues;
+
     private ProgressBar mProgressBar;
+
     private RelativeLayout mRelativeLayout;
 
     public Tab1Fragment() {
@@ -87,7 +99,7 @@ public class Tab1Fragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.srl_article_list);
         RecyclerView recyclerView = view.findViewById(R.id.rv_article);
@@ -95,7 +107,7 @@ public class Tab1Fragment extends Fragment {
         mRelativeLayout = view.findViewById(R.id.rl_write);
         mArticleItemKeys = new ArrayList<>();
         mArticleItemValues = new ArrayList<>();
-        mAdapter = new ArticleListAdapter(getActivity(), mArticleItemKeys, mArticleItemValues, mKey);
+        mAdapter = new ArticleListAdapter(mArticleItemKeys, mArticleItemValues, mKey);
         mOffSet = 1;
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -106,7 +118,7 @@ public class Tab1Fragment extends Fragment {
         });
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (!mHasRequestedMore && dy > 0 && layoutManager != null && layoutManager.findLastCompletelyVisibleItemPosition() >= layoutManager.getItemCount() - 1) {
@@ -189,6 +201,7 @@ public class Tab1Fragment extends Fragment {
             hideProgressBar();
             try {
                 List<Element> list = source.getAllElementsByClass("listbox2");
+
                 for (Element element : list) {
                     Element viewArt = element.getFirstElementByClass("view_art");
                     Element commentWrap = element.getFirstElementByClass("comment_wrap");
@@ -208,6 +221,7 @@ public class Tab1Fragment extends Fragment {
                     viewArt.getFirstElementByClass("list_cont").getChildElements().forEach(childElement -> content.append(childElement.getTextExtractor().toString().concat("\n")));
 
                     mMinId = mMinId == 0 ? Long.parseLong(id) : Math.min(mMinId, Long.parseLong(id));
+
                     if (Long.parseLong(id) > mMinId) {
                         mHasRequestedMore = true;
                         break;
@@ -267,11 +281,12 @@ public class Tab1Fragment extends Fragment {
     private void fetchArticleListFromFirebase(Query query) {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     String key = snapshot.getKey();
                     ArticleItem value = snapshot.getValue(ArticleItem.class);
                     int index = mArticleItemKeys.indexOf(value.getId());
+
                     if (index > -1) {
                         ArticleItem articleItem = mArticleItemValues.get(index);
 
@@ -284,7 +299,7 @@ public class Tab1Fragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e("파이어베이스", databaseError.getMessage());
             }
         });

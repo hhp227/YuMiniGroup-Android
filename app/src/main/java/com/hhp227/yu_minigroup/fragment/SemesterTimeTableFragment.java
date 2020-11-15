@@ -9,6 +9,7 @@ import android.view.*;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.android.volley.Request;
@@ -28,16 +29,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SemesterTimeTableFragment extends Fragment {
     private static final int ROW = 26;
+
     private static final int COL = 6;
+
     private LinearLayout mLayout;
+
     private ProgressBar mProgressBar;
 
     public SemesterTimeTableFragment() {
     }
 
     public static SemesterTimeTableFragment newInstance() {
-        SemesterTimeTableFragment fragment = new SemesterTimeTableFragment();
-        return fragment;
+        return new SemesterTimeTableFragment();
     }
 
     @Override
@@ -46,7 +49,7 @@ public class SemesterTimeTableFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         LinearLayout cardView = view.findViewById(R.id.ll_timetable);
         mProgressBar = view.findViewById(R.id.pb_group);
@@ -65,15 +68,15 @@ public class SemesterTimeTableFragment extends Fragment {
                 params.height = getLcdSizeHeight() / (atomInt.get() == 0 ? 20 : 14);
                 params.setMargins(1, 1, 1, 1);
                 params.gravity = 1;
-
                 mLayout = new LinearLayout(getContext());
+
                 mLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
                 mLayout.setGravity(Gravity.LEFT);
                 mLayout.setOrientation(LinearLayout.HORIZONTAL);
                 cardView.addView(mLayout);
-
                 schedule.stream().limit(COL).forEach(elem -> {
                     TextView textView = new TextView(getActivity());
+
                     textView.setId(atomInt.get());
                     textView.setTextSize(10);
                     textView.setGravity(Gravity.CENTER);
@@ -82,6 +85,7 @@ public class SemesterTimeTableFragment extends Fragment {
                     if (!TextUtils.isEmpty(textView.getText()))
                         textView.setOnClickListener(v -> {
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
                             builder.setMessage(elem.getTextExtractor().toString());
                             builder.setNegativeButton("닫기", (dialog, which) -> dialog.dismiss());
                             builder.create().show();
@@ -99,6 +103,7 @@ public class SemesterTimeTableFragment extends Fragment {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS));
                 return headers;
             }

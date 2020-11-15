@@ -15,8 +15,11 @@ import com.hhp227.yu_minigroup.fragment.TabHostLayoutFragment;
 
 public class GroupActivity extends AppCompatActivity {
     private boolean mIsAdmin;
+
     private int mPosition;
+
     private String mGroupId, mGroupName, mGroupImage, mKey;
+
     private TabHostLayoutFragment mFragMain;
 
     @Override
@@ -38,6 +41,7 @@ public class GroupActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
+
         inflater.inflate(R.menu.main, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -48,6 +52,7 @@ public class GroupActivity extends AppCompatActivity {
             finish();
         else if (item.getItemId() == R.id.action_chat) {
             Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+
             intent.putExtra("grp_chat", true);
             intent.putExtra("chat_nm", mGroupName);
             intent.putExtra("uid", mKey);

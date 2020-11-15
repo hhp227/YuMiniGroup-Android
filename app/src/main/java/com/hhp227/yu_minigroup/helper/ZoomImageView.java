@@ -13,19 +13,27 @@ import androidx.appcompat.widget.AppCompatImageView;
 
 public class ZoomImageView extends AppCompatImageView {
     private Matrix matrix = new Matrix();
+
     private Matrix savedMatrix = new Matrix();
+
     private Matrix savedMatrix2 = new Matrix();
 
     private static final int NONE = 0;
+
     private static final int DRAG = 1;
+
     private static final int ZOOM = 2;
+
     private int mode = NONE;
 
     private PointF start = new PointF();
+
     private PointF mid = new PointF();
+
     private float oldDist = 1f;
 
     private static final int WIDTH = 0;
+
     private static final int HEIGHT = 1;
 
     private boolean isInit = false;

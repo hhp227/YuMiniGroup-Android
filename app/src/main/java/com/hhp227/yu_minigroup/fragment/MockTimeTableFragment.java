@@ -11,6 +11,7 @@ import android.view.*;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.hhp227.yu_minigroup.R;
@@ -19,34 +20,41 @@ import com.hhp227.yu_minigroup.helper.TimetableHelper;
 public class MockTimeTableFragment extends Fragment {
     // DatabaseFile의 경로를 가져오기위한 변수
     private String dbName = "timetable.db";
+
     // Database를 생성 관리하는 클래스
     private TimetableHelper helper;
 
     SQLiteDatabase db;
+
     Cursor cur;
 
     LinearLayout[] lay = new LinearLayout[10];
+
     LinearLayout layTime;
 
     String[] timeLine = {"1교시\n09:00", "2교시\n10:00", "3교시\n11:00", "4교시\n12:00", "5교시\n13:00", "6교시\n14:00", "7교시\n15:00", "8교시\n16:00", "9교시\n17:00", "10교시\n18:00"};
+
     String[] dayLine = {"시간", "월", "화", "수", "목", "금"};
 
     TextView[] time = new TextView[timeLine.length];
+
     TextView[] day = new TextView[dayLine.length];
+
     TextView[] data = new TextView[timeLine.length * dayLine.length];
 
     EditText putSubject;
+
     EditText putClassroom;
 
     int dbId;
+
     String dbClassroom, dbSubject;
 
     public MockTimeTableFragment() {
     }
 
     public static MockTimeTableFragment newInstance() {
-        MockTimeTableFragment fragment = new MockTimeTableFragment();
-        return fragment;
+        return new MockTimeTableFragment();
     }
 
     @Override
@@ -55,7 +63,7 @@ public class MockTimeTableFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         String dbPath = getContext().getDatabasePath(dbName).getPath();
         Log.i("my db path=", "" + dbPath);

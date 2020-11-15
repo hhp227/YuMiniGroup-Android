@@ -8,6 +8,7 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
@@ -27,8 +28,11 @@ import java.util.Map;
 
 public class ReplyModifyActivity extends AppCompatActivity {
     private static final String TAG = "댓글수정";
+
     private Holder mHolder;
+
     private String mGroupId, mArticleId, mReplyId, mReply, mArticleKey, mReplyKey;
+
     private Snackbar mProgressSnackBar;
 
     @Override
@@ -37,7 +41,6 @@ public class ReplyModifyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reply_modify);
         Toolbar toolbar = findViewById(R.id.toolbar);
         RecyclerView recyclerView = findViewById(R.id.rv_write);
-
         Intent intent = getIntent();
         mGroupId = intent.getStringExtra("grp_id");
         mArticleId = intent.getStringExtra("artl_num");
@@ -51,17 +54,17 @@ public class ReplyModifyActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new RecyclerView.Adapter<Holder>() {
-
+            @NonNull
             @Override
-            public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+            public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(getApplicationContext()).inflate(R.layout.modify_text, parent, false);
                 mHolder = new Holder(view);
                 return mHolder;
             }
 
             @Override
-            public void onBindViewHolder(Holder holder, int position) {
-                holder.inputReply.setText(mReply);
+            public void onBindViewHolder(@NonNull Holder holder, int position) {
+                holder.bind(mReply);
             }
 
             @Override
@@ -84,6 +87,7 @@ public class ReplyModifyActivity extends AppCompatActivity {
             return true;
         } else if (item.getItemId() == R.id.action_send) {
             String text = mHolder.inputReply.getText().toString().trim();
+
             if (!TextUtils.isEmpty(text)) {
                 String tag_string_req = "req_send";
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.MODIFY_REPLY, response -> {
@@ -91,11 +95,13 @@ public class ReplyModifyActivity extends AppCompatActivity {
 
                         // 입력 자판 숨기기
                         View view = ReplyModifyActivity.this.getCurrentFocus();
+                        Intent intent = new Intent(ReplyModifyActivity.this, ArticleActivity.class);
+
                         if (view != null) {
                             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+
                             inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
                         }
-                        Intent intent = new Intent(ReplyModifyActivity.this, ArticleActivity.class);
                         intent.putExtra("update_reply", response);
                         setResult(RESULT_OK, intent);
                         finish();
@@ -111,6 +117,7 @@ public class ReplyModifyActivity extends AppCompatActivity {
                     @Override
                     public Map<String, String> getHeaders() {
                         Map<String, String> headers = new HashMap<>();
+
                         headers.put("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS));
                         return headers;
                     }
@@ -118,6 +125,7 @@ public class ReplyModifyActivity extends AppCompatActivity {
                     @Override
                     protected Map<String, String> getParams() {
                         Map<String, String> params = new HashMap<>();
+
                         params.put("CLUB_GRP_ID", mGroupId);
                         params.put("ARTL_NUM", mArticleId);
                         params.put("CMMT_NUM", mReplyId);
@@ -136,22 +144,24 @@ public class ReplyModifyActivity extends AppCompatActivity {
 
     private void initFirebaseData() {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Replys");
+
         updateReplyDataToFirebase(databaseReference.child(mArticleKey).child(mReplyKey));
     }
 
     private void updateReplyDataToFirebase(final Query query) {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
                     ReplyItem replyItem = dataSnapshot.getValue(ReplyItem.class);
+
                     replyItem.setReply(mHolder.inputReply.getText().toString() + "\n");
                     query.getRef().setValue(replyItem);
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
             }
         });
@@ -161,6 +171,7 @@ public class ReplyModifyActivity extends AppCompatActivity {
     private void setProgressBar() {
         mProgressSnackBar = Snackbar.make(getCurrentFocus(), "전송중...", Snackbar.LENGTH_INDEFINITE);
         ViewGroup contentLay = (ViewGroup) mProgressSnackBar.getView().findViewById(com.google.android.material.R.id.snackbar_text).getParent();
+
         contentLay.addView(new ProgressBar(getApplicationContext()));
     }
 
@@ -175,12 +186,16 @@ public class ReplyModifyActivity extends AppCompatActivity {
             mProgressSnackBar.dismiss();
     }
 
-    public class Holder extends RecyclerView.ViewHolder {
-        private EditText inputReply;
+    public static class Holder extends RecyclerView.ViewHolder {
+        private final EditText inputReply;
 
         Holder(View itemView) {
             super(itemView);
             inputReply = itemView.findViewById(R.id.et_reply);
+        }
+
+        public void bind(String reply) {
+            inputReply.setText(reply);
         }
     }
 }

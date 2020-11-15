@@ -35,17 +35,29 @@ import java.util.Map;
 
 public class FindActivity extends AppCompatActivity {
     private static final int LIMIT = 15;
+
     private static final String TAG = FindActivity.class.getSimpleName();
+
     private boolean mHasRequestedMore;
+
     private int mOffSet, mMinId;
+
     private GroupListAdapter mAdapter;
+
     private List<String> mGroupItemKeys;
+
     private List<GroupItem> mGroupItemValues;
+
     private ProgressBar mProgressBar;
+
     private RelativeLayout mRelativeLayout;
+
     private RecyclerView mRecyclerView;
+
     private RecyclerView.OnScrollListener mOnScrollListener;
+
     private ShimmerFrameLayout mShimmerFrameLayout;
+
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
@@ -67,9 +79,11 @@ public class FindActivity extends AppCompatActivity {
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
+
                 if (!mHasRequestedMore && dy > 0 && manager != null && manager.findLastCompletelyVisibleItemPosition() >= manager.getItemCount() - 1) {
                     mHasRequestedMore = true;
                     mOffSet += LIMIT;
+
                     mAdapter.setFooterProgressBarVisibility(View.VISIBLE);
                     mAdapter.notifyDataSetChanged();
                     fetchGroupList();
@@ -92,6 +106,7 @@ public class FindActivity extends AppCompatActivity {
         mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
             mMinId = 0;
             mOffSet = 1;
+
             mGroupItemKeys.clear();
             mGroupItemValues.clear();
             mAdapter.addFooterView();
@@ -123,9 +138,11 @@ public class FindActivity extends AppCompatActivity {
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.GROUP_LIST, response -> {
             Source source = new Source(response);
             List<Element> list = source.getAllElements("id", "accordion", false);
+
             for (Element element : list) {
                 try {
                     Element menuList = element.getFirstElementByClass("menu_list");
+
                     if (element.getAttributeValue("class").equals("accordion")) {
                         int id = groupIdExtract(menuList.getFirstElementByClass("button").getAttributeValue("onclick"));
                         String imageUrl = EndPoint.BASE_URL + element.getFirstElement(HTMLElementName.IMG).getAttributeValue("src");
@@ -133,6 +150,7 @@ public class FindActivity extends AppCompatActivity {
                         StringBuilder info = new StringBuilder();
                         String description = menuList.getAllElementsByClass("info").get(0).getContent().toString();
                         String joinType = menuList.getAllElementsByClass("info").get(1).getTextExtractor().toString().trim();
+
                         element.getFirstElement(HTMLElementName.A).getAllElementsByClass("info").forEach(span -> {
                             String extractedText = span.getTextExtractor().toString();
                             info.append(extractedText.contains("회원수") ?
@@ -140,12 +158,14 @@ public class FindActivity extends AppCompatActivity {
                                     extractedText + "\n");
                         });
                         mMinId = mMinId == 0 ? id : Math.min(mMinId, id);
+
                         if (id > mMinId) {
                             mHasRequestedMore = true;
                             break;
                         } else
                             mHasRequestedMore = false;
                         GroupItem groupItem = new GroupItem();
+
                         groupItem.setId(String.valueOf(id));
                         groupItem.setImage(imageUrl);
                         groupItem.setName(name);
@@ -172,6 +192,7 @@ public class FindActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS));
                 return headers;
             }
@@ -184,6 +205,7 @@ public class FindActivity extends AppCompatActivity {
             @Override
             public byte[] getBody() {
                 Map<String, String> params = new HashMap<>();
+
                 params.put("panel_id", "1");
                 params.put("gubun", "select_share_total");
                 params.put("start", String.valueOf(mOffSet));
@@ -191,6 +213,7 @@ public class FindActivity extends AppCompatActivity {
                 params.put("encoding", "utf-8");
                 if (params.size() > 0) {
                     StringBuilder encodedParams = new StringBuilder();
+
                     try {
                         params.forEach((k, v) -> {
                             try {

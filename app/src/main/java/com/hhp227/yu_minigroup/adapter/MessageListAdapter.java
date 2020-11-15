@@ -1,12 +1,12 @@
 package com.hhp227.yu_minigroup.adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -24,24 +24,26 @@ import java.util.Locale;
 
 public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.MessageListHolder> {
     private static final int MSG_TYPE_LEFT = 0;
-    private static final int MSG_TYPE_RIGHT = 1;
-    private Context mContext;
-    private List<MessageItem> mMessageItems;
-    private String mUid;
 
-    public MessageListAdapter(Context context, List<MessageItem> messageItems, String uid) {
-        this.mContext = context;
+    private static final int MSG_TYPE_RIGHT = 1;
+
+    private final List<MessageItem> mMessageItems;
+
+    private final String mUid;
+
+    public MessageListAdapter(List<MessageItem> messageItems, String uid) {
         this.mMessageItems = messageItems;
         this.mUid = uid;
     }
 
+    @NonNull
     @Override
-    public MessageListHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MessageListHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == MSG_TYPE_LEFT) {
-            View leftView = LayoutInflater.from(mContext).inflate(R.layout.message_item_left, parent, false);
+            View leftView = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_item_left, parent, false);
             return new MessageListHolder(leftView);
         } else if (viewType == MSG_TYPE_RIGHT) {
-            View rightView = LayoutInflater.from(mContext).inflate(R.layout.message_item_right, parent, false);
+            View rightView = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_item_right, parent, false);
             return new MessageListHolder(rightView);
         }
         throw new NullPointerException();
@@ -49,31 +51,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
 
     @Override
     public void onBindViewHolder(MessageListHolder holder, int position) {
-        MessageItem messageItem = mMessageItems.get(position);
-        holder.name.setText(messageItem.getName());
-        holder.message.setText(messageItem.getMessage());
-        holder.timeStamp.setText(getTimeStamp(messageItem.getTimeStamp()));
-        if (position > 0 && getTimeStamp(mMessageItems.get(position - 1).getTimeStamp()).equals(getTimeStamp(messageItem.getTimeStamp())) && mMessageItems.get(position - 1).getFrom().equals(messageItem.getFrom())) {
-            holder.name.setVisibility(View.GONE);
-            holder.messageBox.setPadding(holder.messageBox.getPaddingLeft(), 0, holder.messageBox.getPaddingRight(), holder.messageBox.getPaddingBottom());
-            holder.profileImage.setVisibility(View.INVISIBLE);
-        } else {
-            holder.name.setVisibility(getItemViewType(position) == MSG_TYPE_RIGHT ? View.GONE : View.VISIBLE);
-            holder.profileImage.setVisibility(View.VISIBLE);
-            holder.messageBox.setPadding(holder.messageBox.getPaddingLeft(), 10, holder.messageBox.getPaddingRight(), 10); // 수정완료 경북대 소모임에도 반영할것
-            Glide.with(mContext)
-                    .load(messageItem.getFrom() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", messageItem.getFrom()), new LazyHeaders.Builder()
-                            .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
-                            .build()) : null)
-                    .apply(RequestOptions
-                            .errorOf(R.drawable.user_image_view_circle)
-                            .circleCrop()
-                            .skipMemoryCache(true)
-                            .diskCacheStrategy(DiskCacheStrategy.NONE))
-                    .into(holder.profileImage);
-        }
-        // 경북대 소모임에도 반영할것
-        holder.timeStamp.setVisibility(position + 1 != mMessageItems.size() && getTimeStamp(messageItem.getTimeStamp()).equals(getTimeStamp(mMessageItems.get(position + 1).getTimeStamp())) && messageItem.getFrom().equals(mMessageItems.get(position + 1).getFrom()) ? View.INVISIBLE : View.VISIBLE);
+        holder.bind(mMessageItems.get(position));
     }
 
     @Override
@@ -91,14 +69,16 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         return position;
     }
 
-    private String getTimeStamp(long time) {
+    private static String getTimeStamp(long time) {
         return new SimpleDateFormat("a h:mm", Locale.getDefault()).format(time);
     }
 
-    public static class MessageListHolder extends RecyclerView.ViewHolder {
-        private ImageView profileImage;
-        private LinearLayout messageBox;
-        private TextView name, message, timeStamp;
+    public class MessageListHolder extends RecyclerView.ViewHolder {
+        private final ImageView profileImage;
+
+        private final LinearLayout messageBox;
+
+        private final TextView name, message, timeStamp;
 
         public MessageListHolder(View itemView) {
             super(itemView);
@@ -107,6 +87,34 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             name = itemView.findViewById(R.id.tv_name);
             message = itemView.findViewById(R.id.tv_message);
             timeStamp = itemView.findViewById(R.id.tv_timestamp);
+        }
+
+        public void bind(MessageItem messageItem) {
+            name.setText(messageItem.getName());
+            message.setText(messageItem.getMessage());
+            timeStamp.setText(getTimeStamp(messageItem.getTimeStamp()));
+            if (getAdapterPosition() > 0 && getTimeStamp(mMessageItems.get(getAdapterPosition() - 1).getTimeStamp()).equals(getTimeStamp(messageItem.getTimeStamp())) && mMessageItems.get(getAdapterPosition() - 1).getFrom().equals(messageItem.getFrom())) {
+                name.setVisibility(View.GONE);
+                messageBox.setPadding(messageBox.getPaddingLeft(), 0, messageBox.getPaddingRight(), messageBox.getPaddingBottom());
+                profileImage.setVisibility(View.INVISIBLE);
+            } else {
+                name.setVisibility(!mMessageItems.get(getAdapterPosition()).getFrom().equals(mUid) ? MSG_TYPE_LEFT : View.GONE);
+                profileImage.setVisibility(View.VISIBLE);
+                messageBox.setPadding(messageBox.getPaddingLeft(), 10, messageBox.getPaddingRight(), 10); // 수정완료 경북대 소모임에도 반영할것
+                Glide.with(itemView.getContext())
+                        .load(messageItem.getFrom() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", messageItem.getFrom()), new LazyHeaders.Builder()
+                                .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
+                                .build()) : null)
+                        .apply(RequestOptions
+                                .errorOf(R.drawable.user_image_view_circle)
+                                .circleCrop()
+                                .skipMemoryCache(true)
+                                .diskCacheStrategy(DiskCacheStrategy.NONE))
+                        .into(profileImage);
+            }
+
+            // 경북대 소모임에도 반영할것
+            timeStamp.setVisibility(getAdapterPosition() + 1 != mMessageItems.size() && getTimeStamp(messageItem.getTimeStamp()).equals(getTimeStamp(mMessageItems.get(getAdapterPosition() + 1).getTimeStamp())) && messageItem.getFrom().equals(mMessageItems.get(getAdapterPosition() + 1).getFrom()) ? View.INVISIBLE : View.VISIBLE);
         }
     }
 }

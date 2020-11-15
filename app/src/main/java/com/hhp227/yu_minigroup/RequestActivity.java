@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -35,16 +36,27 @@ import java.util.Map;
 
 public class RequestActivity extends AppCompatActivity {
     private static final int LIMIT = 100;
+
     private static final String TAG = RequestActivity.class.getSimpleName();
+
     private boolean mHasRequestedMore;
+
     private int mOffSet;
+
     private GroupListAdapter mAdapter;
+
     private List<String> mGroupItemKeys;
+
     private List<GroupItem> mGroupItemValues;
+
     private ProgressBar mProgressBar;
+
     private RecyclerView mRecyclerView;
+
     private RelativeLayout mRelativeLayout;
+
     private ShimmerFrameLayout mShimmerFrameLayout;
+
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
@@ -74,17 +86,18 @@ public class RequestActivity extends AppCompatActivity {
         });
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
             }
 
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (!mHasRequestedMore && dy > 0 && manager != null && manager.findLastCompletelyVisibleItemPosition() >= manager.getItemCount() - 1) {
                     mHasRequestedMore = true;
                     mOffSet += LIMIT;
+
                     mAdapter.setFooterProgressBarVisibility(View.VISIBLE);
                     mAdapter.notifyDataSetChanged();
                     fetchGroupList();
@@ -113,9 +126,11 @@ public class RequestActivity extends AppCompatActivity {
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.GROUP_LIST, response -> {
             Source source = new Source(response);
             List<Element> list = source.getAllElements("id", "accordion", false);
+
             for (Element element : list) {
                 try {
                     Element menuList = element.getFirstElementByClass("menu_list");
+
                     if (element.getAttributeValue("class").equals("accordion")) {
                         String id = groupIdExtract(menuList.getFirstElementByClass("button").getAttributeValue("onclick"));
                         String imageUrl = EndPoint.BASE_URL + element.getFirstElement(HTMLElementName.IMG).getAttributeValue("src");
@@ -123,13 +138,16 @@ public class RequestActivity extends AppCompatActivity {
                         StringBuilder info = new StringBuilder();
                         String description = menuList.getAllElementsByClass("info").get(0).getContent().toString();
                         String joinType = menuList.getAllElementsByClass("info").get(1).getContent().toString();
+
                         for (Element span : element.getFirstElement(HTMLElementName.A).getAllElementsByClass("info")) {
                             String extractedText = span.getTextExtractor().toString();
+
                             info.append(extractedText.contains("회원수") ?
                                     extractedText.substring(0, extractedText.lastIndexOf("생성일")).trim() + "\n" :
                                     extractedText + "\n");
                         }
                         GroupItem groupItem = new GroupItem();
+
                         groupItem.setId(id);
                         groupItem.setImage(imageUrl);
                         groupItem.setName(name);
@@ -146,6 +164,7 @@ public class RequestActivity extends AppCompatActivity {
                 }
             }
             mHasRequestedMore = false;
+
             mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             mAdapter.notifyDataSetChanged();
             hideProgressBar();
@@ -157,6 +176,7 @@ public class RequestActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS));
                 return headers;
             }
@@ -169,6 +189,7 @@ public class RequestActivity extends AppCompatActivity {
             @Override
             public byte[] getBody() {
                 Map<String, String> params = new HashMap<>();
+
                 params.put("panel_id", "1");
                 params.put("gubun", "select_share_total");
                 params.put("start", String.valueOf(mOffSet));
@@ -176,6 +197,7 @@ public class RequestActivity extends AppCompatActivity {
                 params.put("encoding", "utf-8");
                 if (params.size() > 0) {
                     StringBuilder encodedParams = new StringBuilder();
+
                     try {
                         params.forEach((k, v) -> {
                             try {
@@ -199,6 +221,7 @@ public class RequestActivity extends AppCompatActivity {
 
     public void refresh() {
         mOffSet = 1;
+
         mGroupItemKeys.clear();
         mGroupItemValues.clear();
         mAdapter.addFooterView();
@@ -208,19 +231,21 @@ public class RequestActivity extends AppCompatActivity {
 
     private void initFirebaseData() {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("UserGroupList");
+
         fetchDataTaskFromFirebase(databaseReference.child(AppController.getInstance().getPreferenceManager().getUser().getUid()).orderByValue().equalTo(false), false);
     }
 
     private void fetchDataTaskFromFirebase(Query query, final boolean isRecursion) {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (isRecursion) {
                     try {
                         String key = dataSnapshot.getKey();
                         GroupItem value = dataSnapshot.getValue(GroupItem.class);
                         assert value != null;
                         int index = mGroupItemKeys.indexOf(value.getId());
+
                         if (index > -1) {
                             //mGroupItemValues.set(index, value); // isAdmin값때문에 주석처리
                             mGroupItemKeys.set(index, key);
@@ -232,13 +257,14 @@ public class RequestActivity extends AppCompatActivity {
                 } else {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Groups");
+
                         fetchDataTaskFromFirebase(databaseReference.child(snapshot.getKey()), true);
                     }
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
             }
         });

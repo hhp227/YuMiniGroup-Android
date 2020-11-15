@@ -34,11 +34,17 @@ public class YouTubeSearchActivity extends AppCompatActivity {
     public static final String API_KEY = "AIzaSyCHF6p97aduruLMxgCuEVfFaKUiGPcMuOQ";
 
     private static final int LIMIT = 50;
+
     private int mType;
+
     private YouTubeListAdapter mAdapter;
+
     private List<YouTubeItem> mYouTubeItemList;
+
     private ProgressBar mProgressBar;
+
     private ShimmerFrameLayout mShimmerFrameLayout;
+
     private String mSearchText;
 
     @Override
@@ -51,7 +57,7 @@ public class YouTubeSearchActivity extends AppCompatActivity {
         mProgressBar = findViewById(R.id.pb_group);
         mShimmerFrameLayout = findViewById(R.id.sfl_group);
         mYouTubeItemList = new ArrayList<>();
-        mAdapter = new YouTubeListAdapter(this, mYouTubeItemList);
+        mAdapter = new YouTubeListAdapter(mYouTubeItemList);
         mSearchText = "";
         mType = getIntent().getIntExtra("type", 0);
 
@@ -106,11 +112,12 @@ public class YouTubeSearchActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                mSearchText = query;
+
                 showProgressBar();
                 mShimmerFrameLayout.setVisibility(View.VISIBLE);
                 mYouTubeItemList.clear();
                 mAdapter.notifyDataSetChanged();
-                mSearchText = query;
                 fetchDataTask();
                 searchView.clearFocus();
                 return true;
@@ -129,6 +136,7 @@ public class YouTubeSearchActivity extends AppCompatActivity {
             hideProgressBar();
             try {
                 JSONArray items = response.getJSONArray("items");
+
                 for (int i = 0; i < items.length(); i++) {
                     JSONObject jsonObject = items.getJSONObject(i);
                     String id = jsonObject.getJSONObject("id").getString("videoId");
@@ -137,8 +145,8 @@ public class YouTubeSearchActivity extends AppCompatActivity {
                     String title = snippet.getString("title");
                     String thumbnail = snippet.getJSONObject("thumbnails").getJSONObject("medium").getString("url");
                     String channelTitle = snippet.getString("channelTitle");
-
                     YouTubeItem youTubeItem = new YouTubeItem(id, publishedAt, title, thumbnail, channelTitle);
+
                     mYouTubeItemList.add(youTubeItem);
                     mAdapter.notifyItemInserted(mYouTubeItemList.size() - 1);
                 }

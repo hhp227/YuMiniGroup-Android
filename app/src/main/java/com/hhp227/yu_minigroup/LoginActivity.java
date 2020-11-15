@@ -37,9 +37,13 @@ import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "로그인화면";
+
     private CookieManager mCookieManager;
+
     private EditText mInputId, mInputPassword;
+
     private PreferenceManager mPreferenceManager;
+
     private ProgressBar mProgressBar;
 
     @Override
@@ -70,6 +74,7 @@ public class LoginActivity extends AppCompatActivity {
                     try {
                         Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new ByteArrayInputStream(response.getBytes("utf-8"))));
                         String code = getTextNodeValue(((Element) document.getElementsByTagName("neo").item(0)).getElementsByTagName("code").item(0));
+
                         if (code.equals("00")) {
                             Snackbar.make(getCurrentFocus(), "로그인 성공", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                             loginLMS(id, password, null, null);
@@ -93,6 +98,7 @@ public class LoginActivity extends AppCompatActivity {
                         params.put("usr_pw", password);
                         if (params.size() > 0) {
                             StringBuilder encodedParams = new StringBuilder();
+
                             try {
                                 params.forEach((k, v) -> {
                                     try {
@@ -134,9 +140,7 @@ public class LoginActivity extends AppCompatActivity {
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                List<Header> headers = response.allHeaders;
-
-                headers.stream()
+                response.allHeaders.stream()
                         .filter(header -> header.getName().equals("Set-Cookie") && header.getValue().contains("ssotoken"))
                         .forEach(header -> loginLMS(id, password, header.getValue(), cookie));
                 return super.parseNetworkResponse(response);
@@ -209,6 +213,7 @@ public class LoginActivity extends AppCompatActivity {
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.CREATE_LOG, response -> {
             try {
                 JSONObject jsonObject = new JSONObject(response);
+
                 if (!jsonObject.getBoolean("error")) {
 
                     // 로그기록 성공

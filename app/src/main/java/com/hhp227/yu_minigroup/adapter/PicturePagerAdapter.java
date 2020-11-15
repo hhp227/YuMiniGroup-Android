@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 import com.bumptech.glide.Glide;
 import com.hhp227.yu_minigroup.R;
@@ -12,24 +13,24 @@ import com.hhp227.yu_minigroup.helper.ZoomImageView;
 import java.util.List;
 
 public class PicturePagerAdapter extends PagerAdapter {
-    private Context mContext;
-    private LayoutInflater mInflater;
-    private List<String> mImageList;
+    private final List<String> mImageList;
 
-    public PicturePagerAdapter(Context context, List<String> images) {
-        this.mContext = context;
+    private LayoutInflater mInflater;
+
+    public PicturePagerAdapter(List<String> images) {
         this.mImageList = images;
     }
 
+    @NonNull
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
+    public Object instantiateItem(@NonNull ViewGroup container, int position) {
         if (mInflater == null)
-            mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mInflater = (LayoutInflater) container.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = mInflater.inflate(R.layout.image_fullscreen, container, false);
         ZoomImageView zoomImageView = view.findViewById(R.id.ziv_image);
         String image = mImageList.get(position);
 
-        Glide.with(mContext).load(image).into(zoomImageView);
+        Glide.with(view.getContext()).load(image).into(zoomImageView);
         container.addView(view);
         return view;
     }
@@ -40,12 +41,12 @@ public class PicturePagerAdapter extends PagerAdapter {
     }
 
     @Override
-    public boolean isViewFromObject(View view, Object object) {
+    public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
         return view == object;
     }
 
     @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
+    public void destroyItem(ViewGroup container, int position, @NonNull Object object) {
         container.removeView((View) object);
     }
 }

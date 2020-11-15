@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.davidmigloz:youtube-android-player-api-gradle:1.2.2.1@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/925030063848b46a3f842ab4021d80ec/jetified-youtube-android-player-api-gradle-1.2.2.1/jars/libs/YouTubeAndroidPlayerApi.jar!/" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/925030063848b46a3f842ab4021d80ec/jetified-youtube-android-player-api-gradle-1.2.2.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/925030063848b46a3f842ab4021d80ec/jetified-youtube-android-player-api-gradle-1.2.2.1/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/edd79945cca2a5b69d0542b14a060931/jetified-youtube-android-player-api-gradle-1.2.2.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/edd79945cca2a5b69d0542b14a060931/jetified-youtube-android-player-api-gradle-1.2.2.1/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/edd79945cca2a5b69d0542b14a060931/jetified-youtube-android-player-api-gradle-1.2.2.1/jars/libs/YouTubeAndroidPlayerApi.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

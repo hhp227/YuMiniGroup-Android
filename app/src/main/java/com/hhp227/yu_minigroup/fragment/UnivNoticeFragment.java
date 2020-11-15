@@ -36,17 +36,29 @@ import java.util.List;
 
 public class UnivNoticeFragment extends Fragment {
     private static final int MAX_PAGE = 10; // 최대볼수 있는 페이지 수
+
     private static final String TAG = "영대소식";
+
     private boolean mHasRequestedMore; // 데이터 불러올때 중복안되게 하기위한 변수
+
     private int mOffSet;
+
     private AppCompatActivity mActivity;
+
     private ArrayList<BbsItem> mBbsItemArrayList;
+
     private BbsListAdapter mAdapter;
+
     private DrawerLayout mDrawerLayout;
+
     private ProgressBar mProgressBar;
+
     private RecyclerView mRecyclerView;
+
     private RecyclerView.OnScrollListener mOnScrollListener;
+
     private SwipeRefreshLayout mSwipeRefreshLayout;
+
     private Toolbar mToolbar;
 
     public UnivNoticeFragment() {
@@ -58,7 +70,7 @@ public class UnivNoticeFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity);
         mRecyclerView = view.findViewById(R.id.recycler_view);
@@ -68,7 +80,7 @@ public class UnivNoticeFragment extends Fragment {
         mToolbar = view.findViewById(R.id.toolbar);
         mSwipeRefreshLayout = view.findViewById(R.id.srl);
         mBbsItemArrayList = new ArrayList<>();
-        mAdapter = new BbsListAdapter(mActivity, mBbsItemArrayList);
+        mAdapter = new BbsListAdapter(mBbsItemArrayList);
         mOnScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -98,6 +110,7 @@ public class UnivNoticeFragment extends Fragment {
         setDrawerToggle();
         mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
             mOffSet = 1; // offSet 초기화
+
             mBbsItemArrayList.clear();
             mSwipeRefreshLayout.setRefreshing(false);
             fetchDataList();
@@ -119,6 +132,7 @@ public class UnivNoticeFragment extends Fragment {
 
     private void setDrawerToggle() {
         ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(mActivity, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
         mDrawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
     }
@@ -126,13 +140,16 @@ public class UnivNoticeFragment extends Fragment {
     private void fetchDataList() {
         String tag_string_req = "req_yu_news";
         StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.URL_YU_NOTICE.replace("{PAGE}", String.valueOf(mOffSet)), this::onResponse, this::onErrorResponse);
+
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
 
     private void onResponse(String response) {
         Source source = new Source(response);
+
         try {
             Element boardList = source.getFirstElementByClass("boardList");
+
             for (Element tr : boardList.getFirstElement(HTMLElementName.TBODY).getAllElements(HTMLElementName.TR)) {
                 BbsItem bbsItem = new BbsItem();
                 List<Element> tds = tr.getChildElements();

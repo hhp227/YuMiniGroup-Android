@@ -35,16 +35,25 @@ import java.util.UUID;
 
 public class CreateActivity extends AppCompatActivity {
     public static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
+
     public static final int CAMERA_PICK_IMAGE_REQUEST_CODE = 200;
 
     private static final String TAG = CreateActivity.class.getSimpleName();
+
     private boolean mJoinTypeCheck;
+
     private String mCookie, mPushId;
+
     private Bitmap mBitmap;
+
     private EditText mGroupTitle, mGroupDescription;
+
     private ImageView mGroupImage, mResetTitle;
+
     private PreferenceManager mPreferenceManager;
+
     private RelativeLayout mProgressLayout;
+
     private TextWatcher mTextWatcher;
 
     @Override
@@ -110,6 +119,7 @@ public class CreateActivity extends AppCompatActivity {
                 String title = mGroupTitle.getText().toString().trim();
                 String description = mGroupDescription.getText().toString().trim();
                 String join = !mJoinTypeCheck ? "0" : "1";
+
                 if (!title.isEmpty() && !description.isEmpty()) {
                     showProgressLayout();
                     AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.POST, EndPoint.CREATE_GROUP, null, response -> {
@@ -117,6 +127,7 @@ public class CreateActivity extends AppCompatActivity {
                             if (!response.getBoolean("isError")) {
                                 String groupId = response.getString("CLUB_GRP_ID").trim();
                                 String groupName = response.getString("GRP_NM");
+
                                 if (mBitmap != null)
                                     groupImageUpdate(groupId, groupName, description, join);
                                 else {
@@ -135,6 +146,7 @@ public class CreateActivity extends AppCompatActivity {
                         @Override
                         public Map<String, String> getHeaders() {
                             Map<String, String> headers = new HashMap<>();
+
                             headers.put("Cookie", mCookie);
                             return headers;
                         }
@@ -147,11 +159,13 @@ public class CreateActivity extends AppCompatActivity {
                         @Override
                         public byte[] getBody() {
                             Map<String, String> params = new HashMap<>();
+
                             params.put("GRP_NM", title);
                             params.put("TXT", description);
                             params.put("JOIN_DIV", join);
                             if (params.size() > 0) {
                                 StringBuilder encodedParams = new StringBuilder();
+
                                 try {
                                     params.forEach((k, v) -> {
                                         try {
@@ -194,10 +208,12 @@ public class CreateActivity extends AppCompatActivity {
         switch (item.getTitle().toString()) {
             case "카메라":
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
                 startActivityForResult(cameraIntent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
                 break;
             case "갤러리":
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK);
+
                 galleryIntent.setType(MediaStore.Images.Media.CONTENT_TYPE);
                 galleryIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(galleryIntent, CAMERA_PICK_IMAGE_REQUEST_CODE);
@@ -205,6 +221,7 @@ public class CreateActivity extends AppCompatActivity {
             case "이미지 없음":
                 mGroupImage.setImageResource(R.drawable.add_photo);
                 mBitmap = null;
+
                 Snackbar.make(getCurrentFocus(), "이미지 없음 선택", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 break;
         }
@@ -216,16 +233,19 @@ public class CreateActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             mBitmap = (Bitmap) data.getExtras().get("data");
+
             mGroupImage.setImageBitmap(mBitmap);
         } else if (requestCode == CAMERA_PICK_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             Uri fileUri = data.getData();
             mBitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
+
             mGroupImage.setImageBitmap(mBitmap);
         }
     }
 
     private void createGroupSuccess(String groupId, String groupName) {
         Intent intent = new Intent(CreateActivity.this, GroupActivity.class);
+
         intent.putExtra("admin", true);
         intent.putExtra("grp_id", groupId);
         intent.putExtra("grp_nm", groupName);
@@ -249,6 +269,7 @@ public class CreateActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Cookie", mCookie);
                 return headers;
             }
@@ -256,6 +277,7 @@ public class CreateActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
+
                 params.put("CLUB_GRP_ID", clubGrpId);
                 return params;
             }
@@ -263,12 +285,14 @@ public class CreateActivity extends AppCompatActivity {
             @Override
             protected Map<String, DataPart> getByteData() {
                 Map<String, DataPart> params = new HashMap<>();
+
                 params.put("file", new DataPart(UUID.randomUUID().toString().replace("-", "").concat(".jpg"), getFileDataFromDrawable(mBitmap)));
                 return params;
             }
 
             private byte[] getFileDataFromDrawable(Bitmap bitmap) {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
                 bitmap.compress(Bitmap.CompressFormat.PNG, 80, byteArrayOutputStream);
                 return byteArrayOutputStream.toByteArray();
             }
@@ -278,8 +302,9 @@ public class CreateActivity extends AppCompatActivity {
     private void insertGroupToFirebase(String groupId, String groupName, String description, String joinType) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         Map<String, Boolean> members = new HashMap<>();
-        members.put(mPreferenceManager.getUser().getUid(), true);
         GroupItem groupItem = new GroupItem();
+
+        members.put(mPreferenceManager.getUser().getUid(), true);
         groupItem.setId(groupId);
         groupItem.setTimestamp(System.currentTimeMillis());
         groupItem.setAuthor(mPreferenceManager.getUser().getName());
@@ -290,10 +315,9 @@ public class CreateActivity extends AppCompatActivity {
         groupItem.setJoinType(joinType);
         groupItem.setMembers(members);
         groupItem.setMemberCount(members.size());
-
         mPushId = databaseReference.push().getKey();
-
         Map<String, Object> childUpdates = new HashMap<>();
+
         childUpdates.put("Groups/" + mPushId, groupItem);
         childUpdates.put("UserGroupList/" + mPreferenceManager.getUser().getUid() + "/" + mPushId, true);
         databaseReference.updateChildren(childUpdates);

@@ -6,6 +6,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,12 +29,11 @@ public class UserFragment extends DialogFragment {
     }
 
     public static UserFragment newInstance() {
-        UserFragment fragment = new UserFragment();
-        return fragment;
+        return new UserFragment();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (getDialog() != null) {
             getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
             getDialog().getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -42,19 +42,19 @@ public class UserFragment extends DialogFragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ImageView profileImage = view.findViewById(R.id.iv_profile_image);
         TextView userName = view.findViewById(R.id.tv_name);
         Button send = view.findViewById(R.id.b_send);
         Button close = view.findViewById(R.id.b_close);
         Bundle bundle = getArguments();
+
         if (bundle != null) {
             mUid = bundle.getString("uid");
             mName = bundle.getString("name");
             mValue = bundle.getString("value");
         }
-
         Glide.with(this)
                 .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mUid), new LazyHeaders.Builder()
                         .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
@@ -71,6 +71,7 @@ public class UserFragment extends DialogFragment {
             send.setText("메시지 보내기");
             send.setOnClickListener(v -> {
                 Intent intent = new Intent(getContext(), ChatActivity.class);
+
                 intent.putExtra("grp_chat", false);
                 intent.putExtra("chat_nm", mName);
                 intent.putExtra("uid", mUid);

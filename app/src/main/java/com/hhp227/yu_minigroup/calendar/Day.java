@@ -11,12 +11,19 @@ import java.util.concurrent.TimeUnit;
 
 public class Day {
     int startDay;
+
     int monthEndDay;
+
     int day;
+
     int year;
+
     int month;
+
     Context context;
+
     BaseAdapter adapter;
+
     ArrayList<Event> events = new ArrayList<>();
 
     Day(Context context,int day, int year, int month) {

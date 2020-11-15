@@ -37,17 +37,29 @@ import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
     private static final int LIMIT = 30;
+
     private boolean mHasRequestedMore, mHasSelection, mIsGroupChat;
+
     private CardView mButtonSend;
+
     private DatabaseReference mDatabaseReference;
+
     private EditText mInputMessage;
+
     private List<MessageItem> mMessageItemList;
+
     private MessageListAdapter mAdapter;
+
     private RecyclerView mRecyclerView;
+
     private String mCursor, mSender, mReceiver, mValue, mFirstMessageKey;
+
     private TextView mSendText;
+
     private TextWatcher mTextWatcher;
+
     private User mUser;
+
     private View.OnLayoutChangeListener mOnLayoutChangeListener;
 
     @Override
@@ -68,7 +80,7 @@ public class ChatActivity extends AppCompatActivity {
         mReceiver = intent.getStringExtra("uid");
         mValue = intent.getStringExtra("value");
         mIsGroupChat = intent.getBooleanExtra("grp_chat", false);
-        mAdapter = new MessageListAdapter(this, mMessageItemList, mSender);
+        mAdapter = new MessageListAdapter(mMessageItemList, mSender);
         mOnLayoutChangeListener = (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
             if (bottom < oldBottom && mHasSelection)
                 mRecyclerView.post(() -> mRecyclerView.scrollToPosition(mMessageItemList.size() - 1));
@@ -112,6 +124,7 @@ public class ChatActivity extends AppCompatActivity {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (!mRecyclerView.canScrollVertically(-1) && !mHasRequestedMore && mCursor != null) {
                     mHasRequestedMore = true;
+
                     fetchMessageList(mIsGroupChat ? mDatabaseReference.child(mReceiver).orderByKey().endAt(mCursor).limitToLast(LIMIT) : mDatabaseReference.child(mSender).child(mReceiver).orderByKey().endAt(mCursor).limitToLast(LIMIT), mMessageItemList.size(), mCursor);
                     mCursor = null;
                 }
@@ -166,6 +179,7 @@ public class ChatActivity extends AppCompatActivity {
                     return;
                 }
                 MessageItem messageItem = dataSnapshot.getValue(MessageItem.class);
+
                 mMessageItemList.add(mMessageItemList.size() - prevCnt, messageItem); // 새로 추가하면 prevCnt는 0으로 됨
                 mAdapter.notifyDataSetChanged();
                 //mAdapter.notifyItemRangeChanged(mMessageItemList.size() > 1 ? mMessageItemList.size() - 2 : 0, 2);
@@ -196,6 +210,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void sendMessage() {
         Map<String, Object> map = new HashMap<>();
+
         map.put("from", mSender);
         map.put("name", mUser.getName());
         map.put("message", mInputMessage.getText().toString());
@@ -230,6 +245,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
+
                 headers.put("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS));
                 return headers;
             }
@@ -242,11 +258,13 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public byte[] getBody() {
                 Map<String, String> params = new HashMap<>();
+
                 params.put("TXT", mInputMessage.getText().toString());
                 params.put("send_msg", "Y");
                 params.put("USERS", mValue);
                 if (params.size() > 0) {
                     StringBuilder encodedParams = new StringBuilder();
+
                     try {
                         params.forEach((k, v) -> {
                             try {

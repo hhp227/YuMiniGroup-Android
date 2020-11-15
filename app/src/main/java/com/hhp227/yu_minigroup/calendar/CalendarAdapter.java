@@ -14,10 +14,15 @@ import java.util.concurrent.TimeUnit;
 
 public class CalendarAdapter extends BaseAdapter {
     static final int FIRST_DAY_OF_WEEK = 0;
+
     Context context;
+
     Calendar cal;
+
     public String[] days;
+
     //OnAddNewEventClick mAddEvent;
+
     ArrayList<Day> dayList = new ArrayList<>();
 
     public CalendarAdapter(Context context, Calendar cal) {
