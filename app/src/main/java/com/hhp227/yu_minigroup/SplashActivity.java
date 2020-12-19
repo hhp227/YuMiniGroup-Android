@@ -15,6 +15,7 @@ import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
+import com.hhp227.yu_minigroup.volley.util.SSLConnect;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -112,6 +113,8 @@ public class SplashActivity extends AppCompatActivity {
                 return params;
             }
         };
+
+        new SSLConnect().postHttps(EndPoint.YU_PORTAL_LOGIN_URL, 1000, 1000);
         AppController.getInstance().addToRequestQueue(stringRequest, tagStringReq);
     }
 }

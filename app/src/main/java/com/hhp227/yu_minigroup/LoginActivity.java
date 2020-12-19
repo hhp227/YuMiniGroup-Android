@@ -1,6 +1,7 @@
 package com.hhp227.yu_minigroup;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.widget.Button;
@@ -16,6 +17,7 @@ import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
+import com.hhp227.yu_minigroup.volley.util.SSLConnect;
 import net.htmlparser.jericho.Source;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,58 +71,8 @@ public class LoginActivity extends AppCompatActivity {
             String password = mInputPassword.getText().toString();
 
             if (!id.isEmpty() && !password.isEmpty()) {
-                StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.LOGIN, response -> {
-                    VolleyLog.d(TAG, "로그인 응답 : " + response);
-                    try {
-                        Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new ByteArrayInputStream(response.getBytes("utf-8"))));
-                        String code = getTextNodeValue(((Element) document.getElementsByTagName("neo").item(0)).getElementsByTagName("code").item(0));
-
-                        if (code.equals("00")) {
-                            Snackbar.make(getCurrentFocus(), "로그인 성공", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                            loginLMS(id, password, null, null);
-                        } else {
-                            Snackbar.make(getCurrentFocus(), "로그인 실패", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                            hideProgressBar();
-                        }
-                    } catch (IOException | SAXException | ParserConfigurationException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> {
-                    VolleyLog.e(TAG, "로그인 에러 : " + error.getMessage());
-                    Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
-                    hideProgressBar();
-                }) {
-                    @Override
-                    public byte[] getBody() {
-                        Map<String, String> params = new HashMap<>();
-
-                        params.put("usr_id", id);
-                        params.put("usr_pw", password);
-                        if (params.size() > 0) {
-                            StringBuilder encodedParams = new StringBuilder();
-
-                            try {
-                                params.forEach((k, v) -> {
-                                    try {
-                                        encodedParams.append(URLEncoder.encode(k, getParamsEncoding()));
-                                        encodedParams.append("=");
-                                        encodedParams.append(URLEncoder.encode(v, getParamsEncoding()));
-                                        encodedParams.append("&");
-                                    } catch (UnsupportedEncodingException e) {
-                                        e.printStackTrace();
-                                    }
-                                });
-                                return encodedParams.toString().getBytes(getParamsEncoding());
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        throw new RuntimeException();
-                    }
-                };
-
                 showProgressBar();
-                AppController.getInstance().addToRequestQueue(stringRequest);
+                loginLMS(id, password, null, null);
             } else {
                 mInputId.setError(id.isEmpty() ? "아이디 또는 학번을 입력하세요." : null);
                 mInputPassword.setError(password.isEmpty() ? "패스워드를 입력하세요." : null);
@@ -131,6 +83,7 @@ public class LoginActivity extends AppCompatActivity {
     private void loginSSOyuPortal(String id, String password, String cookie) {
         String tagStringReq = "req_login_SSO";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.YU_PORTAL_LOGIN_URL, response -> {
+            // TODO 로그인 성공/실패에 대한 처리 분기 필요
             VolleyLog.d(TAG, "로그인 응답 : " + response);
             mCookieManager.setCookie(EndPoint.LOGIN_LMS, cookie);
         }, error -> {
@@ -167,6 +120,8 @@ public class LoginActivity extends AppCompatActivity {
                 return params;
             }
         };
+
+        new SSLConnect().postHttps(EndPoint.YU_PORTAL_LOGIN_URL, 1000, 1000);
         AppController.getInstance().addToRequestQueue(stringRequest, tagStringReq);
     }
 
@@ -178,7 +133,7 @@ public class LoginActivity extends AppCompatActivity {
                 getUserInfo(id, password);
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
-            Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+            Snackbar.make(getCurrentFocus(), "로그인 실패", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             hideProgressBar();
         }) {
             @Override
