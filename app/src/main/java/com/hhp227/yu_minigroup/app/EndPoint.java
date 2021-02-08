@@ -39,7 +39,7 @@ public interface EndPoint {
     String URL_YU_MOBILE = "http://m.yu.ac.kr";
     String URL_YU_NOTICE = URL_YU + "/_korean/about/index.php?c=about_08_a_list&page={PAGE}";
     String URL_YU_MOBILE_NOTICE = URL_YU_MOBILE + "/_mobile/notice/?c=notice_01_view&seq={ID}";
-    String URL_YU_LIBRARY_SEAT = "http://slib.yu.ac.kr";
+    String URL_YU_LIBRARY_SEAT = "https://slib.yu.ac.kr";
     String URL_YU_LIBRARY_SEAT_ROOMS = URL_YU_LIBRARY_SEAT + "/Clicker/GetClickerReadingRooms";
     String URL_YU_LIBRARY_SEAT_DETAIL = URL_YU_LIBRARY_SEAT + "/clicker/UserSeat/{ID}";
     String URL_YU_SHUTTLE_BUS = URL_YU_MOBILE + "/_mobile/life/?c=life_02_02";

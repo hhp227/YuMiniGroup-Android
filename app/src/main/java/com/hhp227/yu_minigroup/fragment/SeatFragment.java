@@ -103,7 +103,10 @@ public class SeatFragment extends Fragment {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }, error -> VolleyLog.e(error.getMessage())));
+        }, error -> {
+            if (error.getMessage() != null)
+                VolleyLog.e(error.getMessage());
+        }));
     }
 
     @Override
