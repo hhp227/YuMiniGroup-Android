@@ -137,7 +137,8 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
         mAdapter = new ReplyListAdapter(mReplyItemKeys, mReplyItemValues);
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mArticleDetail.setOnLongClickListener(v -> {
             v.showContextMenu();
             return true;
@@ -150,6 +151,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 mInputReply.setText("");
                 if (v != null) {
                     InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+
                     inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
             } else

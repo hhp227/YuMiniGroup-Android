@@ -27,15 +27,15 @@ public class PictureActivity extends AppCompatActivity {
         mCount = findViewById(R.id.tv_count);
         int position = 0;
         Bundle b = getIntent().getExtras();
-        PicturePagerAdapter pagerAdapter = new PicturePagerAdapter(mImages);
 
         if (b != null) {
             mImages = b.getStringArrayList("images");
             position = b.getInt("position");
         }
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mViewPager.setAdapter(pagerAdapter);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mViewPager.setAdapter(new PicturePagerAdapter(mImages));
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

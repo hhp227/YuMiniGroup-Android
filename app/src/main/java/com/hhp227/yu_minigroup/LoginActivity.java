@@ -209,8 +209,8 @@ public class LoginActivity extends AppCompatActivity {
                 user.setUserId(id);
                 user.setPassword(password);
                 user.setName(extractedList.get(0));
-                user.setEmail(extractedList.get(1));
-                user.setPhoneNumber(extractedList.get(2));
+                user.setPhoneNumber(extractedList.get(1));
+                user.setEmail(extractedList.get(2));
                 createLog(user);
                 getUserUniqueId(user);
             } catch (Exception e) {
