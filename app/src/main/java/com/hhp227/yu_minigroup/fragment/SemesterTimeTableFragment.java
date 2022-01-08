@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// TODO viewBinding 으로 이전할것
+
 public class SemesterTimeTableFragment extends Fragment {
     private static final int ROW = 26;
 

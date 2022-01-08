@@ -26,11 +26,11 @@ import static com.hhp227.yu_minigroup.fragment.GroupFragment.UPDATE_GROUP;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    public ActivityMainBinding mBinding;
+
     private CookieManager mCookieManager;
 
     private PreferenceManager mPreferenceManager;
-
-    private ActivityMainBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

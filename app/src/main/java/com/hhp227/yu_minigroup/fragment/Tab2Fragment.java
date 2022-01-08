@@ -2,7 +2,6 @@ package com.hhp227.yu_minigroup.fragment;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,9 +13,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
-import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
-import com.hhp227.yu_minigroup.calendar.ExtendedCalendarView;
+import com.hhp227.yu_minigroup.databinding.FragmentTab2Binding;
+import com.hhp227.yu_minigroup.databinding.HeaderCalendarBinding;
+import com.hhp227.yu_minigroup.databinding.ScheduleItemBinding;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
@@ -36,18 +36,20 @@ public class Tab2Fragment extends Fragment {
 
     private List<Map<String, String>> mList;
 
+    private FragmentTab2Binding mBinding;
+
     public Tab2Fragment() {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_tab2, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mBinding = FragmentTab2Binding.inflate(inflater, container, false);
+        return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        RecyclerView recyclerView = view.findViewById(R.id.rv_cal);
         mList = new ArrayList<>();
         mCalendar = Calendar.getInstance();
         mAdapter = new RecyclerView.Adapter() {
@@ -55,11 +57,9 @@ public class Tab2Fragment extends Fragment {
             @Override
             public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 if (viewType == TYPE_CALENDAR) {
-                    View view = LayoutInflater.from(getContext()).inflate(R.layout.header_calendar, parent, false);
-                    return new HeaderHolder(view);
+                    return new HeaderHolder(HeaderCalendarBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
                 } else if (viewType == TYPE_ITEM) {
-                    View view = LayoutInflater.from(getContext()).inflate(R.layout.schedule_item, parent, false);
-                    return new ItemHolder(view);
+                    return new ItemHolder(ScheduleItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
                 }
                 throw new RuntimeException();
             }
@@ -82,9 +82,15 @@ public class Tab2Fragment extends Fragment {
             }
         };
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(mAdapter);
+        mBinding.rvCal.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.rvCal.setAdapter(mAdapter);
         fetchDataTask();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 
     private void fetchDataTask() {
@@ -124,22 +130,22 @@ public class Tab2Fragment extends Fragment {
     }
 
     public class HeaderHolder extends RecyclerView.ViewHolder {
-        public ExtendedCalendarView extendedCalendarView;
+        private final HeaderCalendarBinding mBinding;
 
-        public HeaderHolder(View itemView) {
-            super(itemView);
-            extendedCalendarView = itemView.findViewById(R.id.calendar);
+        public HeaderHolder(HeaderCalendarBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
 
-            extendedCalendarView.prev.setOnClickListener(v -> {
-                extendedCalendarView.previousMonth();
+            mBinding.calendar.prev.setOnClickListener(v -> {
+                mBinding.calendar.previousMonth();
                 if (mCalendar.get(Calendar.MONTH) == mCalendar.getActualMinimum(Calendar.MONTH))
                     mCalendar.set((mCalendar.get(Calendar.YEAR) - 1), mCalendar.getActualMaximum(Calendar.MONTH),1);
                 else
                     mCalendar.set(Calendar.MONTH, mCalendar.get(Calendar.MONTH) - 1);
                 fetchDataTask();
             });
-            extendedCalendarView.next.setOnClickListener(v -> {
-                extendedCalendarView.nextMonth();
+            mBinding.calendar.next.setOnClickListener(v -> {
+                mBinding.calendar.nextMonth();
                 if (mCalendar.get(Calendar.MONTH) == mCalendar.getActualMaximum(Calendar.MONTH))
                     mCalendar.set((mCalendar.get(Calendar.YEAR) + 1), mCalendar.getActualMinimum(Calendar.MONTH),1);
                 else
@@ -150,17 +156,16 @@ public class Tab2Fragment extends Fragment {
     }
 
     public static class ItemHolder extends RecyclerView.ViewHolder {
-        private final TextView date, content;
+        private final ScheduleItemBinding mBinding;
 
-        public ItemHolder(View itemView) {
-            super(itemView);
-            date = itemView.findViewById(R.id.date);
-            content = itemView.findViewById(R.id.content);
+        public ItemHolder(ScheduleItemBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
         }
 
         public void bind(Map<String, String> map) {
-            date.setText(map.get("날짜"));
-            content.setText(map.get("내용"));
+            mBinding.date.setText(map.get("날짜"));
+            mBinding.content.setText(map.get("내용"));
         }
     }
 }

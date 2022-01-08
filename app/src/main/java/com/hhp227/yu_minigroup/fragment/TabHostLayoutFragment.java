@@ -5,25 +5,21 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.WriteActivity;
+import com.hhp227.yu_minigroup.databinding.FragmentTabHostLayoutBinding;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,17 +28,11 @@ import java.util.stream.Stream;
 
 public class TabHostLayoutFragment extends Fragment {
     private static final String IS_ADMIN = "admin";
-
     private static final String GROUP_ID = "grp_id";
-
     private static final String GROUP_NAME = "grp_nm";
-
     private static final String GROUP_IMAGE = "grp_img";
-
     private static final String POSITION = "pos";
-
     private static final String KEY = "key";
-
     private static final String[] TAB_NAMES = {"소식", "일정", "맴버", "설정"};
 
     private boolean mIsAdmin;
@@ -51,9 +41,7 @@ public class TabHostLayoutFragment extends Fragment {
 
     private String mGroupId, mGroupName, mGroupImage, mKey;
 
-    private TabLayout mTabLayout;
-
-    private ViewPager mViewPager;
+    private FragmentTabHostLayoutBinding mBinding;
 
     public TabHostLayoutFragment() {
     }
@@ -86,18 +74,14 @@ public class TabHostLayoutFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_tab_host_layout, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mBinding = FragmentTabHostLayoutBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        CollapsingToolbarLayout toolbarLayout = view.findViewById(R.id.collapsing_toolbar);
-        FloatingActionButton floatingActionButton = view.findViewById(R.id.fab);
-        ImageView headerImage = view.findViewById(R.id.iv_header);
-        ImageView titleImage = view.findViewById(R.id.iv_title);
-        View gradient = view.findViewById(R.id.gradient);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         List<Fragment> fragmentList = Stream.<Fragment>builder()
                 .add(Tab1Fragment.newInstance(mIsAdmin, mGroupId, mGroupName, mGroupImage, mKey))
@@ -118,22 +102,23 @@ public class TabHostLayoutFragment extends Fragment {
                 return fragmentList.size();
             }
         };
-        Toolbar toolbar = view.findViewById(R.id.toolbar);
-        mTabLayout = view.findViewById(R.id.tab_layout);
-        mViewPager = view.findViewById(R.id.view_pager);
 
-        activity.setSupportActionBar(toolbar);
-        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        activity.getSupportActionBar().setTitle(mGroupName);
-        toolbarLayout.setTitleEnabled(false);
-        Arrays.stream(TAB_NAMES).forEach(s -> mTabLayout.addTab(mTabLayout.newTab().setText(s)));
-        mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        if (activity != null) {
+            activity.setSupportActionBar(mBinding.toolbar);
+            if (activity.getSupportActionBar() != null) {
+                activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                activity.getSupportActionBar().setTitle(mGroupName);
+            }
+        }
+        mBinding.collapsingToolbar.setTitleEnabled(false);
+        Arrays.stream(TAB_NAMES).forEach(s -> mBinding.tabLayout.addTab(mBinding.tabLayout.newTab().setText(s)));
+        mBinding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 int position = tab.getPosition();
 
-                mViewPager.setCurrentItem(position);
-                floatingActionButton.setVisibility(position != 0 ? View.GONE : View.VISIBLE);
+                mBinding.viewPager.setCurrentItem(position);
+                mBinding.fab.setVisibility(position != 0 ? View.GONE : View.VISIBLE);
             }
 
             @Override
@@ -144,11 +129,11 @@ public class TabHostLayoutFragment extends Fragment {
             public void onTabReselected(TabLayout.Tab tab) {
             }
         });
-        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
-        mViewPager.setOffscreenPageLimit(TAB_NAMES.length);
-        mViewPager.setAdapter(adapter);
-        floatingActionButton.setOnClickListener(v -> {
-            if (mTabLayout.getSelectedTabPosition() == 0) {
+        mBinding.viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mBinding.tabLayout));
+        mBinding.viewPager.setOffscreenPageLimit(TAB_NAMES.length);
+        mBinding.viewPager.setAdapter(adapter);
+        mBinding.fab.setOnClickListener(v -> {
+            if (mBinding.tabLayout.getSelectedTabPosition() == 0) {
                 Intent intent = new Intent(getActivity(), WriteActivity.class);
 
                 intent.putExtra("admin", mIsAdmin);
@@ -165,34 +150,37 @@ public class TabHostLayoutFragment extends Fragment {
             Glide.with(this)
                     .load(mGroupImage)
                     .apply(RequestOptions.errorOf(R.drawable.header))
-                    .into(headerImage);
-            titleImage.setVisibility(View.INVISIBLE);
-            gradient.setVisibility(View.VISIBLE);
-            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            getActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-            getActivity().getWindow().setStatusBarColor(Color.TRANSPARENT);
-            ViewGroup.LayoutParams toolbarLayoutParams = toolbar.getLayoutParams();
+                    .into(mBinding.ivHeader);
+            mBinding.ivTitle.setVisibility(View.INVISIBLE);
+            mBinding.gradient.setVisibility(View.VISIBLE);
+            if (activity != null && activity.getWindow() != null) {
+                activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                activity.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+                activity.getWindow().setStatusBarColor(Color.TRANSPARENT);
+            }
+            ViewGroup.LayoutParams toolbarLayoutParams = mBinding.toolbar.getLayoutParams();
             toolbarLayoutParams.height = toolbarLayoutParams.height + getStatusBarHeight();
 
-            toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
-            toolbar.setLayoutParams(toolbarLayoutParams);
-            LinearLayout.LayoutParams toolbarLayoutLayoutParams = (LinearLayout.LayoutParams) toolbarLayout.getLayoutParams();
+            mBinding.toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
+            mBinding.toolbar.setLayoutParams(toolbarLayoutParams);
+            LinearLayout.LayoutParams toolbarLayoutLayoutParams = (LinearLayout.LayoutParams) mBinding.collapsingToolbar.getLayoutParams();
             toolbarLayoutLayoutParams.height = toolbarLayoutLayoutParams.height + getStatusBarHeight();
 
-            toolbarLayout.setLayoutParams(toolbarLayoutLayoutParams);
+            mBinding.collapsingToolbar.setLayoutParams(toolbarLayoutLayoutParams);
         } else {
-            titleImage.setVisibility(View.VISIBLE);
-            gradient.setVisibility(View.INVISIBLE);
+            mBinding.ivTitle.setVisibility(View.VISIBLE);
+            mBinding.gradient.setVisibility(View.INVISIBLE);
         }
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mViewPager.clearOnPageChangeListeners();
-        mTabLayout.clearOnTabSelectedListeners();
-        mTabLayout.removeAllTabs();
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding.viewPager.clearOnPageChangeListeners();
+        mBinding.tabLayout.clearOnTabSelectedListeners();
+        mBinding.tabLayout.removeAllTabs();
+        mBinding = null;
     }
 
     @Override

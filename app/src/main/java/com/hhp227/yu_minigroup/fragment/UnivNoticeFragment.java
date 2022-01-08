@@ -2,6 +2,7 @@ package com.hhp227.yu_minigroup.fragment;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
@@ -22,10 +23,12 @@ import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.snackbar.Snackbar;
+import com.hhp227.yu_minigroup.MainActivity;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.BbsListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.FragmentListBinding;
 import com.hhp227.yu_minigroup.dto.BbsItem;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
@@ -49,41 +52,29 @@ public class UnivNoticeFragment extends Fragment {
 
     private BbsListAdapter mAdapter;
 
-    private DrawerLayout mDrawerLayout;
-
-    private ProgressBar mProgressBar;
-
-    private RecyclerView mRecyclerView;
-
     private RecyclerView.OnScrollListener mOnScrollListener;
 
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-
-    private Toolbar mToolbar;
+    private FragmentListBinding mBinding;
 
     public UnivNoticeFragment() {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_list, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mBinding = FragmentListBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity);
-        mRecyclerView = view.findViewById(R.id.recycler_view);
         mActivity = (AppCompatActivity) getActivity();
-        mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
-        mProgressBar = view.findViewById(R.id.progress_circular);
-        mToolbar = view.findViewById(R.id.toolbar);
-        mSwipeRefreshLayout = view.findViewById(R.id.srl);
         mBbsItemArrayList = new ArrayList<>();
         mAdapter = new BbsListAdapter(mBbsItemArrayList);
         mOnScrollListener = new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (!mHasRequestedMore && !recyclerView.canScrollVertically(1)) {
                     if (mOffSet != MAX_PAGE) {
@@ -97,7 +88,7 @@ public class UnivNoticeFragment extends Fragment {
             }
 
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
             }
         };
@@ -106,34 +97,36 @@ public class UnivNoticeFragment extends Fragment {
         mOffSet = 1;
 
         mActivity.setTitle(getString(R.string.yu_news));
-        mActivity.setSupportActionBar(mToolbar);
+        mActivity.setSupportActionBar(mBinding.toolbar);
         setDrawerToggle();
-        mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
+        mBinding.srl.setOnRefreshListener(() -> new Handler(Looper.getMainLooper()).postDelayed(() -> {
             mOffSet = 1; // offSet 초기화
 
             mBbsItemArrayList.clear();
-            mSwipeRefreshLayout.setRefreshing(false);
+            mBinding.srl.setRefreshing(false);
             fetchDataList();
         }, 1000));
-        mRecyclerView.addOnScrollListener(mOnScrollListener);
-        mRecyclerView.setLayoutManager(linearLayoutManager);
-        mRecyclerView.setAdapter(mAdapter);
+        mBinding.recyclerView.addOnScrollListener(mOnScrollListener);
+        mBinding.recyclerView.setLayoutManager(linearLayoutManager);
+        mBinding.recyclerView.setAdapter(mAdapter);
         showProgressBar();
         fetchDataList();
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDestroyView() {
+        super.onDestroyView();
         if (mOnScrollListener != null)
-            mRecyclerView.removeOnScrollListener(mOnScrollListener);
+            mBinding.recyclerView.removeOnScrollListener(mOnScrollListener);
         mOnScrollListener = null;
+        mBinding = null;
     }
 
     private void setDrawerToggle() {
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(mActivity, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        DrawerLayout drawerLayout = ((MainActivity) mActivity).mBinding.drawerLayout;
+        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(mActivity, drawerLayout, mBinding.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
-        mDrawerLayout.addDrawerListener(drawerToggle);
+        drawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
     }
 
@@ -180,12 +173,12 @@ public class UnivNoticeFragment extends Fragment {
     }
 
     private void showProgressBar() {
-        if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE)
-            mProgressBar.setVisibility(View.VISIBLE);
+        if (mBinding.progressCircular.getVisibility() == View.GONE)
+            mBinding.progressCircular.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressBar() {
-        if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE)
-            mProgressBar.setVisibility(View.GONE);
+        if (mBinding.progressCircular.getVisibility() == View.VISIBLE)
+            mBinding.progressCircular.setVisibility(View.GONE);
     }
 }
