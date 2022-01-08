@@ -399,7 +399,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 String name = listTitle.substring(listTitle.lastIndexOf("-") + 1).trim();
                 String timeStamp = viewArt.getFirstElement(HTMLElementName.TD).getTextExtractor().toString();
                 String content = contentExtractor(viewArt.getFirstElementByClass("list_cont"));
-                String replyCnt = commentWrap.getContent().getFirstElement(HTMLElementName.P).getTextExtractor().toString();
+                String replyCnt = commentWrap.getFirstElementByClass("commentBtn").getTextExtractor().toString();
 
                 Glide.with(getApplicationContext())
                         .load(profileImg)
@@ -476,6 +476,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 if (mIsUpdate)
                     deliveryUpdate(title, content, replyCnt);//
             } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
                 Toast.makeText(getApplicationContext(), "값이 없습니다.", Toast.LENGTH_LONG).show();
             } finally {
                 fetchArticleDataFromFirebase();

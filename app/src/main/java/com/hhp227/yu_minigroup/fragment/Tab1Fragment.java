@@ -214,7 +214,7 @@ public class Tab1Fragment extends Fragment {
                     List<Element> images = viewArt.getAllElements(HTMLElementName.IMG);
                     StringBuilder content = new StringBuilder();
                     List<String> imageList = new ArrayList<>();
-                    String replyCnt = commentWrap.getContent().getFirstElement(HTMLElementName.P).getTextExtractor().toString();
+                    String replyCnt = commentWrap.getFirstElementByClass("commentBtn").getTextExtractor().toString(); // 댓글 + commentWrap.getFirstElementByClass("comment_cnt").getTextExtractor();
 
                     if (images.size() > 0)
                         images.forEach(image -> imageList.add(!image.getAttributeValue("src").contains("http") ? EndPoint.BASE_URL + image.getAttributeValue("src") : image.getAttributeValue("src")));
