@@ -113,7 +113,10 @@ public class Tab2Fragment extends Fragment {
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
             }
-        }, error -> VolleyLog.e(error.getMessage())));
+        }, error -> {
+            if (error.getMessage() != null)
+                VolleyLog.e(error.getMessage());
+        }));
     }
 
     public void addHeaderView() {

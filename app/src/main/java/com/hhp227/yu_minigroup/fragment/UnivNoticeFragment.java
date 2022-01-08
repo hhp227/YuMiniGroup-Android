@@ -174,7 +174,8 @@ public class UnivNoticeFragment extends Fragment {
     }
 
     private void onErrorResponse(VolleyError error) {
-        Log.e(TAG, error.getMessage());
+        if (error.getMessage() != null)
+            Log.e(TAG, error.getMessage());
         hideProgressBar();
     }
 
