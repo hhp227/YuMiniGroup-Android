@@ -2,27 +2,28 @@ package com.hhp227.yu_minigroup;
 
 import android.view.MenuItem;
 import android.webkit.WebSettings;
-import android.webkit.WebView;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import com.hhp227.yu_minigroup.databinding.ActivityWebViewBinding;
 
 public class WebViewActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_web_view);
+        ActivityWebViewBinding binding = ActivityWebViewBinding.inflate(getLayoutInflater());
+
+        setContentView(binding.getRoot());
         ActionBar actionBar = getSupportActionBar();
-        WebView webView = findViewById(R.id.wv_news);
-        WebSettings webSettings = webView.getSettings();
+        WebSettings webSettings = binding.wvNews.getSettings();
         String url = getIntent().getStringExtra("url");
 
         if (actionBar != null) {
             actionBar.setTitle(getIntent().getStringExtra("title"));
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        webView.loadUrl(url);
+        binding.wvNews.loadUrl(url);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setBuiltInZoomControls(true);

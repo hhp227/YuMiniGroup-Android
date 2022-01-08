@@ -5,13 +5,9 @@ import android.graphics.Bitmap;
 import android.provider.MediaStore;
 import android.view.*;
 import android.webkit.CookieManager;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 import com.android.volley.*;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.bumptech.glide.Glide;
@@ -22,9 +18,9 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityProfileBinding;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
-import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import com.hhp227.yu_minigroup.volley.util.MultipartRequest;
 import org.json.JSONException;
 
@@ -45,28 +41,23 @@ public class ProfileActivity extends AppCompatActivity {
 
     private CookieManager mCookieManager;
 
-    private ImageView mProfileImage;
-
     private Snackbar mProgressSnackBar;
+
+    private ActivityProfileBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        TextView name = findViewById(R.id.tv_name);
-        TextView yuId = findViewById(R.id.tv_yu_id);
-        TextView department = findViewById(R.id.tv_dept);
-        TextView grade = findViewById(R.id.tv_grade);
-        TextView email = findViewById(R.id.tv_email);
-        TextView hp = findViewById(R.id.tv_phone_num);
-        Button sync = findViewById(R.id.b_sync);
+        mBinding = ActivityProfileBinding.inflate(getLayoutInflater());
+
+        setContentView(mBinding.getRoot());
         mCookieManager = AppController.getInstance().getCookieManager();
         User user = AppController.getInstance().getPreferenceManager().getUser();
-        mProfileImage = findViewById(R.id.iv_profile_image);
 
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setSupportActionBar(mBinding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         Glide.with(getApplicationContext())
                 .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", user.getUid()), new LazyHeaders.Builder()
                         .addHeader("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS))
@@ -76,13 +67,13 @@ public class ProfileActivity extends AppCompatActivity {
                         .circleCrop()
                         .skipMemoryCache(true)
                         .diskCacheStrategy(DiskCacheStrategy.NONE))
-                .into(mProfileImage);
-        mProfileImage.setOnClickListener(v -> {
+                .into(mBinding.ivProfileImage);
+        mBinding.ivProfileImage.setOnClickListener(v -> {
             registerForContextMenu(v);
             openContextMenu(v);
             unregisterForContextMenu(v);
         });
-        sync.setOnClickListener(v -> {
+        mBinding.bSync.setOnClickListener(v -> {
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, EndPoint.SYNC_PROFILE, null, response -> {
                 hideProgressBar();
                 try {
@@ -96,7 +87,7 @@ public class ProfileActivity extends AppCompatActivity {
                                         .circleCrop()
                                         .skipMemoryCache(true)
                                         .diskCacheStrategy(DiskCacheStrategy.NONE))
-                                .into(mProfileImage);
+                                .into(mBinding.ivProfileImage);
                         setResult(RESULT_OK);
                         Snackbar.make(findViewById(android.R.id.content), response.getString("message"), Snackbar.LENGTH_LONG).show();
                     } else
@@ -120,12 +111,18 @@ public class ProfileActivity extends AppCompatActivity {
             showProgressBar();
             AppController.getInstance().addToRequestQueue(jsonObjectRequest);
         });
-        name.setText(user.getName());
-        yuId.setText(user.getUserId());
-        department.setText(user.getDepartment());
-        grade.setText(user.getGrade());
-        email.setText(user.getEmail());
-        hp.setText(user.getPhoneNumber());
+        mBinding.tvName.setText(user.getName());
+        mBinding.tvYuId.setText(user.getUserId());
+        mBinding.tvDept.setText(user.getDepartment());
+        mBinding.tvGrade.setText(user.getGrade());
+        mBinding.tvEmail.setText(user.getEmail());
+        mBinding.tvPhoneNum.setText(user.getPhoneNumber());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBinding = null;
     }
 
     @Override
@@ -173,7 +170,7 @@ public class ProfileActivity extends AppCompatActivity {
             Glide.with(getApplicationContext())
                     .load(mBitmap)
                     .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle).circleCrop())
-                    .into(mProfileImage);
+                    .into(mBinding.ivProfileImage);
             invalidateOptionsMenu();
         }
     }

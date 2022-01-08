@@ -8,10 +8,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.*;
-import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -20,6 +18,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityCreateBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
@@ -46,27 +45,18 @@ public class CreateActivity extends AppCompatActivity {
 
     private Bitmap mBitmap;
 
-    private EditText mGroupTitle, mGroupDescription;
-
-    private ImageView mGroupImage, mResetTitle;
-
     private PreferenceManager mPreferenceManager;
 
-    private RelativeLayout mProgressLayout;
-
     private TextWatcher mTextWatcher;
+
+    private ActivityCreateBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        RadioGroup joinType = findViewById(R.id.rg_jointype);
-        mGroupTitle = findViewById(R.id.et_title);
-        mGroupDescription = findViewById(R.id.et_description);
-        mResetTitle = findViewById(R.id.iv_reset);
-        mGroupImage = findViewById(R.id.iv_group_image);
-        mProgressLayout = findViewById(R.id.rl_progress);
+        mBinding = ActivityCreateBinding.inflate(getLayoutInflater());
+
+        setContentView(mBinding.getRoot());
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookie = AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS);
         mTextWatcher = new TextWatcher() {
@@ -76,7 +66,7 @@ public class CreateActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mResetTitle.setImageResource(s.length() > 0 ? R.drawable.ic_clear_black_24dp : R.drawable.ic_clear_gray_24dp);
+                mBinding.ivReset.setImageResource(s.length() > 0 ? R.drawable.ic_clear_black_24dp : R.drawable.ic_clear_gray_24dp);
             }
 
             @Override
@@ -84,23 +74,26 @@ public class CreateActivity extends AppCompatActivity {
             }
         };
 
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mGroupTitle.addTextChangedListener(mTextWatcher);
-        mResetTitle.setOnClickListener(v -> mGroupTitle.setText(""));
-        mGroupImage.setOnClickListener(v -> {
+        setSupportActionBar(mBinding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        mBinding.etTitle.addTextChangedListener(mTextWatcher);
+        mBinding.ivReset.setOnClickListener(v -> mBinding.etTitle.setText(""));
+        mBinding.ivGroupImage.setOnClickListener(v -> {
             registerForContextMenu(v);
             openContextMenu(v);
             unregisterForContextMenu(v);
         });
-        joinType.setOnCheckedChangeListener((group, checkedId) -> mJoinTypeCheck = checkedId != R.id.rb_auto);
-        joinType.check(R.id.rb_auto);
+        mBinding.rgJointype.setOnCheckedChangeListener((group, checkedId) -> mJoinTypeCheck = checkedId != R.id.rb_auto);
+        mBinding.rgJointype.check(R.id.rb_auto);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mGroupTitle.removeTextChangedListener(mTextWatcher);
+        mBinding.etTitle.removeTextChangedListener(mTextWatcher);
+        mBinding = null;
     }
 
     @Override
@@ -116,8 +109,8 @@ public class CreateActivity extends AppCompatActivity {
                 finish();
                 return true;
             case R.id.action_send:
-                String title = mGroupTitle.getText().toString().trim();
-                String description = mGroupDescription.getText().toString().trim();
+                String title = mBinding.etTitle.getText().toString().trim();
+                String description = mBinding.etDescription.getText().toString().trim();
                 String join = !mJoinTypeCheck ? "0" : "1";
 
                 if (!title.isEmpty() && !description.isEmpty()) {
@@ -186,7 +179,7 @@ public class CreateActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-                    mGroupTitle.setError(title.isEmpty() ? "그룹명을 입력하세요." : null);
+                    mBinding.etTitle.setError(title.isEmpty() ? "그룹명을 입력하세요." : null);
                     if (description.isEmpty())
                         Snackbar.make(getCurrentFocus(), "그룹설명을 입력해주세요.", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 }
@@ -219,7 +212,7 @@ public class CreateActivity extends AppCompatActivity {
                 startActivityForResult(galleryIntent, CAMERA_PICK_IMAGE_REQUEST_CODE);
                 break;
             case "이미지 없음":
-                mGroupImage.setImageResource(R.drawable.add_photo);
+                mBinding.ivGroupImage.setImageResource(R.drawable.add_photo);
                 mBitmap = null;
 
                 Snackbar.make(getCurrentFocus(), "이미지 없음 선택", Snackbar.LENGTH_LONG).setAction("Action", null).show();
@@ -234,12 +227,12 @@ public class CreateActivity extends AppCompatActivity {
         if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             mBitmap = (Bitmap) data.getExtras().get("data");
 
-            mGroupImage.setImageBitmap(mBitmap);
+            mBinding.ivGroupImage.setImageBitmap(mBitmap);
         } else if (requestCode == CAMERA_PICK_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             Uri fileUri = data.getData();
             mBitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
 
-            mGroupImage.setImageBitmap(mBitmap);
+            mBinding.ivGroupImage.setImageBitmap(mBitmap);
         }
     }
 
@@ -324,14 +317,14 @@ public class CreateActivity extends AppCompatActivity {
     }
 
     private void showProgressLayout() {
-        if (mProgressLayout != null && mProgressLayout.getVisibility() == View.GONE)
-            mProgressLayout.setVisibility(View.VISIBLE);
+        if (mBinding.rlProgress.getVisibility() == View.GONE)
+            mBinding.rlProgress.setVisibility(View.VISIBLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 
     private void hideProgressLayout() {
-        if (mProgressLayout != null && mProgressLayout.getVisibility() == View.VISIBLE)
-            mProgressLayout.setVisibility(View.GONE);
+        if (mBinding.rlProgress.getVisibility() == View.VISIBLE)
+            mBinding.rlProgress.setVisibility(View.GONE);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 }

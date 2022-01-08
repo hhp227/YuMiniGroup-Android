@@ -4,9 +4,6 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,26 +12,15 @@ import com.android.volley.toolbox.*;
 import com.google.android.material.snackbar.Snackbar;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityLoginBinding;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import com.hhp227.yu_minigroup.volley.util.SSLConnect;
 import net.htmlparser.jericho.HTMLElementName;
-import net.htmlparser.jericho.HTMLElements;
 import net.htmlparser.jericho.Source;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,20 +31,16 @@ public class LoginActivity extends AppCompatActivity {
 
     private CookieManager mCookieManager;
 
-    private EditText mInputId, mInputPassword;
-
     private PreferenceManager mPreferenceManager;
 
-    private ProgressBar mProgressBar;
+    private ActivityLoginBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        Button login = findViewById(R.id.b_login);
-        mInputId = findViewById(R.id.et_id);
-        mInputPassword = findViewById(R.id.et_password);
-        mProgressBar = findViewById(R.id.pb_login);
+        mBinding = ActivityLoginBinding.inflate(getLayoutInflater());
+
+        setContentView(mBinding.getRoot());
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookieManager = AppController.getInstance().getCookieManager();
 
@@ -69,18 +51,24 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         // 로그인 버튼 클릭 이벤트
-        login.setOnClickListener(v -> {
-            String id = mInputId.getText().toString();
-            String password = mInputPassword.getText().toString();
+        mBinding.bLogin.setOnClickListener(v -> {
+            String id = mBinding.etId.getText().toString();
+            String password = mBinding.etPassword.getText().toString();
 
             if (!id.isEmpty() && !password.isEmpty()) {
                 showProgressBar();
                 loginLMS(id, password, null, null);
             } else {
-                mInputId.setError(id.isEmpty() ? "아이디 또는 학번을 입력하세요." : null);
-                mInputPassword.setError(password.isEmpty() ? "패스워드를 입력하세요." : null);
+                mBinding.etId.setError(id.isEmpty() ? "아이디 또는 학번을 입력하세요." : null);
+                mBinding.etPassword.setError(password.isEmpty() ? "패스워드를 입력하세요." : null);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBinding = null;
     }
 
     private void loginSSOyuPortal(String id, String password, String cookie) {
@@ -142,9 +130,11 @@ public class LoginActivity extends AppCompatActivity {
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                response.allHeaders.stream()
-                        .filter(header -> header.getName().equals("Set-Cookie") && header.getValue().contains("SESSION_IMAX"))
-                        .forEach(header -> loginSSOyuPortal(id, password, header.getValue()));
+                if (response.allHeaders != null) {
+                    response.allHeaders.stream()
+                            .filter(header -> header.getName().equals("Set-Cookie") && header.getValue().contains("SESSION_IMAX"))
+                            .forEach(header -> loginSSOyuPortal(id, password, header.getValue()));
+                }
                 return super.parseNetworkResponse(response);
             }
 
@@ -259,12 +249,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void showProgressBar() {
-        if (mProgressBar != null)
-            mProgressBar.setVisibility(View.VISIBLE);
+        if (mBinding.pbLogin.getVisibility() == View.GONE)
+            mBinding.pbLogin.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressBar() {
-        if (mProgressBar != null)
-            mProgressBar.setVisibility(View.GONE);
+        if (mBinding.pbLogin.getVisibility() == View.VISIBLE)
+            mBinding.pbLogin.setVisibility(View.GONE);
     }
 }

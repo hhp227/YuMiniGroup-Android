@@ -11,16 +11,13 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.*;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.snackbar.Snackbar;
@@ -28,6 +25,7 @@ import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.adapter.WriteListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityWriteBinding;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
@@ -60,14 +58,14 @@ public class ModifyActivity extends AppCompatActivity {
 
     private YouTubeItem mYouTubeItem;
 
+    private ActivityWriteBinding mBinding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_write);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        LinearLayout buttonImage = findViewById(R.id.ll_image);
-        LinearLayout buttonVideo = findViewById(R.id.ll_video);
-        RecyclerView recyclerView = findViewById(R.id.rv_write);
+        mBinding = ActivityWriteBinding.inflate(getLayoutInflater());
+
+        setContentView(mBinding.getRoot());
         Intent intent = getIntent();
         Map<String, Object> headerMap = new HashMap<>();
         mContents = new ArrayList<>();
@@ -83,15 +81,17 @@ public class ModifyActivity extends AppCompatActivity {
         mGrpKey = intent.getStringExtra("grp_key");
         mArtlKey = intent.getStringExtra("artl_key");
 
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        buttonImage.setOnClickListener(this::showContextMenu);
-        buttonVideo.setOnClickListener(this::showContextMenu);
+        setSupportActionBar(mBinding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        mBinding.llImage.setOnClickListener(this::showContextMenu);
+        mBinding.llVideo.setOnClickListener(this::showContextMenu);
         headerMap.put("title", mTitle);
         headerMap.put("content", mContent);
         mAdapter.addHeaderView(headerMap);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(mAdapter);
+        mBinding.rvWrite.setLayoutManager(new LinearLayoutManager(this));
+        mBinding.rvWrite.setAdapter(mAdapter);
         mProgressDialog.setCancelable(false);
         if (mImageList.size() > 0) {
             mContents.addAll(mImageList);
@@ -99,6 +99,12 @@ public class ModifyActivity extends AppCompatActivity {
         }
         if (mYouTubeItem != null)
             mContents.add(mYouTubeItem.position + 1, mYouTubeItem);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBinding = null;
     }
 
     @Override

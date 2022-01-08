@@ -18,9 +18,6 @@ import android.webkit.CookieManager;
 import android.widget.*;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
@@ -36,6 +33,8 @@ import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.adapter.ReplyListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityArticleBinding;
+import com.hhp227.yu_minigroup.databinding.ArticleDetailBinding;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.ReplyItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
@@ -68,57 +67,33 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
 
     private String mGroupId, mArticleId, mGroupName, mGroupImage, mGroupKey, mArticleKey;
 
-    private CardView mButtonSend;
-
     private CookieManager mCookieManager;
-
-    private EditText mInputReply;
-
-    private ImageView mArticleProfile;
-
-    private LinearLayout mArticleImages;
 
     private List<String> mImageList, mReplyItemKeys;
 
     private List<ReplyItem> mReplyItemValues;
 
-    private ListView mListView;
-
     private PreferenceManager mPreferenceManager;
-
-    private ProgressBar mProgressBar;
 
     private ReplyListAdapter mAdapter;
 
     private Source mSource;
 
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-
-    private TextView mArticleTitle, mArticleTimeStamp, mArticleContent, mSendText;
-
-    private View mArticleDetail;
-
     private YouTubeItem mYouTubeItem;
 
     private YouTubePlayerView mYouTubePlayerView;
 
+    private ActivityArticleBinding mActivityArticleBinding;
+
+    private ArticleDetailBinding mArticleDetailBinding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_article);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        mArticleDetail = getLayoutInflater().inflate(R.layout.article_detail, null, false);
-        mArticleProfile = mArticleDetail.findViewById(R.id.iv_profile_image);
-        mArticleTitle = mArticleDetail.findViewById(R.id.tv_title);
-        mArticleTimeStamp = mArticleDetail.findViewById(R.id.tv_timestamp);
-        mArticleContent = mArticleDetail.findViewById(R.id.tv_content);
-        mArticleImages = mArticleDetail.findViewById(R.id.ll_image);
-        mButtonSend = findViewById(R.id.cv_btn_send);
-        mInputReply = findViewById(R.id.et_reply);
-        mListView = findViewById(R.id.lv_article);
-        mSendText = findViewById(R.id.tv_btn_send);
-        mSwipeRefreshLayout = findViewById(R.id.srl_article);
-        mProgressBar = findViewById(R.id.pb_article);
+        mActivityArticleBinding = ActivityArticleBinding.inflate(getLayoutInflater());
+        mArticleDetailBinding = ArticleDetailBinding.inflate(getLayoutInflater());
+
+        setContentView(mActivityArticleBinding.getRoot());
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookieManager = AppController.getInstance().getCookieManager();
         Intent intent = getIntent();
@@ -136,19 +111,19 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
         mReplyItemValues = new ArrayList<>();
         mAdapter = new ReplyListAdapter(mReplyItemKeys, mReplyItemValues);
 
-        setSupportActionBar(toolbar);
+        setSupportActionBar(mActivityArticleBinding.toolbar);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mArticleDetail.setOnLongClickListener(v -> {
+        mArticleDetailBinding.getRoot().setOnLongClickListener(v -> {
             v.showContextMenu();
             return true;
         });
-        mButtonSend.setOnClickListener(v -> {
-            if (mInputReply.getText().toString().trim().length() > 0) {
-                actionSend(mInputReply.getText().toString());
+        mActivityArticleBinding.cvBtnSend.setOnClickListener(v -> {
+            if (mActivityArticleBinding.etReply.getText().toString().trim().length() > 0) {
+                actionSend(mActivityArticleBinding.etReply.getText().toString());
 
                 // 전송하면 텍스트 초기화
-                mInputReply.setText("");
+                mActivityArticleBinding.etReply.setText("");
                 if (v != null) {
                     InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -157,31 +132,38 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
             } else
                 Toast.makeText(getApplicationContext(), "댓글을 입력하세요.", Toast.LENGTH_LONG).show();
         });
-        mInputReply.addTextChangedListener(new TextWatcher() {
+        mActivityArticleBinding.etReply.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mButtonSend.setCardBackgroundColor(getResources().getColor(s.length() > 0 ? R.color.colorAccent : androidx.cardview.R.color.cardview_light_background, null));
-                mSendText.setTextColor(getResources().getColor(s.length() > 0 ? android.R.color.white : android.R.color.darker_gray, null));
+                mActivityArticleBinding.cvBtnSend.setCardBackgroundColor(getResources().getColor(s.length() > 0 ? R.color.colorAccent : androidx.cardview.R.color.cardview_light_background, null));
+                mActivityArticleBinding.tvBtnSend.setTextColor(getResources().getColor(s.length() > 0 ? android.R.color.white : android.R.color.darker_gray, null));
             }
 
             @Override
             public void afterTextChanged(Editable s) {
             }
         });
-        mInputReply.setOnFocusChangeListener((v, hasFocus) -> {
+        mActivityArticleBinding.etReply.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus)
-                mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+                mActivityArticleBinding.lvArticle.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
         });
-        mListView.addHeaderView(mArticleDetail);
-        mListView.setAdapter(mAdapter);
-        mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(this::refresh, 1000));
-        registerForContextMenu(mListView);
+        mActivityArticleBinding.lvArticle.addHeaderView(mArticleDetailBinding.getRoot());
+        mActivityArticleBinding.lvArticle.setAdapter(mAdapter);
+        mActivityArticleBinding.srlArticle.setOnRefreshListener(() -> new Handler(getMainLooper()).postDelayed(this::refresh, 1000));
+        registerForContextMenu(mActivityArticleBinding.lvArticle);
         showProgressBar();
         fetchArticleData();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mActivityArticleBinding = null;
+        mArticleDetailBinding = null;
     }
 
     @Override
@@ -206,8 +188,8 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
 
                 modifyIntent.putExtra("grp_id", mGroupId);
                 modifyIntent.putExtra("artl_num", mArticleId);
-                modifyIntent.putExtra("sbjt", mArticleTitle.getText().toString().substring(0, mArticleTitle.getText().toString().lastIndexOf("-")).trim());
-                modifyIntent.putExtra("txt", mArticleContent.getText().toString());
+                modifyIntent.putExtra("sbjt", mArticleDetailBinding.tvTitle.getText().toString().substring(0, mArticleDetailBinding.tvTitle.getText().toString().lastIndexOf("-")).trim());
+                modifyIntent.putExtra("txt", mArticleDetailBinding.tvContent.getText().toString());
                 modifyIntent.putStringArrayListExtra("img", (ArrayList<String>) mImageList);
                 modifyIntent.putExtra("vid", mYouTubeItem);
                 modifyIntent.putExtra("grp_key", mGroupKey);
@@ -318,7 +300,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
             case 1:
                 android.content.ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 
-                clipboard.setText(info.position == 0 ? mArticleContent.getText().toString() : replyItem.getReply());
+                clipboard.setText(info.position == 0 ? mArticleDetailBinding.tvContent.getText().toString() : replyItem.getReply());
                 Toast.makeText(getApplicationContext(), "클립보드에 복사되었습니다!", Toast.LENGTH_SHORT).show();
                 return true;
             case 2:
@@ -408,17 +390,17 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                                 .circleCrop()
                                 .skipMemoryCache(true)
                                 .diskCacheStrategy(DiskCacheStrategy.NONE))
-                        .into(mArticleProfile);
-                mArticleTitle.setText(title + " - " + name);
-                mArticleTimeStamp.setText(timeStamp);
+                        .into(mArticleDetailBinding.ivProfileImage);
+                mArticleDetailBinding.tvTitle.setText(title + " - " + name);
+                mArticleDetailBinding.tvTimestamp.setText(timeStamp);
                 if (!TextUtils.isEmpty(content)) {
-                    mArticleContent.setText(content);
-                    mArticleContent.setVisibility(View.VISIBLE);
+                    mArticleDetailBinding.tvContent.setText(content);
+                    mArticleDetailBinding.tvContent.setVisibility(View.VISIBLE);
                 } else
-                    mArticleContent.setVisibility(View.GONE);
+                    mArticleDetailBinding.tvContent.setVisibility(View.GONE);
                 if (!mImageList.isEmpty() || mYouTubeItem != null) {
                     for (int i = 0; i < mImageList.size(); i++) {
-                        if (mArticleImages.getChildCount() > mImageList.size() - 1)
+                        if (mArticleDetailBinding.llImage.getChildCount() > mImageList.size() - 1)
                             break;
                         int position = i;
                         ImageView articleImage = new ImageView(this);
@@ -437,7 +419,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                                 .load(mImageList.get(i))
                                 .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
                                 .into(articleImage);
-                        mArticleImages.addView(articleImage);
+                        mArticleDetailBinding.llImage.addView(articleImage);
                     }
                     if (mYouTubeItem != null) {
                         LinearLayout youtubeContainer = new LinearLayout(this);
@@ -467,11 +449,11 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                         });
                         youtubeContainer.addView(mYouTubePlayerView);
                         youtubeContainer.setPadding(0, 0, 0, 30);
-                        mArticleImages.addView(youtubeContainer, mYouTubeItem.position);
+                        mArticleDetailBinding.llImage.addView(youtubeContainer, mYouTubeItem.position);
                     }
-                    mArticleImages.setVisibility(View.VISIBLE);
+                    mArticleDetailBinding.llImage.setVisibility(View.VISIBLE);
                 } else
-                    mArticleImages.setVisibility(View.GONE);
+                    mArticleDetailBinding.llImage.setVisibility(View.GONE);
                 fetchReplyData(commentList);
                 if (mIsUpdate)
                     deliveryUpdate(title, content, replyCnt);//
@@ -578,11 +560,11 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
      * 리스트뷰 하단으로 간다.
      */
     private void setListViewBottom() {
-        new Handler().postDelayed(() -> {
-            int articleHeight = mArticleDetail.getMeasuredHeight();
+        new Handler(getMainLooper()).postDelayed(() -> {
+            int articleHeight = mArticleDetailBinding.getRoot().getMeasuredHeight();
             mIsBottom = false;
 
-            mListView.setSelection(articleHeight);
+            mActivityArticleBinding.lvArticle.setSelection(articleHeight);
         }, 300);
     }
 
@@ -602,11 +584,11 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
         mIsUpdate = true;
         mYouTubeItem = null;
 
-        mArticleImages.removeAllViews();
+        mArticleDetailBinding.llImage.removeAllViews();
         mImageList.clear();
         mReplyItemKeys.clear();
         mReplyItemValues.clear();
-        mSwipeRefreshLayout.setRefreshing(false);
+        mActivityArticleBinding.srlArticle.setRefreshing(false);
         fetchArticleData();
     }
 
@@ -656,8 +638,8 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                                     .circleCrop()
                                     .skipMemoryCache(true)
                                     .diskCacheStrategy(DiskCacheStrategy.NONE))
-                            .into(mArticleProfile);
-                    mArticleTimeStamp.setText(new SimpleDateFormat("yyyy.MM.dd a h:mm:ss").format(articleItem.getTimestamp()));
+                            .into(mArticleDetailBinding.ivProfileImage);
+                    mArticleDetailBinding.tvTimestamp.setText(new SimpleDateFormat("yyyy.MM.dd a h:mm:ss").format(articleItem.getTimestamp()));
                 }
             }
 
@@ -726,12 +708,12 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
     }
 
     private void showProgressBar() {
-        if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE)
-            mProgressBar.setVisibility(View.VISIBLE);
+        if (mActivityArticleBinding.pbArticle.getVisibility() == View.GONE)
+            mActivityArticleBinding.pbArticle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressBar() {
-        if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE)
-            mProgressBar.setVisibility(View.GONE);
+        if (mActivityArticleBinding.pbArticle.getVisibility() == View.VISIBLE)
+            mActivityArticleBinding.pbArticle.setVisibility(View.GONE);
     }
 }

@@ -12,14 +12,11 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
@@ -30,6 +27,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.hhp227.yu_minigroup.adapter.WriteListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityWriteBinding;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
@@ -73,14 +71,14 @@ public class WriteActivity extends AppCompatActivity {
 
     private YouTubeItem mYouTubeItem;
 
+    private ActivityWriteBinding mBinding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_write);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        LinearLayout buttonImage = findViewById(R.id.ll_image);
-        LinearLayout buttonVideo = findViewById(R.id.ll_video);
-        RecyclerView recyclerView = findViewById(R.id.rv_write);
+        mBinding = ActivityWriteBinding.inflate(getLayoutInflater());
+
+        setContentView(mBinding.getRoot());
         mContents = new ArrayList<>();
         mAdapter = new WriteListAdapter(mContents);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
@@ -92,14 +90,22 @@ public class WriteActivity extends AppCompatActivity {
         mGrpImg = getIntent().getStringExtra("grp_img");
         mKey = getIntent().getStringExtra("key");
 
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setSupportActionBar(mBinding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         mAdapter.addHeaderView(new HashMap<>());
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(mAdapter);
-        buttonImage.setOnClickListener(this::showContextMenu);
-        buttonVideo.setOnClickListener(this::showContextMenu);
+        mBinding.rvWrite.setLayoutManager(new LinearLayoutManager(this));
+        mBinding.rvWrite.setAdapter(mAdapter);
+        mBinding.llImage.setOnClickListener(this::showContextMenu);
+        mBinding.llVideo.setOnClickListener(this::showContextMenu);
         mProgressDialog.setCancelable(false);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBinding = null;
     }
 
     @Override

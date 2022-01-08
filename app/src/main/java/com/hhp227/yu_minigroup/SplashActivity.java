@@ -13,6 +13,7 @@ import com.android.volley.*;
 import com.android.volley.toolbox.StringRequest;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivitySplashBinding;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import com.hhp227.yu_minigroup.volley.util.SSLConnect;
@@ -27,11 +28,15 @@ public class SplashActivity extends AppCompatActivity {
 
     private PreferenceManager mPreferenceManager;
 
+    private ActivitySplashBinding mBinding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
-        Handler handler = new Handler();
+        mBinding = ActivitySplashBinding.inflate(getLayoutInflater());
+
+        setContentView(mBinding.getRoot());
+        Handler handler = new Handler(getMainLooper());
         Window window = getWindow();
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
 
@@ -43,6 +48,12 @@ public class SplashActivity extends AppCompatActivity {
 
             loginLMS(user.getUserId(), user.getPassword(), null, null);
         }, SPLASH_TIME_OUT);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBinding = null;
     }
 
     private void loginLMS(String id, String password, String ssoToken, String lmsToken) {

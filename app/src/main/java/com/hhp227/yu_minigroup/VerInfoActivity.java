@@ -2,22 +2,21 @@ package com.hhp227.yu_minigroup;
 
 import android.os.Bundle;
 import android.view.MenuItem;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import android.view.View;
+import com.hhp227.yu_minigroup.databinding.ActivityVerInfoBinding;
 
 public class VerInfoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ver_info);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        ActivityVerInfoBinding binding = ActivityVerInfoBinding.inflate(getLayoutInflater());
 
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setContentView(binding.getRoot());
+        setSupportActionBar(binding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     @Override

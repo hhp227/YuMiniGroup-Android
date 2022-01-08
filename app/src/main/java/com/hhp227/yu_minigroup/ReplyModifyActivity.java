@@ -6,12 +6,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
@@ -21,6 +19,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityReplyModifyBinding;
+import com.hhp227.yu_minigroup.databinding.ModifyTextBinding;
 import com.hhp227.yu_minigroup.dto.ReplyItem;
 
 import java.util.HashMap;
@@ -35,12 +35,14 @@ public class ReplyModifyActivity extends AppCompatActivity {
 
     private Snackbar mProgressSnackBar;
 
+    private ActivityReplyModifyBinding mBinding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reply_modify);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        RecyclerView recyclerView = findViewById(R.id.rv_write);
+        mBinding = ActivityReplyModifyBinding.inflate(getLayoutInflater());
+
+        setContentView(mBinding.getRoot());
         Intent intent = getIntent();
         mGroupId = intent.getStringExtra("grp_id");
         mArticleId = intent.getStringExtra("artl_num");
@@ -50,15 +52,16 @@ public class ReplyModifyActivity extends AppCompatActivity {
         mReply = intent.getStringExtra("cmt");
         mReply = mReply.contains("※") ? mReply.substring(0, mReply.lastIndexOf("※")).trim() : mReply;
 
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new RecyclerView.Adapter<Holder>() {
+        setSupportActionBar(mBinding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        mBinding.rvWrite.setLayoutManager(new LinearLayoutManager(this));
+        mBinding.rvWrite.setAdapter(new RecyclerView.Adapter<Holder>() {
             @NonNull
             @Override
             public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(getApplicationContext()).inflate(R.layout.modify_text, parent, false);
-                mHolder = new Holder(view);
+                mHolder = new Holder(ModifyTextBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
                 return mHolder;
             }
 
@@ -75,6 +78,12 @@ public class ReplyModifyActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBinding = null;
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.write, menu);
         return true;
@@ -86,7 +95,7 @@ public class ReplyModifyActivity extends AppCompatActivity {
             finish();
             return true;
         } else if (item.getItemId() == R.id.action_send) {
-            String text = mHolder.inputReply.getText().toString().trim();
+            String text = mHolder.mBinding.etReply.getText().toString().trim();
 
             if (!TextUtils.isEmpty(text)) {
                 String tag_string_req = "req_send";
@@ -155,7 +164,7 @@ public class ReplyModifyActivity extends AppCompatActivity {
                 if (dataSnapshot.getValue() != null) {
                     ReplyItem replyItem = dataSnapshot.getValue(ReplyItem.class);
 
-                    replyItem.setReply(mHolder.inputReply.getText().toString() + "\n");
+                    replyItem.setReply(mHolder.mBinding.etReply.getText().toString() + "\n");
                     query.getRef().setValue(replyItem);
                 }
             }
@@ -187,15 +196,15 @@ public class ReplyModifyActivity extends AppCompatActivity {
     }
 
     public static class Holder extends RecyclerView.ViewHolder {
-        private final EditText inputReply;
+        private final ModifyTextBinding mBinding;
 
-        Holder(View itemView) {
-            super(itemView);
-            inputReply = itemView.findViewById(R.id.et_reply);
+        Holder(ModifyTextBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
         }
 
         public void bind(String reply) {
-            inputReply.setText(reply);
+            mBinding.etReply.setText(reply);
         }
     }
 }
