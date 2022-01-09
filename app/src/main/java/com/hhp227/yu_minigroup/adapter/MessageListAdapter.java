@@ -22,6 +22,8 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
+//TODO viewBinding으로 이전할 것
+
 public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.MessageListHolder> {
     private static final int MSG_TYPE_LEFT = 0;
 

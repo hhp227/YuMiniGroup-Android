@@ -1,5 +1,6 @@
 package com.hhp227.yu_minigroup.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -25,6 +26,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.snackbar.Snackbar;
 import com.hhp227.yu_minigroup.MainActivity;
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.WebViewActivity;
 import com.hhp227.yu_minigroup.adapter.BbsListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
@@ -109,6 +111,14 @@ public class UnivNoticeFragment extends Fragment {
         mBinding.recyclerView.addOnScrollListener(mOnScrollListener);
         mBinding.recyclerView.setLayoutManager(linearLayoutManager);
         mBinding.recyclerView.setAdapter(mAdapter);
+        mAdapter.setOnItemClickListener((v, p) -> {
+            BbsItem bbsItem = mBbsItemArrayList.get(p);
+            Intent intent = new Intent(getContext(), WebViewActivity.class);
+
+            intent.putExtra("url", EndPoint.URL_YU_MOBILE_NOTICE.replace("{ID}", bbsItem.getId()));
+            intent.putExtra("title", getString(R.string.yu_news));
+            startActivity(intent);
+        });
         showProgressBar();
         fetchDataList();
     }

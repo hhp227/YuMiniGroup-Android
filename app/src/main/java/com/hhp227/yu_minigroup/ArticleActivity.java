@@ -443,8 +443,14 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
 
                             @Override
                             public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
-                                if (youTubeInitializationResult.isUserRecoverableError())
-                                    youTubeInitializationResult.getErrorDialog(getParent(), 0).show();
+                                try {
+                                    if (youTubeInitializationResult.isUserRecoverableError())
+                                        youTubeInitializationResult.getErrorDialog(getParent(), 0).show();
+                                } catch (Exception e) {
+                                    if (e.getMessage() != null) {
+                                        Log.e(TAG, e.getMessage());
+                                    }
+                                }
                             }
                         });
                         youtubeContainer.addView(mYouTubePlayerView);

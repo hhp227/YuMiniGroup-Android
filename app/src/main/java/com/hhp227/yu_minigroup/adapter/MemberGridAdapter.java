@@ -3,8 +3,6 @@ package com.hhp227.yu_minigroup.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
@@ -15,14 +13,16 @@ import com.bumptech.glide.request.RequestOptions;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.MemberItemBinding;
 import com.hhp227.yu_minigroup.dto.MemberItem;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.MemberGridHolder> {
     private final List<MemberItem> mMemberItemList;
 
-    private OnItemClickListener mOnItemClickListener;
+    private BiConsumer<View, Integer> mOnItemClickListener;
 
     public MemberGridAdapter(List<MemberItem> memberItemList) {
         this.mMemberItemList = memberItemList;
@@ -30,9 +30,8 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
 
     @NonNull
     @Override
-    public MemberGridHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.member_item, parent, false);
-        return new MemberGridHolder(view);
+    public MemberGridHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new MemberGridHolder(MemberItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
     }
 
     @Override
@@ -50,28 +49,25 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
         return position;
     }
 
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+    public void setOnItemClickListener(BiConsumer<View, Integer> onItemClickListener) {
         this.mOnItemClickListener = onItemClickListener;
     }
 
     public class MemberGridHolder extends RecyclerView.ViewHolder {
-        private final ImageView profileImage;
+        private final MemberItemBinding mBinding;
 
-        private final TextView name;
-
-        public MemberGridHolder(View itemView) {
-            super(itemView);
-            profileImage = itemView.findViewById(R.id.iv_profile_image);
-            name = itemView.findViewById(R.id.tv_name);
+        public MemberGridHolder(MemberItemBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
 
             itemView.setOnClickListener(v -> {
                 if (mOnItemClickListener != null)
-                    mOnItemClickListener.onItemClick(v, getAdapterPosition());
+                    mOnItemClickListener.accept(v, getAdapterPosition());
             });
         }
 
         public void bind(MemberItem memberItem) {
-            name.setText(memberItem.name);
+            mBinding.tvName.setText(memberItem.name);
             Glide.with(itemView.getContext())
                     .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", memberItem.uid), new LazyHeaders.Builder()
                             .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
@@ -80,11 +76,7 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
                             .error(R.drawable.user_image_view)
                             .skipMemoryCache(true)
                             .diskCacheStrategy(DiskCacheStrategy.NONE))
-                    .into(profileImage);
+                    .into(mBinding.ivProfileImage);
         }
-    }
-
-    public interface OnItemClickListener {
-        void onItemClick(View view, int position);
     }
 }
