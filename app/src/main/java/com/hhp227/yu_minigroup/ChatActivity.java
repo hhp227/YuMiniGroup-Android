@@ -7,14 +7,10 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
@@ -49,8 +45,6 @@ public class ChatActivity extends AppCompatActivity {
 
     private String mCursor, mSender, mReceiver, mValue, mFirstMessageKey;
 
-    private TextView mSendText;
-
     private TextWatcher mTextWatcher;
 
     private User mUser;
@@ -67,7 +61,6 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(mBinding.getRoot());
         Intent intent = getIntent();
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        mSendText = findViewById(R.id.tv_btn_send);
         mDatabaseReference = FirebaseDatabase.getInstance().getReference("Messages");
         mMessageItemList = new ArrayList<>();
         mUser = AppController.getInstance().getPreferenceManager().getUser();
@@ -88,7 +81,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 mBinding.cvBtnSend.setCardBackgroundColor(getResources().getColor(s.length() > 0 ? R.color.colorAccent : androidx.cardview.R.color.cardview_light_background, null));
-                mSendText.setTextColor(getResources().getColor(s.length() > 0 ? android.R.color.white : android.R.color.darker_gray, null));
+                mBinding.tvBtnSend.setTextColor(getResources().getColor(s.length() > 0 ? android.R.color.white : android.R.color.darker_gray, null));
             }
 
             @Override
