@@ -36,6 +36,7 @@ import com.hhp227.yu_minigroup.activity.SettingsActivity;
 import com.hhp227.yu_minigroup.activity.VerInfoActivity;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ContentTab4Binding;
 import com.hhp227.yu_minigroup.databinding.FragmentTab4Binding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.dto.User;

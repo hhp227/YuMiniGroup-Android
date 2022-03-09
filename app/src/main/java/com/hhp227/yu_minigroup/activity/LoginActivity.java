@@ -12,6 +12,7 @@ import com.android.volley.toolbox.*;
 import com.google.android.material.snackbar.Snackbar;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityLoginBinding;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import com.hhp227.yu_minigroup.volley.util.SSLConnect;

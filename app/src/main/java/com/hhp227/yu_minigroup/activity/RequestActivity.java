@@ -16,6 +16,7 @@ import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.adapter.GroupListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityListBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.fragment.GroupInfoFragment;
 import net.htmlparser.jericho.Element;

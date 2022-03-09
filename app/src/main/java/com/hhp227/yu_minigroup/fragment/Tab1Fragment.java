@@ -25,6 +25,7 @@ import com.hhp227.yu_minigroup.activity.WriteActivity;
 import com.hhp227.yu_minigroup.adapter.ArticleListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.FragmentTab1Binding;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import net.htmlparser.jericho.Element;

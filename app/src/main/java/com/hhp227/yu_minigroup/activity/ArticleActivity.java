@@ -34,6 +34,8 @@ import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.ReplyListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityArticleBinding;
+import com.hhp227.yu_minigroup.databinding.ArticleDetailBinding;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.ReplyItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;

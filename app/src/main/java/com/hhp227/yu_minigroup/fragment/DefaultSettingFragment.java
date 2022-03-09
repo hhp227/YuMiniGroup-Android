@@ -25,6 +25,7 @@ import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.FragmentDefaultSettingBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.Source;

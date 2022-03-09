@@ -24,6 +24,7 @@ import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.activity.RequestActivity;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.FragmentGroupInfoBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import org.json.JSONException;

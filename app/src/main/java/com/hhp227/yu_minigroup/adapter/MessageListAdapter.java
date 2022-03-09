@@ -100,7 +100,8 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 messageBox.setPadding(messageBox.getPaddingLeft(), 0, messageBox.getPaddingRight(), messageBox.getPaddingBottom());
                 profileImage.setVisibility(View.INVISIBLE);
             } else {
-                name.setVisibility(!mMessageItems.get(getAdapterPosition()).getFrom().equals(mUid) ? MSG_TYPE_LEFT : View.GONE);
+                //name.setVisibility(!mMessageItems.get(getAdapterPosition()).getFrom().equals(mUid) ? MSG_TYPE_LEFT : View.GONE); 기존코드인데 이상하게 적용되어있다. 확인해볼것
+                name.setVisibility(getItemViewType() == MSG_TYPE_RIGHT ? View.GONE : View.VISIBLE);
                 profileImage.setVisibility(View.VISIBLE);
                 messageBox.setPadding(messageBox.getPaddingLeft(), 10, messageBox.getPaddingRight(), 10); // 수정완료 경북대 소모임에도 반영할것
                 Glide.with(itemView.getContext())

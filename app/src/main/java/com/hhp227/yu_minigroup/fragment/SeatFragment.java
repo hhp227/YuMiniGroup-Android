@@ -20,6 +20,7 @@ import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.SeatListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.FragmentSeatBinding;
 import com.hhp227.yu_minigroup.dto.SeatItem;
 import org.json.JSONArray;
 import org.json.JSONException;

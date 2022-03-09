@@ -19,6 +19,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.tabs.TabLayout;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.activity.WriteActivity;
+import com.hhp227.yu_minigroup.databinding.FragmentTabHostLayoutBinding;
 
 import java.util.Arrays;
 import java.util.List;

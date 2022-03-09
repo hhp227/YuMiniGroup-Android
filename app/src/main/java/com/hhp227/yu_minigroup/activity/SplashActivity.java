@@ -14,6 +14,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivitySplashBinding;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import com.hhp227.yu_minigroup.volley.util.SSLConnect;

@@ -38,6 +38,7 @@ import com.hhp227.yu_minigroup.activity.RequestActivity;
 import com.hhp227.yu_minigroup.adapter.GroupGridAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.FragmentGroupBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import net.htmlparser.jericho.Element;

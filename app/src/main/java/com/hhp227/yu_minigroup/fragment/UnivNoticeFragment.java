@@ -28,6 +28,7 @@ import com.hhp227.yu_minigroup.activity.WebViewActivity;
 import com.hhp227.yu_minigroup.adapter.BbsListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.FragmentListBinding;
 import com.hhp227.yu_minigroup.dto.BbsItem;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;

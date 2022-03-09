@@ -26,6 +26,7 @@ import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.WriteListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityWriteBinding;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;

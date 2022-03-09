@@ -20,6 +20,8 @@ import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityReplyModifyBinding;
+import com.hhp227.yu_minigroup.databinding.ModifyTextBinding;
 import com.hhp227.yu_minigroup.dto.ReplyItem;
 
 import java.util.HashMap;

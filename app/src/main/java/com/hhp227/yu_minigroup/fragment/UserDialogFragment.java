@@ -20,6 +20,7 @@ import com.hhp227.yu_minigroup.activity.ChatActivity;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.FragmentUserBinding;
 
 public class UserDialogFragment extends DialogFragment {
     private String mUid, mName, mValue;

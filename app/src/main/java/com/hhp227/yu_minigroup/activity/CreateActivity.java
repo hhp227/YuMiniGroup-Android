@@ -19,6 +19,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityCreateBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;

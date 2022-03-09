@@ -17,6 +17,8 @@ import com.google.android.gms.ads.MobileAds;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityMainBinding;
+import com.hhp227.yu_minigroup.databinding.NavHeaderMainBinding;
 import com.hhp227.yu_minigroup.fragment.*;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 

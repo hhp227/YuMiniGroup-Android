@@ -17,6 +17,7 @@ import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.YouTubeListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityListBinding;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import org.json.JSONArray;
 import org.json.JSONException;

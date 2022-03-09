@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.databinding.ActivityGroupBinding;
 import com.hhp227.yu_minigroup.fragment.TabHostLayoutFragment;
 
 public class GroupActivity extends AppCompatActivity {
