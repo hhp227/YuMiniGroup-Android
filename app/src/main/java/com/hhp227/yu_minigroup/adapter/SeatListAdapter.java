@@ -2,16 +2,13 @@ package com.hhp227.yu_minigroup.adapter;
 
 import android.content.Intent;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.WebViewActivity;
+import com.hhp227.yu_minigroup.activity.WebViewActivity;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.SeatItemBinding;
 import com.hhp227.yu_minigroup.dto.SeatItem;
 
 import java.util.List;
@@ -26,8 +23,7 @@ public class SeatListAdapter extends RecyclerView.Adapter<SeatListAdapter.SeatLi
     @NonNull
     @Override
     public SeatListHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.seat_item, parent, false);
-        return new SeatListHolder(view);
+        return new SeatListHolder(SeatItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
     }
 
     @Override
@@ -41,19 +37,13 @@ public class SeatListAdapter extends RecyclerView.Adapter<SeatListAdapter.SeatLi
     }
 
     public class SeatListHolder extends RecyclerView.ViewHolder {
-        private final ProgressBar rate;
+        private final SeatItemBinding mBinding;
 
-        private final TextView name, seat, status;
+        SeatListHolder(SeatItemBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
 
-        SeatListHolder(View itemView) {
-            super(itemView);
-            CardView cardView = itemView.findViewById(R.id.card_view);
-            name = itemView.findViewById(R.id.name);
-            seat = itemView.findViewById(R.id.seat);
-            rate = itemView.findViewById(R.id.pb_seat);
-            status = itemView.findViewById(R.id.status);
-
-            cardView.setOnClickListener(v -> {
+            mBinding.cardView.setOnClickListener(v -> {
                 Intent intent = new Intent(itemView.getContext(), WebViewActivity.class);
 
                 intent.putExtra("url", EndPoint.URL_YU_LIBRARY_SEAT_DETAIL.replace("{ID}", mSearItemList.get(getAdapterPosition()).id));
@@ -63,12 +53,10 @@ public class SeatListAdapter extends RecyclerView.Adapter<SeatListAdapter.SeatLi
         }
 
         private void bind(SeatItem seatItem) {
-            int rateNum = Integer.parseInt(seatItem.percentageInteger);
-
-            name.setText(seatItem.name);
-            seat.setText("[" + Integer.parseInt(seatItem.occupied) + "/" + seatItem.count + "]");
-            rate.setProgress(rateNum);
-            status.setText(seatItem.status);
+            mBinding.name.setText(seatItem.name);
+            mBinding.seat.setText("[" + Integer.parseInt(seatItem.occupied) + "/" + seatItem.count + "]");
+            mBinding.pbSeat.setProgress(Integer.parseInt(seatItem.percentageInteger));
+            mBinding.status.setText(seatItem.status);
         }
     }
 }

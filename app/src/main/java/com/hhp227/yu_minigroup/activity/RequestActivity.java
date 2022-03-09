@@ -1,26 +1,22 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.view.View;
-import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.adapter.GroupListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ActivityListBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.fragment.GroupInfoFragment;
 import net.htmlparser.jericho.Element;
@@ -49,42 +45,32 @@ public class RequestActivity extends AppCompatActivity {
 
     private List<GroupItem> mGroupItemValues;
 
-    private ProgressBar mProgressBar;
-
-    private RecyclerView mRecyclerView;
-
-    private RelativeLayout mRelativeLayout;
-
-    private ShimmerFrameLayout mShimmerFrameLayout;
-
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private ActivityListBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        mRecyclerView = findViewById(R.id.recycler_view);
-        mProgressBar = findViewById(R.id.pb_group);
-        mRelativeLayout = findViewById(R.id.rl_group);
-        mShimmerFrameLayout = findViewById(R.id.sfl_group);
-        mSwipeRefreshLayout = findViewById(R.id.srl_list);
+        mBinding = ActivityListBinding.inflate(getLayoutInflater());
+
+        setContentView(mBinding.getRoot());
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
         mAdapter = new GroupListAdapter(this, mGroupItemKeys, mGroupItemValues);
         mOffSet = 1;
 
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.post(() -> {
+        setSupportActionBar(mBinding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        mBinding.recyclerView.setHasFixedSize(true);
+        mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mBinding.recyclerView.setAdapter(mAdapter);
+        mBinding.recyclerView.post(() -> {
             mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             mAdapter.addFooterView();
             mAdapter.setButtonType(GroupInfoFragment.TYPE_CANCEL);
         });
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        mBinding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -104,15 +90,16 @@ public class RequestActivity extends AppCompatActivity {
                 }
             }
         });
-        mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(this::refresh, 1000));
+        mBinding.srlList.setOnRefreshListener(() -> new Handler(getMainLooper()).postDelayed(this::refresh, 1000));
         showProgressBar();
-        new Handler().postDelayed(this::fetchGroupList, 500);
+        new Handler(getMainLooper()).postDelayed(this::fetchGroupList, 500);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mRecyclerView.clearOnScrollListeners();
+        mBinding.recyclerView.clearOnScrollListeners();
+        mBinding = null;
     }
 
     @Override
@@ -168,7 +155,7 @@ public class RequestActivity extends AppCompatActivity {
             mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             mAdapter.notifyDataSetChanged();
             hideProgressBar();
-            mRelativeLayout.setVisibility(mGroupItemValues.size() > 1 ? View.GONE : View.VISIBLE);
+            mBinding.rlGroup.setVisibility(mGroupItemValues.size() > 1 ? View.GONE : View.VISIBLE);
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
             hideProgressBar();
@@ -225,7 +212,7 @@ public class RequestActivity extends AppCompatActivity {
         mGroupItemKeys.clear();
         mGroupItemValues.clear();
         mAdapter.addFooterView();
-        mSwipeRefreshLayout.setRefreshing(false);
+        mBinding.srlList.setRefreshing(false);
         fetchGroupList();
     }
 
@@ -275,20 +262,20 @@ public class RequestActivity extends AppCompatActivity {
     }
 
     private void showProgressBar() {
-        if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE)
-            mProgressBar.setVisibility(View.VISIBLE);
-        if (!mShimmerFrameLayout.isShimmerStarted())
-            mShimmerFrameLayout.startShimmer();
-        if (!mShimmerFrameLayout.isShimmerVisible())
-            mShimmerFrameLayout.setVisibility(View.VISIBLE);
+        if (mBinding.pbGroup.getVisibility() == View.GONE)
+            mBinding.pbGroup.setVisibility(View.VISIBLE);
+        if (!mBinding.sflGroup.isShimmerStarted())
+            mBinding.sflGroup.startShimmer();
+        if (!mBinding.sflGroup.isShimmerVisible())
+            mBinding.sflGroup.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressBar() {
-        if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE)
-            mProgressBar.setVisibility(View.GONE);
-        if (mShimmerFrameLayout.isShimmerStarted())
-            mShimmerFrameLayout.stopShimmer();
-        if (mShimmerFrameLayout.isShimmerVisible())
-            mShimmerFrameLayout.setVisibility(View.GONE);
+        if (mBinding.pbGroup.getVisibility() == View.VISIBLE)
+            mBinding.pbGroup.setVisibility(View.GONE);
+        if (mBinding.sflGroup.isShimmerStarted())
+            mBinding.sflGroup.stopShimmer();
+        if (mBinding.sflGroup.isShimmerVisible())
+            mBinding.sflGroup.setVisibility(View.GONE);
     }
 }

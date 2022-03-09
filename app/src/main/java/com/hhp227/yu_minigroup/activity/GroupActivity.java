@@ -1,41 +1,45 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
 import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.Toast;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import com.hhp227.yu_minigroup.adapter.GroupGridAdapter;
-import com.hhp227.yu_minigroup.fragment.GroupFragment;
+
+import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.databinding.ActivityGroupBinding;
 import com.hhp227.yu_minigroup.fragment.TabHostLayoutFragment;
 
 public class GroupActivity extends AppCompatActivity {
-    private boolean mIsAdmin;
-
-    private int mPosition;
-
-    private String mGroupId, mGroupName, mGroupImage, mKey;
+    private String mGroupName, mKey;
 
     private TabHostLayoutFragment mFragMain;
+
+    private ActivityGroupBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_group);
+        mBinding = ActivityGroupBinding.inflate(getLayoutInflater());
+
+        setContentView(mBinding.getRoot());
         Intent intent = getIntent();
-        mIsAdmin = intent.getBooleanExtra("admin", false);
-        mGroupId = intent.getStringExtra("grp_id");
+        boolean isAdmin = intent.getBooleanExtra("admin", false);
+        String groupId = intent.getStringExtra("grp_id");
         mGroupName = intent.getStringExtra("grp_nm");
-        mGroupImage = intent.getStringExtra("grp_img");
-        mPosition = intent.getIntExtra("pos", 0);
+        String groupImage = intent.getStringExtra("grp_img");
+        int position = intent.getIntExtra("pos", 0);
         mKey = intent.getStringExtra("key");
-        mFragMain = TabHostLayoutFragment.newInstance(mIsAdmin, mGroupId, mGroupName, mGroupImage, mPosition, mKey);
+        mFragMain = TabHostLayoutFragment.newInstance(isAdmin, groupId, mGroupName, groupImage, position, mKey);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, mFragMain).commit();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBinding = null;
     }
 
     @Override

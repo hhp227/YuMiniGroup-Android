@@ -17,6 +17,8 @@ import androidx.fragment.app.Fragment;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.helper.TimetableHelper;
 
+// TODO viewBinding 으로 이전할것
+
 public class MockTimeTableFragment extends Fragment {
     // DatabaseFile의 경로를 가져오기위한 변수
     private String dbName = "timetable.db";

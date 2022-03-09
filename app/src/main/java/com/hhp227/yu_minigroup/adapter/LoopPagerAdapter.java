@@ -4,13 +4,10 @@ import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.databinding.FragmentMainPagerBinding;
 
 import java.util.List;
 
@@ -30,42 +27,33 @@ public class LoopPagerAdapter extends PagerAdapter {
     @NonNull
     @Override
     public Object instantiateItem(ViewGroup view, int position) {
-        View rootView = LayoutInflater.from(view.getContext()).inflate(R.layout.fragment_main_pager, null);
-        RelativeLayout rl_main = rootView.findViewById(R.id.rl_type_main);
-        RelativeLayout rl_image = rootView.findViewById(R.id.rl_type_image);
-        ImageView imageView = rootView.findViewById(R.id.iv_banner);
-        TextView textType1 = rootView.findViewById(R.id.tv_type1);
-        TextView textType2 = rootView.findViewById(R.id.tv_type2);
-
+        FragmentMainPagerBinding binding = FragmentMainPagerBinding.inflate(LayoutInflater.from(view.getContext()), view, false);
         switch (mPagerItemList.get(position)) {
             case "메인":
-                Button findGroup = rootView.findViewById(R.id.b_find);
-                Button createCroup = rootView.findViewById(R.id.b_create);
-
-                textType1.setVisibility(View.GONE);
-                textType2.setVisibility(View.GONE);
-                rl_main.setVisibility(View.VISIBLE);
-                rl_image.setVisibility(View.GONE);
-                findGroup.setOnClickListener(mOnClickListener);
-                createCroup.setOnClickListener(mOnClickListener);
+                binding.tvType1.setVisibility(View.GONE);
+                binding.tvType2.setVisibility(View.GONE);
+                binding.rlTypeMain.setVisibility(View.VISIBLE);
+                binding.rlTypeImage.setVisibility(View.GONE);
+                binding.bFind.setOnClickListener(mOnClickListener);
+                binding.bCreate.setOnClickListener(mOnClickListener);
                 break;
             case "이미지1":
-                textType1.setVisibility(View.VISIBLE);
-                textType2.setVisibility(View.GONE);
-                rl_main.setVisibility(View.GONE);
-                rl_image.setVisibility(View.VISIBLE);
-                imageView.setImageResource(R.drawable.banner01);
+                binding.tvType1.setVisibility(View.VISIBLE);
+                binding.tvType2.setVisibility(View.GONE);
+                binding.rlTypeMain.setVisibility(View.GONE);
+                binding.rlTypeImage.setVisibility(View.VISIBLE);
+                binding.ivBanner.setImageResource(R.drawable.banner01);
                 break;
             case "이미지2":
-                textType1.setVisibility(View.GONE);
-                textType2.setVisibility(View.VISIBLE);
-                rl_main.setVisibility(View.GONE);
-                rl_image.setVisibility(View.VISIBLE);
-                imageView.setImageResource(R.drawable.banner02);
+                binding.tvType1.setVisibility(View.GONE);
+                binding.tvType2.setVisibility(View.VISIBLE);
+                binding.rlTypeMain.setVisibility(View.GONE);
+                binding.rlTypeImage.setVisibility(View.VISIBLE);
+                binding.ivBanner.setImageResource(R.drawable.banner02);
                 break;
         }
-        view.addView(rootView, 0);
-        return rootView;
+        view.addView(binding.getRoot(), 0);
+        return binding.getRoot();
     }
 
     @Override

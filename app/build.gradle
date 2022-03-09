@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
     buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.hhp227.yu_minigroup"
-        minSdkVersion 24
-        targetSdkVersion 31
-        versionCode 18
-        versionName "1.48"
+        minSdkVersion 21
+        targetSdkVersion 32
+        versionCode 19
+        versionName "1.49"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -25,6 +25,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    viewBinding {
+        enabled = true
     }
 }
 

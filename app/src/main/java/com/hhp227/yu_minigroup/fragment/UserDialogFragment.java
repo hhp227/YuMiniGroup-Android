@@ -1,12 +1,11 @@
 package com.hhp227.yu_minigroup.fragment;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,44 +16,53 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
-import com.hhp227.yu_minigroup.ChatActivity;
+import com.hhp227.yu_minigroup.activity.ChatActivity;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.FragmentUserBinding;
 
-public class UserFragment extends DialogFragment {
+public class UserDialogFragment extends DialogFragment {
     private String mUid, mName, mValue;
 
-    public UserFragment() {
+    private FragmentUserBinding mBinding;
+
+    public UserDialogFragment() {
     }
 
-    public static UserFragment newInstance() {
-        return new UserFragment();
+    public static UserDialogFragment newInstance() {
+        return new UserDialogFragment();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mUid = getArguments().getString("uid");
+            mName = getArguments().getString("name");
+            mValue = getArguments().getString("value");
+        }
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+
+        dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        return dialog;
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (getDialog() != null) {
-            getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-            getDialog().getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        }
-        return inflater.inflate(R.layout.fragment_user, container, false);
+        mBinding = FragmentUserBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ImageView profileImage = view.findViewById(R.id.iv_profile_image);
-        TextView userName = view.findViewById(R.id.tv_name);
-        Button send = view.findViewById(R.id.b_send);
-        Button close = view.findViewById(R.id.b_close);
-        Bundle bundle = getArguments();
-
-        if (bundle != null) {
-            mUid = bundle.getString("uid");
-            mName = bundle.getString("name");
-            mValue = bundle.getString("value");
-        }
         Glide.with(this)
                 .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mUid), new LazyHeaders.Builder()
                         .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
@@ -63,13 +71,13 @@ public class UserFragment extends DialogFragment {
                         .circleCrop()
                         .skipMemoryCache(true)
                         .diskCacheStrategy(DiskCacheStrategy.NONE))
-                .into(profileImage);
-        userName.setText(mName);
+                .into(mBinding.ivProfileImage);
+        mBinding.tvName.setText(mName);
         if (mUid.equals(AppController.getInstance().getPreferenceManager().getUser().getUid()))
-            send.setVisibility(View.GONE);
+            mBinding.bSend.setVisibility(View.GONE);
         else {
-            send.setText("메시지 보내기");
-            send.setOnClickListener(v -> {
+            mBinding.bSend.setText("메시지 보내기");
+            mBinding.bSend.setOnClickListener(v -> {
                 Intent intent = new Intent(getContext(), ChatActivity.class);
 
                 intent.putExtra("grp_chat", false);
@@ -79,6 +87,12 @@ public class UserFragment extends DialogFragment {
                 startActivity(intent);
             });
         }
-        close.setOnClickListener(v -> dismiss());
+        mBinding.bClose.setOnClickListener(v -> dismiss());
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 }

@@ -5,12 +5,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
-import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.databinding.WriteContentBinding;
+import com.hhp227.yu_minigroup.databinding.WriteTextBinding;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 
 import java.util.List;
@@ -36,12 +35,10 @@ public class WriteListAdapter extends RecyclerView.Adapter {
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
             case TYPE_TEXT:
-                View headerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.write_text, parent, false);
-                mHeaderHolder = new HeaderHolder(headerView);
+                mHeaderHolder = new HeaderHolder(WriteTextBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
                 return mHeaderHolder;
             case TYPE_CONTENT:
-                View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.write_content, parent, false);
-                return new ItemHolder(itemView);
+                return new ItemHolder(WriteContentBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
         }
         throw new RuntimeException();
     }
@@ -72,35 +69,33 @@ public class WriteListAdapter extends RecyclerView.Adapter {
     }
 
     public Map<String, Object> getTextMap() {
-        mTextMap.put("title", mHeaderHolder.inputTitle.getText().toString());
-        mTextMap.put("content", mHeaderHolder.inputContent.getText());
+        mTextMap.put("title", mHeaderHolder.mBinding.etTitle.getText().toString());
+        mTextMap.put("content", mHeaderHolder.mBinding.etContent.getText());
         return mTextMap;
     }
 
     public static class HeaderHolder extends RecyclerView.ViewHolder {
-        public TextView inputTitle, inputContent;
+        private final WriteTextBinding mBinding;
 
-        public HeaderHolder(View itemView) {
-            super(itemView);
-            inputTitle = itemView.findViewById(R.id.et_title);
-            inputContent = itemView.findViewById(R.id.et_content);
+        public HeaderHolder(WriteTextBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
         }
 
         public void bind(String title, String content) {
-            inputTitle.setText(title);
-            inputContent.setText(content);
+            mBinding.etTitle.setText(title);
+            mBinding.etContent.setText(content);
         }
     }
 
     public class ItemHolder extends RecyclerView.ViewHolder {
-        private final ImageView imageView, videoMark;
+        private final WriteContentBinding mBinding;
 
-        public ItemHolder(View itemView) {
-            super(itemView);
-            imageView = itemView.findViewById(R.id.iv_image_preview);
-            videoMark = itemView.findViewById(R.id.iv_video_preview);
+        public ItemHolder(WriteContentBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
 
-            itemView.setOnClickListener(view -> {
+            mBinding.ivImagePreview.setOnClickListener(view -> {
                 view.setOnCreateContextMenuListener((menu, v, menuInfo) -> {
                     menu.setHeaderTitle("작업 선택");
                     menu.add(0, getAdapterPosition(), Menu.NONE, "삭제");
@@ -113,25 +108,25 @@ public class WriteListAdapter extends RecyclerView.Adapter {
             if (object instanceof Bitmap) {
                 Bitmap bitmap = (Bitmap) mWriteItemList.get(getAdapterPosition());
 
-                imageView.setVisibility(bitmap != null ? View.VISIBLE : View.GONE);
+                mBinding.ivImagePreview.setVisibility(bitmap != null ? View.VISIBLE : View.GONE);
                 Glide.with(itemView.getContext())
                         .load(bitmap)
-                        .into(imageView);
-                videoMark.setVisibility(View.GONE);
+                        .into(mBinding.ivImagePreview);
+                mBinding.ivVideoPreview.setVisibility(View.GONE);
             } else if (object instanceof String) {
                 String imageUrl = (String) mWriteItemList.get(getAdapterPosition());
 
-                imageView.setVisibility(imageUrl != null ? View.VISIBLE : View.GONE);
-                Glide.with(itemView.getContext()).load(imageUrl).into(imageView);
-                videoMark.setVisibility(View.GONE);
+                mBinding.ivImagePreview.setVisibility(imageUrl != null ? View.VISIBLE : View.GONE);
+                Glide.with(itemView.getContext()).load(imageUrl).into(mBinding.ivImagePreview);
+                mBinding.ivVideoPreview.setVisibility(View.GONE);
             } else if (object instanceof YouTubeItem) { // 수정
                 YouTubeItem youTubeItem = (YouTubeItem) mWriteItemList.get(getAdapterPosition());
 
                 //리팩토링 요망
-                videoMark.setVisibility(View.VISIBLE);
+                mBinding.ivVideoPreview.setVisibility(View.VISIBLE);
                 Glide.with(itemView.getContext())
                         .load(youTubeItem.thumbnail)
-                        .into(imageView);
+                        .into(mBinding.ivImagePreview);
             }
         }
     }

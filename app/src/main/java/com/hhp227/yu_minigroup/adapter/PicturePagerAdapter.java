@@ -1,21 +1,17 @@
 package com.hhp227.yu_minigroup.adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 import com.bumptech.glide.Glide;
-import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.helper.ZoomImageView;
+import com.hhp227.yu_minigroup.databinding.ImageFullscreenBinding;
 
 import java.util.List;
 
 public class PicturePagerAdapter extends PagerAdapter {
     private final List<String> mImageList;
-
-    private LayoutInflater mInflater;
 
     public PicturePagerAdapter(List<String> images) {
         this.mImageList = images;
@@ -24,15 +20,12 @@ public class PicturePagerAdapter extends PagerAdapter {
     @NonNull
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
-        if (mInflater == null)
-            mInflater = (LayoutInflater) container.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = mInflater.inflate(R.layout.image_fullscreen, container, false);
-        ZoomImageView zoomImageView = view.findViewById(R.id.ziv_image);
+        ImageFullscreenBinding binding = ImageFullscreenBinding.inflate(LayoutInflater.from(container.getContext()), container, false);
         String image = mImageList.get(position);
 
-        Glide.with(view.getContext()).load(image).into(zoomImageView);
-        container.addView(view);
-        return view;
+        Glide.with(container.getContext()).load(image).into(binding.zivImage);
+        container.addView(binding.getRoot());
+        return binding.getRoot();
     }
 
     @Override

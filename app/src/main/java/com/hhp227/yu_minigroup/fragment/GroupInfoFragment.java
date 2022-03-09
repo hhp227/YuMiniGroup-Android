@@ -1,5 +1,6 @@
 package com.hhp227.yu_minigroup.fragment;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,11 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.CookieManager;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -20,11 +19,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.database.*;
-import com.hhp227.yu_minigroup.MainActivity;
+import com.hhp227.yu_minigroup.activity.MainActivity;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.RequestActivity;
+import com.hhp227.yu_minigroup.activity.RequestActivity;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.FragmentGroupInfoBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import org.json.JSONException;
@@ -53,6 +53,8 @@ public class GroupInfoFragment extends DialogFragment {
 
     private PreferenceManager mPreferenceManager;
 
+    private FragmentGroupInfoBinding mBinding;
+
     public static GroupInfoFragment newInstance() {
         Bundle args = new Bundle();
 
@@ -76,28 +78,29 @@ public class GroupInfoFragment extends DialogFragment {
         }
     }
 
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+
+        dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        return dialog;
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (getDialog() != null) {
-            getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-            getDialog().getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        }
-        return inflater.inflate(R.layout.fragment_group_info, container, false);
+        mBinding = FragmentGroupInfoBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Button button = view.findViewById(R.id.b_request);
-        Button close = view.findViewById(R.id.b_close);
-        ImageView image = view.findViewById(R.id.iv_group_image);
-        TextView name = view.findViewById(R.id.tv_name);
-        TextView info = view.findViewById(R.id.tv_info);
-        TextView desc = view.findViewById(R.id.tv_desciption);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookieManager = AppController.getInstance().getCookieManager();
 
-        button.setOnClickListener(v -> {
+        mBinding.bRequest.setOnClickListener(v -> {
             String tag_json_req = "req_register";
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, mButtonType == TYPE_REQUEST ? EndPoint.REGISTER_GROUP : EndPoint.WITHDRAWAL_GROUP, null, response -> {
                 try {
@@ -105,8 +108,10 @@ public class GroupInfoFragment extends DialogFragment {
                         Toast.makeText(getContext(), "신청완료", Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(getContext(), MainActivity.class);
 
-                        getActivity().setResult(RESULT_OK, intent);
-                        getActivity().finish();
+                        if (getActivity() != null) {
+                            getActivity().setResult(RESULT_OK, intent);
+                            getActivity().finish();
+                        }
                         insertGroupToFirebase();
                     } else if (mButtonType == TYPE_CANCEL && !response.getBoolean("isError")) {
                         Toast.makeText(getContext(), "신청취소", Toast.LENGTH_LONG).show();
@@ -160,17 +165,23 @@ public class GroupInfoFragment extends DialogFragment {
             };
             AppController.getInstance().addToRequestQueue(jsonObjectRequest, tag_json_req);
         });
-        close.setOnClickListener(v -> dismiss());
-        name.setText(mGroupName);
-        info.setText(mGroupInfo);
-        desc.setText(mGroupDesc);
-        desc.setMaxLines(DESC_MAX_LINE);
-        button.setText(mButtonType == TYPE_REQUEST ? "가입신청" : "신청취소");
+        mBinding.bClose.setOnClickListener(v -> dismiss());
+        mBinding.tvName.setText(mGroupName);
+        mBinding.tvInfo.setText(mGroupInfo);
+        mBinding.tvDesciption.setText(mGroupDesc);
+        mBinding.tvDesciption.setMaxLines(DESC_MAX_LINE);
+        mBinding.bRequest.setText(mButtonType == TYPE_REQUEST ? "가입신청" : "신청취소");
         Glide.with(this)
                 .load(mGroupImage)
                 .apply(RequestOptions.placeholderOf(R.drawable.ic_launcher_background).error(R.drawable.ic_launcher_background))
                 .transition(DrawableTransitionOptions.withCrossFade(150))
-                .into(image);
+                .into(mBinding.ivGroupImage);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 
     private void insertGroupToFirebase() {

@@ -7,9 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.CookieManager;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -30,12 +27,17 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.firebase.database.*;
-import com.hhp227.yu_minigroup.*;
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.activity.MainActivity;
+import com.hhp227.yu_minigroup.activity.NoticeActivity;
+import com.hhp227.yu_minigroup.activity.ProfileActivity;
+import com.hhp227.yu_minigroup.activity.SettingsActivity;
+import com.hhp227.yu_minigroup.activity.VerInfoActivity;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.ContentTab4Binding;
+import com.hhp227.yu_minigroup.databinding.FragmentTab4Binding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.dto.User;
 import org.json.JSONException;
@@ -62,7 +64,7 @@ public class Tab4Fragment extends Fragment {
 
     private User mUser;
 
-    private RecyclerView mRecyclerView;
+    private FragmentTab4Binding mBinding;
 
     public Tab4Fragment() {
     }
@@ -93,23 +95,22 @@ public class Tab4Fragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_tab4, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mBinding = FragmentTab4Binding.inflate(inflater, container, false);
+        return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mRecyclerView = view.findViewById(R.id.recycler_view);
         mCookieManager = AppController.getInstance().getCookieManager();
 
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.setAdapter(new RecyclerView.Adapter<Tab4Holder>() {
+        mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.recyclerView.setAdapter(new RecyclerView.Adapter<Tab4Holder>() {
             @NonNull
             @Override
             public Tab4Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(getContext()).inflate(R.layout.content_tab4, parent, false);
-                return new Tab4Holder(view);
+                return new Tab4Holder(ContentTab4Binding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
             }
 
             @Override
@@ -124,6 +125,12 @@ public class Tab4Fragment extends Fragment {
                 return 1;
             }
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 
     @Override
@@ -142,7 +149,7 @@ public class Tab4Fragment extends Fragment {
             getActivity().setResult(Activity.RESULT_OK, intent);
             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(groupName);
         } else if (requestCode == UPDATE_PROFILE && resultCode == Activity.RESULT_OK) {
-            mRecyclerView.getAdapter().notifyDataSetChanged();
+            mBinding.recyclerView.getAdapter().notifyDataSetChanged();
             getActivity().setResult(Activity.RESULT_OK);
         }
     }
@@ -207,33 +214,24 @@ public class Tab4Fragment extends Fragment {
     }
 
     public class Tab4Holder extends RecyclerView.ViewHolder {
-        private final AdView adView;
+        private final ContentTab4Binding mBinding;
 
-        private final LinearLayout profile, withdrawal, settings, notice, feedback, appStore, share, version;
+        public Tab4Holder(ContentTab4Binding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
 
-        private final ImageView profileImage;
-
-        private final TextView name, yuId, withdrawalText;
-
-        public Tab4Holder(View itemView) {
-            super(itemView);
-            adView = itemView.findViewById(R.id.ad_view);
-            appStore = itemView.findViewById(R.id.ll_appstore);
-            feedback = itemView.findViewById(R.id.ll_feedback);
-            name = itemView.findViewById(R.id.tv_name);
-            notice = itemView.findViewById(R.id.ll_notice);
-            profile = itemView.findViewById(R.id.ll_profile);
-            profileImage = itemView.findViewById(R.id.iv_profile_image);
-            settings = itemView.findViewById(R.id.ll_settings);
-            share = itemView.findViewById(R.id.ll_share);
-            version = itemView.findViewById(R.id.ll_verinfo);
-            withdrawal = itemView.findViewById(R.id.ll_withdrawal);
-            withdrawalText = itemView.findViewById(R.id.tv_withdrawal);
-            yuId = itemView.findViewById(R.id.tv_yu_id);
+            mBinding.llProfile.setOnClickListener(this::onClick);
+            mBinding.llWithdrawal.setOnClickListener(this::onClick);
+            mBinding.llNotice.setOnClickListener(this::onClick);
+            mBinding.llFeedback.setOnClickListener(this::onClick);
+            mBinding.llAppstore.setOnClickListener(this::onClick);
+            mBinding.llShare.setOnClickListener(this::onClick);
+            mBinding.llVerinfo.setOnClickListener(this::onClick);
+            mBinding.llSettings.setOnClickListener(this::onClick);
         }
 
         public void bind(String userId, String userName) {
-            Glide.with(getActivity())
+            Glide.with(itemView.getContext())
                     .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mUser.getUid()), new LazyHeaders.Builder()
                             .addHeader("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS))
                             .build()))
@@ -242,25 +240,18 @@ public class Tab4Fragment extends Fragment {
                             .error(R.drawable.user_image_view_circle)
                             .skipMemoryCache(true)
                             .diskCacheStrategy(DiskCacheStrategy.NONE))
-                    .into(profileImage);
-            name.setText(userName);
-            yuId.setText(userId);
-            profile.setOnClickListener(this::onClick);
-            withdrawal.setOnClickListener(this::onClick);
+                    .into(mBinding.ivProfileImage);
+            mBinding.tvName.setText(userName);
+            mBinding.tvYuId.setText(userId);
+
             if (mIsAdmin) {
-                withdrawalText.setText("소모임 폐쇄");
-                settings.setOnClickListener(this::onClick);
-                settings.setVisibility(View.VISIBLE);
+                mBinding.tvWithdrawal.setText("소모임 폐쇄");
+                mBinding.llSettings.setVisibility(View.VISIBLE);
             } else {
-                withdrawalText.setText("소모임 탈퇴");
-                settings.setVisibility(View.GONE);
+                mBinding.tvWithdrawal.setText("소모임 탈퇴");
+                mBinding.llSettings.setVisibility(View.GONE);
             }
-            notice.setOnClickListener(this::onClick);
-            feedback.setOnClickListener(this::onClick);
-            appStore.setOnClickListener(this::onClick);
-            share.setOnClickListener(this::onClick);
-            version.setOnClickListener(this::onClick);
-            adView.loadAd(new AdRequest.Builder().build());
+            mBinding.adView.loadAd(new AdRequest.Builder().build());
         }
 
         private void onClick(View v) {

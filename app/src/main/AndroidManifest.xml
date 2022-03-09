@@ -1,102 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.hhp227.yu_minigroup">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.hhp227.yu_minigroup">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission
-            android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-            android:maxSdkVersion="18"/>
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18"/>
 
     <uses-feature
-            android:name="android.hardware.camera"
-            android:required="true"/>
+        android:name="android.hardware.camera"
+        android:required="true"/>
 
     <application
-            android:name=".app.AppController"
-            android:allowBackup="true"
-            android:icon="@drawable/ic_icon"
-            android:label="@string/app_name"
-            android:supportsRtl="true"
-            android:theme="@style/AppTheme"
-            android:usesCleartextTraffic="true">
+        android:name=".app.AppController"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_icon"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
         <activity
-                android:name=".YouTubeSearchActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.YouTubeSearchActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".NoticeActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.NoticeActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".ReplyModifyActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.ReplyModifyActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".ModifyActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.ModifyActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".PictureActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.PictureActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".ProfileActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.ProfileActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".SettingsActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.SettingsActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".WriteActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.WriteActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".ArticleActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.ArticleActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".VerInfoActivity"
-                android:label="@string/title_activity_ver_info"
-                android:launchMode="singleTask"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.VerInfoActivity"
+            android:label="@string/title_activity_ver_info"
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".ChatActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.ChatActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".WebViewActivity">
-        </activity>
-        <activity
-                android:name=".RequestActivity"
-                android:label="@string/title_request"
-                android:launchMode="singleTask"
-                android:theme="@style/AppTheme.NoActionBar">
+        <activity android:name=".activity.WebViewActivity">
         </activity>
         <activity
-                android:name=".FindActivity"
-                android:label="@string/title_find"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.RequestActivity"
+            android:label="@string/title_request"
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".CreateActivity"
-                android:label="@string/title_create"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.FindActivity"
+            android:label="@string/title_find"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".GroupActivity"
-                android:configChanges="orientation|screenSize"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.CreateActivity"
+            android:label="@string/title_create"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".SplashActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.GroupActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".LoginActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.SplashActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+            android:name=".activity.LoginActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -104,29 +106,29 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".MainActivity"
-                android:configChanges="orientation|screenSize"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.MainActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
         <provider
-                android:name="androidx.core.content.FileProvider"
-                android:authorities="com.hhp227.yu_minigroup"
-                android:exported="false"
-                android:grantUriPermissions="true">
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.hhp227.yu_minigroup"
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
-                    android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/file_paths"/>
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
         </provider> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
-                android:name="com.google.android.gms.ads.APPLICATION_ID"
-                android:value="@string/admob_app_id"/>
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="@string/admob_app_id"/>
         <meta-data
-                android:name="com.google.firebase.messaging.default_notification_icon"
-                android:resource="@drawable/ic_icon"/>
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_icon"/>
         <meta-data
-                android:name="com.google.firebase.messaging.default_notification_color"
-                android:resource="@color/colorAccent"/>
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorAccent"/>
     </application>
 
 </manifest>

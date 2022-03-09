@@ -11,12 +11,10 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
-import android.webkit.ValueCallback;
-import android.widget.ProgressBar;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -25,17 +23,22 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.*;
-import com.hhp227.yu_minigroup.*;
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.activity.CreateActivity;
+import com.hhp227.yu_minigroup.activity.FindActivity;
+import com.hhp227.yu_minigroup.activity.GroupActivity;
+import com.hhp227.yu_minigroup.activity.LoginActivity;
+import com.hhp227.yu_minigroup.activity.MainActivity;
+import com.hhp227.yu_minigroup.activity.RequestActivity;
 import com.hhp227.yu_minigroup.adapter.GroupGridAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.FragmentGroupBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import net.htmlparser.jericho.Element;
@@ -65,13 +68,9 @@ public class GroupFragment extends Fragment {
 
     private int mSpanCount;
 
-    private AppCompatActivity mActivity;
-
     private CookieManager mCookieManager;
 
     private CountDownTimer mCountDownTimer;
-
-    private DrawerLayout mDrawerLayout;
 
     private GridLayoutManager mGridLayoutManager;
 
@@ -85,34 +84,22 @@ public class GroupFragment extends Fragment {
 
     private PreferenceManager mPreferenceManager;
 
-    private ProgressBar mProgressBar;
-
-    private RecyclerView mRecyclerView;
-
     private RecyclerView.ItemDecoration mItemDecoration;
 
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-
-    private Toolbar mToolbar;
+    private FragmentGroupBinding mBinding;
 
     public GroupFragment() {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_group, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mBinding = FragmentGroupBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        BottomNavigationView bottomNavigationView = view.findViewById(R.id.bnv_group_button);
-        mActivity = (AppCompatActivity) getActivity();
-        mDrawerLayout = mActivity.findViewById(R.id.drawer_layout);
-        mToolbar = view.findViewById(R.id.toolbar);
-        mSwipeRefreshLayout = view.findViewById(R.id.srl_group);
-        mProgressBar = view.findViewById(R.id.pb_group);
-        mRecyclerView = view.findViewById(R.id.rv_group);
         mSpanCount = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? PORTAIT_SPAN_COUNT :
                      getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? LANDSCAPE_SPAN_COUNT :
                      0;
@@ -162,9 +149,7 @@ public class GroupFragment extends Fragment {
             }
         };
 
-        mActivity.setTitle(getString(R.string.main));
-        mActivity.setSupportActionBar(mToolbar);
-        setDrawerToggle();
+        ((MainActivity) requireActivity()).setAppBar(mBinding.toolbar, getString(R.string.main));
         mAdapter.setHasStableIds(true);
         mAdapter.setOnItemClickListener((v, position) -> {
             if (mGroupItemValues.get(position) instanceof GroupItem) {
@@ -190,18 +175,18 @@ public class GroupFragment extends Fragment {
             }
         });
         mGridLayoutManager.setSpanSizeLookup(mSpanSizeLookup);
-        mRecyclerView.setLayoutManager(mGridLayoutManager);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.addItemDecoration(mItemDecoration);
-        mSwipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
+        mBinding.rvGroup.setLayoutManager(mGridLayoutManager);
+        mBinding.rvGroup.setAdapter(mAdapter);
+        mBinding.rvGroup.addItemDecoration(mItemDecoration);
+        mBinding.srlGroup.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
             mGroupItemKeys.clear();
             mGroupItemValues.clear();
-            mSwipeRefreshLayout.setRefreshing(false);
+            mBinding.srlGroup.setRefreshing(false);
             fetchDataTask();
         }, 1700));
-        mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light, android.R.color.holo_orange_light, android.R.color.holo_red_light);
-        bottomNavigationView.getMenu().getItem(0).setCheckable(false);
-        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+        mBinding.srlGroup.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light, android.R.color.holo_orange_light, android.R.color.holo_red_light);
+        mBinding.bnvGroupButton.getMenu().getItem(0).setCheckable(false);
+        mBinding.bnvGroupButton.setOnNavigationItemSelectedListener(item -> {
             item.setCheckable(false);
             switch (item.getItemId()) {
                 case R.id.navigation_find:
@@ -223,9 +208,10 @@ public class GroupFragment extends Fragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mRecyclerView.removeItemDecoration(mItemDecoration);
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding.rvGroup.removeItemDecoration(mItemDecoration);
+        mBinding = null;
     }
 
     @Override
@@ -278,18 +264,11 @@ public class GroupFragment extends Fragment {
         }
         mGridLayoutManager.setSpanSizeLookup(mSpanSizeLookup);
         mGridLayoutManager.setSpanCount(mSpanCount);
-        mRecyclerView.invalidateItemDecorations();
-    }
-
-    private void setDrawerToggle() {
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(mActivity, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-
-        mDrawerLayout.addDrawerListener(drawerToggle);
-        drawerToggle.syncState();
+        mBinding.rvGroup.invalidateItemDecorations();
     }
 
     private void fetchDataTask() {
-        mActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.GROUP_LIST, response -> {
             Source source = new Source(response);
 
@@ -422,12 +401,12 @@ public class GroupFragment extends Fragment {
     }
 
     private void showProgressBar() {
-        if (mProgressBar != null)
-            mProgressBar.setVisibility(View.VISIBLE);
+        if (mBinding.pbGroup.getVisibility() == View.GONE)
+            mBinding.pbGroup.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressBar() {
-        if (mProgressBar != null)
-            mProgressBar.setVisibility(View.GONE);
+        if (mBinding.pbGroup.getVisibility() == View.VISIBLE)
+            mBinding.pbGroup.setVisibility(View.GONE);
     }
 }

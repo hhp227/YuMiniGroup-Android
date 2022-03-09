@@ -4,10 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -16,17 +15,17 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.google.firebase.database.*;
-import com.hhp227.yu_minigroup.ArticleActivity;
+import com.hhp227.yu_minigroup.activity.ArticleActivity;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.WriteActivity;
+import com.hhp227.yu_minigroup.activity.WriteActivity;
 import com.hhp227.yu_minigroup.adapter.ArticleListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.FragmentTab1Binding;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import net.htmlparser.jericho.Element;
@@ -61,9 +60,7 @@ public class Tab1Fragment extends Fragment {
 
     private List<ArticleItem> mArticleItemValues;
 
-    private ProgressBar mProgressBar;
-
-    private RelativeLayout mRelativeLayout;
+    private FragmentTab1Binding mBinding;
 
     public Tab1Fragment() {
     }
@@ -94,29 +91,26 @@ public class Tab1Fragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_tab1, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mBinding = FragmentTab1Binding.inflate(inflater, container, false);
+        return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.srl_article_list);
-        RecyclerView recyclerView = view.findViewById(R.id.rv_article);
-        mProgressBar = view.findViewById(R.id.pb_article);
-        mRelativeLayout = view.findViewById(R.id.rl_write);
         mArticleItemKeys = new ArrayList<>();
         mArticleItemValues = new ArrayList<>();
         mAdapter = new ArticleListAdapter(mArticleItemKeys, mArticleItemValues, mKey);
         mOffSet = 1;
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.post(() -> {
+        mBinding.rvArticle.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.rvArticle.setAdapter(mAdapter);
+        mBinding.rvArticle.post(() -> {
             mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             mAdapter.addFooterView();
         });
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        mBinding.rvArticle.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -147,7 +141,7 @@ public class Tab1Fragment extends Fragment {
             intent.putExtra("artl_key", mAdapter.getKey(position));
             startActivityForResult(intent, UPDATE_ARTICLE);
         });
-        mRelativeLayout.setOnClickListener(v -> {
+        mBinding.rlWrite.setOnClickListener(v -> {
             if (SystemClock.elapsedRealtime() - mLastClickTime < 1000)
                 return;
             mLastClickTime = SystemClock.elapsedRealtime();
@@ -160,19 +154,25 @@ public class Tab1Fragment extends Fragment {
             intent.putExtra("key", mKey);
             startActivity(intent);
         });
-        swipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
+        mBinding.srlArticleList.setOnRefreshListener(() -> new Handler(Looper.getMainLooper()).postDelayed(() -> {
             mMinId = 0;
             mOffSet = 1;
 
             mArticleItemKeys.clear();
             mArticleItemValues.clear();
             mAdapter.addFooterView();
-            swipeRefreshLayout.setRefreshing(false);
+            mBinding.srlArticleList.setRefreshing(false);
             fetchArticleList();
         }, 2000));
-        swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_red_light, android.R.color.holo_orange_light, android.R.color.holo_green_light, android.R.color.holo_blue_bright);
+        mBinding.srlArticleList.setColorSchemeResources(android.R.color.holo_red_light, android.R.color.holo_orange_light, android.R.color.holo_green_light, android.R.color.holo_blue_bright);
         showProgressBar();
         fetchArticleList();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 
     @Override
@@ -214,7 +214,7 @@ public class Tab1Fragment extends Fragment {
                     List<Element> images = viewArt.getAllElements(HTMLElementName.IMG);
                     StringBuilder content = new StringBuilder();
                     List<String> imageList = new ArrayList<>();
-                    String replyCnt = commentWrap.getContent().getFirstElement(HTMLElementName.P).getTextExtractor().toString();
+                    String replyCnt = commentWrap.getFirstElementByClass("commentBtn").getTextExtractor().toString(); // 댓글 + commentWrap.getFirstElementByClass("comment_cnt").getTextExtractor();
 
                     if (images.size() > 0)
                         images.forEach(image -> imageList.add(!image.getAttributeValue("src").contains("http") ? EndPoint.BASE_URL + image.getAttributeValue("src") : image.getAttributeValue("src")));
@@ -256,7 +256,7 @@ public class Tab1Fragment extends Fragment {
             }
             mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             mAdapter.notifyDataSetChanged();
-            mRelativeLayout.setVisibility(mArticleItemValues.size() > 1 ? View.GONE : View.VISIBLE);
+            mBinding.rlWrite.setVisibility(mArticleItemValues.size() > 1 ? View.GONE : View.VISIBLE);
         }, error -> {
             VolleyLog.e(error.getMessage());
             hideProgressBar();
@@ -306,12 +306,12 @@ public class Tab1Fragment extends Fragment {
     }
 
     private void showProgressBar() {
-        if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE)
-            mProgressBar.setVisibility(View.VISIBLE);
+        if (mBinding.pbArticle.getVisibility() == View.GONE)
+            mBinding.pbArticle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressBar() {
-        if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE)
-            mProgressBar.setVisibility(View.GONE);
+        if (mBinding.pbArticle.getVisibility() == View.VISIBLE)
+            mBinding.pbArticle.setVisibility(View.GONE);
     }
 }

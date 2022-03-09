@@ -20,6 +20,7 @@ import com.google.android.gms.ads.formats.UnifiedNativeAdView;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.databinding.*;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.ui.loopviewpager.LoopViewPager;
 import com.hhp227.yu_minigroup.helper.ui.pageindicator.LoopingCirclePageIndicator;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -53,7 +55,7 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
 
     private final List<Object> mGroupItemValues;
 
-    private OnItemClickListener mOnItemClickListener;
+    private BiConsumer<View, Integer> mOnItemClickListener;
 
     private LoopViewPager mLoopViewPager;
 
@@ -71,20 +73,15 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
             case TYPE_TEXT:
-                View headerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.group_grid_header, parent, false);
-                return new HeaderHolder(headerView);
+                return new HeaderHolder(GroupGridHeaderBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
             case TYPE_GROUP:
-                View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.group_grid_item, parent, false);
-                return new ItemHolder(itemView);
+                return new ItemHolder(GroupGridItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
             case TYPE_AD:
-                View adView = LayoutInflater.from(parent.getContext()).inflate(R.layout.group_grid_ad, parent, false);
-                return new AdHolder(adView);
+                return new AdHolder(GroupGridAdBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
             case TYPE_BANNER:
-                View bannerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.group_grid_no_item, parent, false);
-                return new BannerHolder(bannerView);
+                return new BannerHolder(GroupGridNoItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
             case TYPE_VIEW_PAGER:
-                View popularView = LayoutInflater.from(parent.getContext()).inflate(R.layout.group_grid_view_pager, parent, false);
-                return new ViewPagerHolder(popularView);
+                return new ViewPagerHolder(GroupGridViewPagerBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
         }
         throw new NullPointerException();
     }
@@ -99,11 +96,11 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
             ((AdHolder) holder).bind();
         } else if (holder instanceof BannerHolder) {
             mLoopPagerAdapter = new LoopPagerAdapter(Stream.<String>builder().add("메인").add("이미지1").add("이미지2").build().collect(Collectors.toList()));//
-            mLoopViewPager = ((BannerHolder) holder).loopViewPager;
+            mLoopViewPager = ((BannerHolder) holder).mBinding.lvpThemeSliderPager;
 
             mLoopViewPager.setAdapter(mLoopPagerAdapter);
             mLoopPagerAdapter.setOnClickListener(mOnClickListener);
-            ((BannerHolder) holder).circlePageIndicator.setViewPager(mLoopViewPager);
+            ((BannerHolder) holder).bind();
         } else if (holder instanceof ViewPagerHolder) {
             ((ViewPagerHolder) holder).bind();
         }
@@ -159,7 +156,7 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
         notifyItemInserted(position);
     }
 
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+    public void setOnItemClickListener(BiConsumer<View, Integer> onItemClickListener) {
         this.mOnItemClickListener = onItemClickListener;
     }
 
@@ -185,37 +182,30 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
     }
 
     public static class HeaderHolder extends RecyclerView.ViewHolder {
-        private final TextView text;
+        private final GroupGridHeaderBinding mBinding;
 
-        HeaderHolder(View itemView) {
-            super(itemView);
-            text = itemView.findViewById(R.id.tv_title);
+        HeaderHolder(@NonNull GroupGridHeaderBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
         }
 
         public void bind(Map<String, String> map) {
-            text.setText(map.get("text"));
+            mBinding.tvTitle.setText(map.get("text"));
         }
     }
 
     public class ItemHolder extends RecyclerView.ViewHolder {
-        private final ImageView groupImage, more;
+        private final GroupGridItemBinding mBinding;
 
-        private final RelativeLayout groupLayout;
+        ItemHolder(GroupGridItemBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
 
-        private final TextView groupName;
-
-        ItemHolder(View itemView) {
-            super(itemView);
-            groupLayout = itemView.findViewById(R.id.rl_group);
-            groupImage = itemView.findViewById(R.id.iv_group_image);
-            groupName = itemView.findViewById(R.id.tv_title);
-            more = itemView.findViewById(R.id.iv_more);
-
-            groupLayout.setOnClickListener(v -> {
+            mBinding.rlGroup.setOnClickListener(v -> {
                 if (mOnItemClickListener != null)
-                    mOnItemClickListener.onItemClick(v, getAdapterPosition());
+                    mOnItemClickListener.accept(v, getAdapterPosition());
             });
-            more.setOnClickListener(v -> {
+            mBinding.ivMore.setOnClickListener(v -> {
                 PopupMenu popupMenu = new PopupMenu(itemView.getContext(), v);
                 MenuInflater inflater = popupMenu.getMenuInflater();
 
@@ -239,50 +229,42 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
             Glide.with(itemView.getContext())
                     .load(groupItem.getImage())
                     .transition(new DrawableTransitionOptions().crossFade(150))
-                    .into(groupImage);
-            groupName.setText(groupItem.getName());
-            groupLayout.setVisibility(View.VISIBLE);
+                    .into(mBinding.ivGroupImage);
+            mBinding.tvTitle.setText(groupItem.getName());
+            mBinding.rlGroup.setVisibility(View.VISIBLE);
         }
     }
 
     public class AdHolder extends RecyclerView.ViewHolder {
-        private final MediaView mediaView;
+        private final GroupGridAdBinding mBinding;
 
-        private final TextView headlineView, bodyView, advertiser;
-
-        private final UnifiedNativeAdView adView;
-
-        AdHolder(View itemView) {
-            super(itemView);
-            adView = itemView.findViewById(R.id.unav);
-            mediaView = itemView.findViewById(R.id.ad_media);
-            headlineView = itemView.findViewById(R.id.ad_headline);
-            bodyView = itemView.findViewById(R.id.ad_body);
-            advertiser = itemView.findViewById(R.id.ad_advertiser);
+        AdHolder(GroupGridAdBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
         }
 
         public void bind() {
             AdLoader.Builder builder = new AdLoader.Builder(itemView.getContext(), itemView.getContext().getString(R.string.native_ad));
             builder.forUnifiedNativeAd(unifiedNativeAd -> {
-                mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
-                adView.setMediaView(mediaView);
-                adView.setHeadlineView(headlineView);
-                adView.setBodyView(bodyView);
-                adView.setAdvertiserView(advertiser);
-                headlineView.setText(unifiedNativeAd.getHeadline());
-                adView.getMediaView().setMediaContent(unifiedNativeAd.getMediaContent());
+                mBinding.adMedia.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
+                mBinding.unav.setMediaView(mBinding.adMedia);
+                mBinding.unav.setHeadlineView(mBinding.adHeadline);
+                mBinding.unav.setBodyView(mBinding.adBody);
+                mBinding.unav.setAdvertiserView(mBinding.adAdvertiser);
+                mBinding.adHeadline.setText(unifiedNativeAd.getHeadline());
+                mBinding.unav.getMediaView().setMediaContent(unifiedNativeAd.getMediaContent());
                 if (unifiedNativeAd.getBody() != null) {
-                    bodyView.setText(unifiedNativeAd.getBody());
-                    adView.getBodyView().setVisibility(View.VISIBLE);
+                    mBinding.adBody.setText(unifiedNativeAd.getBody());
+                    mBinding.unav.getBodyView().setVisibility(View.VISIBLE);
                 } else
-                    adView.getBodyView().setVisibility(View.INVISIBLE);
+                    mBinding.unav.getBodyView().setVisibility(View.INVISIBLE);
                 if (unifiedNativeAd.getAdvertiser() != null) {
-                    advertiser.setText(unifiedNativeAd.getAdvertiser());
-                    adView.getAdvertiserView().setVisibility(View.VISIBLE);
+                    mBinding.adAdvertiser.setText(unifiedNativeAd.getAdvertiser());
+                    mBinding.unav.getAdvertiserView().setVisibility(View.VISIBLE);
                 } else
-                    adView.getAdvertiserView().setVisibility(View.GONE);
-                adView.setNativeAd(unifiedNativeAd);
-                mediaView.addView(getAdText(itemView.getContext()));
+                    mBinding.unav.getAdvertiserView().setVisibility(View.GONE);
+                mBinding.unav.setNativeAd(unifiedNativeAd);
+                mBinding.adMedia.addView(getAdText(itemView.getContext()));
             });
             AdLoader adLoader = builder.withAdListener(new AdListener() {
                 @Override
@@ -298,31 +280,29 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
                 }
             }).build();
             adLoader.loadAd(new AdRequest.Builder().build());
-            adView.setVisibility(View.VISIBLE);
+            mBinding.unav.setVisibility(View.VISIBLE);
         }
     }
 
     public static class BannerHolder extends RecyclerView.ViewHolder {
-        private final LoopingCirclePageIndicator circlePageIndicator;
+        private final GroupGridNoItemBinding mBinding;
 
-        private final LoopViewPager loopViewPager;
+        BannerHolder(GroupGridNoItemBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
+        }
 
-        BannerHolder(View itemView) {
-            super(itemView);
-            circlePageIndicator = itemView.findViewById(R.id.cpi_theme_slider_indicator);
-            loopViewPager = itemView.findViewById(R.id.lvp_theme_slider_pager);
+        public void bind() {
+            mBinding.cpiThemeSliderIndicator.setViewPager(mBinding.lvpThemeSliderPager);
         }
     }
 
     public static class ViewPagerHolder extends RecyclerView.ViewHolder {
-        private final ProgressBar progressBar;
+        private final GroupGridViewPagerBinding mBinding;
 
-        private final ViewPager viewPager;
-
-        ViewPagerHolder(View itemView) {
-            super(itemView);
-            progressBar = itemView.findViewById(R.id.pb_group);
-            viewPager = itemView.findViewById(R.id.view_pager);
+        ViewPagerHolder(GroupGridViewPagerBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
         }
 
         public void bind() {
@@ -330,20 +310,20 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
             List<GroupItem> popularItemList = new ArrayList<>();
             GroupPagerAdapter groupPagerAdapter = new GroupPagerAdapter(popularItemList);
 
-            viewPager.setAdapter(groupPagerAdapter);
-            viewPager.setClipToPadding(false);
-            viewPager.setPadding(margin, 0, margin, 0);
-            viewPager.setPageTransformer(false, (page, pos) -> {
-                if (viewPager.getCurrentItem() == 0) {
+            mBinding.viewPager.setAdapter(groupPagerAdapter);
+            mBinding.viewPager.setClipToPadding(false);
+            mBinding.viewPager.setPadding(margin, 0, margin, 0);
+            mBinding.viewPager.setPageTransformer(false, (page, pos) -> {
+                if (mBinding.viewPager.getCurrentItem() == 0) {
                     page.setTranslationX(-(margin * 3) / 4);
-                } else if (viewPager.getCurrentItem() == groupPagerAdapter.getCount() - 1) {
+                } else if (mBinding.viewPager.getCurrentItem() == groupPagerAdapter.getCount() - 1) {
                     page.setTranslationX(margin * 3 / 4);
                 } else {
                     page.setTranslationX(-((margin / 2) + (margin / 8)));
                 }
             });
-            viewPager.setPageMargin(margin / 4);
-            progressBar.setVisibility(View.VISIBLE);
+            mBinding.viewPager.setPageMargin(margin / 4);
+            mBinding.pbGroup.setVisibility(View.VISIBLE);
             AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.GROUP_LIST, response -> {
                 Source source = new Source(response);
                 List<Element> list = source.getAllElements("id", "accordion", false);
@@ -382,10 +362,10 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
                     }
                 });
                 groupPagerAdapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.GONE);
+                mBinding.pbGroup.setVisibility(View.GONE);
             }, error -> {
                 VolleyLog.e(TAG, error.getMessage());
-                progressBar.setVisibility(View.GONE);
+                mBinding.pbGroup.setVisibility(View.GONE);
             }) {
                 @Override
                 public Map<String, String> getHeaders() {
@@ -429,9 +409,5 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
                 }
             });
         }
-    }
-
-    public interface OnItemClickListener {
-        void onItemClick(View v, int position);
     }
 }

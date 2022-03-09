@@ -1,30 +1,26 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 import com.hhp227.yu_minigroup.adapter.PicturePagerAdapter;
+import com.hhp227.yu_minigroup.databinding.ActivityPictureBinding;
 
 import java.util.List;
 
 public class PictureActivity extends AppCompatActivity {
     private List<String> mImages;
 
-    private TextView mCount;
-
-    private ViewPager mViewPager;
+    private ActivityPictureBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_picture);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        mViewPager = findViewById(R.id.view_pager);
-        mCount = findViewById(R.id.tv_count);
+        mBinding = ActivityPictureBinding.inflate(getLayoutInflater());
+
+        setContentView(mBinding.getRoot());
         int position = 0;
         Bundle b = getIntent().getExtras();
 
@@ -32,33 +28,35 @@ public class PictureActivity extends AppCompatActivity {
             mImages = b.getStringArrayList("images");
             position = b.getInt("position");
         }
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null)
+        setSupportActionBar(mBinding.toolbar);
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mViewPager.setAdapter(new PicturePagerAdapter(mImages));
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        }
+        mBinding.viewPager.setAdapter(new PicturePagerAdapter(mImages));
+        mBinding.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             }
 
             @Override
             public void onPageSelected(int position) {
-                mCount.setText((position + 1) + " / " + mImages.size());
+                mBinding.tvCount.setText((position + 1) + " / " + mImages.size());
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
             }
         });
-        mViewPager.setCurrentItem(position, false);
-        mCount.setVisibility(mImages.size() > 1 ? View.VISIBLE : View.GONE);
-        mCount.setText((position + 1) + " / " + mImages.size());
+        mBinding.viewPager.setCurrentItem(position, false);
+        mBinding.tvCount.setVisibility(mImages.size() > 1 ? View.VISIBLE : View.GONE);
+        mBinding.tvCount.setText((position + 1) + " / " + mImages.size());
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mViewPager.clearOnPageChangeListeners();
+        mBinding.viewPager.clearOnPageChangeListeners();
+        mBinding = null;
     }
 
     @Override
