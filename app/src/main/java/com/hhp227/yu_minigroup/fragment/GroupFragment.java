@@ -13,9 +13,6 @@ import android.view.WindowManager;
 import android.webkit.CookieManager;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,8 +26,8 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.activity.CreateActivity;
-import com.hhp227.yu_minigroup.activity.FindActivity;
+import com.hhp227.yu_minigroup.activity.CreateGroupActivity;
+import com.hhp227.yu_minigroup.activity.FindGroupActivity;
 import com.hhp227.yu_minigroup.activity.GroupActivity;
 import com.hhp227.yu_minigroup.activity.LoginActivity;
 import com.hhp227.yu_minigroup.activity.MainActivity;
@@ -168,10 +165,10 @@ public class GroupFragment extends Fragment {
         mAdapter.setOnClickListener(v -> {
             switch (v.getId()) {
                 case R.id.b_find:
-                    startActivityForResult(new Intent(getContext(), FindActivity.class), REGISTER_CODE);
+                    startActivityForResult(new Intent(getContext(), FindGroupActivity.class), REGISTER_CODE);
                     return;
                 case R.id.b_create:
-                    startActivityForResult(new Intent(getContext(), CreateActivity.class), CREATE_CODE);
+                    startActivityForResult(new Intent(getContext(), CreateGroupActivity.class), CREATE_CODE);
             }
         });
         mGridLayoutManager.setSpanSizeLookup(mSpanSizeLookup);
@@ -190,13 +187,13 @@ public class GroupFragment extends Fragment {
             item.setCheckable(false);
             switch (item.getItemId()) {
                 case R.id.navigation_find:
-                    startActivityForResult(new Intent(getContext(), FindActivity.class), REGISTER_CODE);
+                    startActivityForResult(new Intent(getContext(), FindGroupActivity.class), REGISTER_CODE);
                     return true;
                 case R.id.navigation_request:
                     startActivity(new Intent(getContext(), RequestActivity.class));
                     return true;
                 case R.id.navigation_create:
-                    startActivityForResult(new Intent(getContext(), CreateActivity.class), CREATE_CODE);
+                    startActivityForResult(new Intent(getContext(), CreateGroupActivity.class), CREATE_CODE);
                     return true;
             }
             return false;

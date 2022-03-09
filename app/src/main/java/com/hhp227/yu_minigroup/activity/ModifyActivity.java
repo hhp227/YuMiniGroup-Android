@@ -26,7 +26,7 @@ import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.WriteListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.ActivityWriteBinding;
+import com.hhp227.yu_minigroup.databinding.ActivityCreateArticleBinding;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.hhp227.yu_minigroup.activity.WriteActivity.*;
+import static com.hhp227.yu_minigroup.activity.CreateArticleActivity.*;
 
 public class ModifyActivity extends AppCompatActivity {
     private static final String TAG = ModifyActivity.class.getSimpleName();
@@ -59,12 +59,12 @@ public class ModifyActivity extends AppCompatActivity {
 
     private YouTubeItem mYouTubeItem;
 
-    private ActivityWriteBinding mBinding;
+    private ActivityCreateArticleBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = ActivityWriteBinding.inflate(getLayoutInflater());
+        mBinding = ActivityCreateArticleBinding.inflate(getLayoutInflater());
 
         setContentView(mBinding.getRoot());
         Intent intent = getIntent();

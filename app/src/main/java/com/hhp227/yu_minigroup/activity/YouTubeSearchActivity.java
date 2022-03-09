@@ -55,7 +55,7 @@ public class YouTubeSearchActivity extends AppCompatActivity {
         setSupportActionBar(mBinding.toolbar);
         mAdapter.setOnItemClickListener((v, position) -> {//리팩토링 요망
             YouTubeItem youTubeItem = mYouTubeItemList.get(position);
-            Intent intent = new Intent(this, mType == 0 ? WriteActivity.class : ModifyActivity.class);
+            Intent intent = new Intent(this, mType == 0 ? CreateArticleActivity.class : ModifyActivity.class);
 
             intent.putExtra("youtube", youTubeItem);
             setResult(RESULT_OK, intent);

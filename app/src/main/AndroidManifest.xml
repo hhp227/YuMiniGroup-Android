@@ -31,7 +31,7 @@
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".activity.ReplyModifyActivity"
+            android:name=".activity.UpdateCommentActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
@@ -51,7 +51,7 @@
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".activity.WriteActivity"
+            android:name=".activity.CreateArticleActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
@@ -77,12 +77,12 @@
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".activity.FindActivity"
+            android:name=".activity.FindGroupActivity"
             android:label="@string/title_find"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".activity.CreateActivity"
+            android:name=".activity.CreateGroupActivity"
             android:label="@string/title_create"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>

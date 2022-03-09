@@ -19,7 +19,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.ActivityCreateBinding;
+import com.hhp227.yu_minigroup.databinding.ActivityCreateGroupBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
@@ -33,12 +33,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class CreateActivity extends AppCompatActivity {
+public class CreateGroupActivity extends AppCompatActivity {
     public static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
 
     public static final int CAMERA_PICK_IMAGE_REQUEST_CODE = 200;
 
-    private static final String TAG = CreateActivity.class.getSimpleName();
+    private static final String TAG = CreateGroupActivity.class.getSimpleName();
 
     private boolean mJoinTypeCheck;
 
@@ -50,12 +50,12 @@ public class CreateActivity extends AppCompatActivity {
 
     private TextWatcher mTextWatcher;
 
-    private ActivityCreateBinding mBinding;
+    private ActivityCreateGroupBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = ActivityCreateBinding.inflate(getLayoutInflater());
+        mBinding = ActivityCreateGroupBinding.inflate(getLayoutInflater());
 
         setContentView(mBinding.getRoot());
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
@@ -238,7 +238,7 @@ public class CreateActivity extends AppCompatActivity {
     }
 
     private void createGroupSuccess(String groupId, String groupName) {
-        Intent intent = new Intent(CreateActivity.this, GroupActivity.class);
+        Intent intent = new Intent(CreateGroupActivity.this, GroupActivity.class);
 
         intent.putExtra("admin", true);
         intent.putExtra("grp_id", groupId);

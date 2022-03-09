@@ -18,7 +18,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.tabs.TabLayout;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.activity.WriteActivity;
+import com.hhp227.yu_minigroup.activity.CreateArticleActivity;
 import com.hhp227.yu_minigroup.databinding.FragmentTabHostLayoutBinding;
 
 import java.util.Arrays;
@@ -134,7 +134,7 @@ public class TabHostLayoutFragment extends Fragment {
         mBinding.viewPager.setAdapter(adapter);
         mBinding.fab.setOnClickListener(v -> {
             if (mBinding.tabLayout.getSelectedTabPosition() == 0) {
-                Intent intent = new Intent(getActivity(), WriteActivity.class);
+                Intent intent = new Intent(getActivity(), CreateArticleActivity.class);
 
                 intent.putExtra("admin", mIsAdmin);
                 intent.putExtra("grp_id", mGroupId);

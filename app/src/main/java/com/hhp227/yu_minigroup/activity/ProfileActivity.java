@@ -30,8 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.hhp227.yu_minigroup.activity.CreateActivity.CAMERA_CAPTURE_IMAGE_REQUEST_CODE;
-import static com.hhp227.yu_minigroup.activity.CreateActivity.CAMERA_PICK_IMAGE_REQUEST_CODE;
+import static com.hhp227.yu_minigroup.activity.CreateGroupActivity.CAMERA_CAPTURE_IMAGE_REQUEST_CODE;
+import static com.hhp227.yu_minigroup.activity.CreateGroupActivity.CAMERA_PICK_IMAGE_REQUEST_CODE;
 
 public class ProfileActivity extends AppCompatActivity {
     private static final String TAG = "프로필";

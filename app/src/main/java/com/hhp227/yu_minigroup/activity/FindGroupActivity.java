@@ -29,10 +29,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FindActivity extends AppCompatActivity {
+public class FindGroupActivity extends AppCompatActivity {
     private static final int LIMIT = 15;
 
-    private static final String TAG = FindActivity.class.getSimpleName();
+    private static final String TAG = FindGroupActivity.class.getSimpleName();
 
     private boolean mHasRequestedMore;
 

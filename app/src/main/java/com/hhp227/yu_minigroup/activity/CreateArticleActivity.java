@@ -28,7 +28,7 @@ import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.WriteListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.ActivityWriteBinding;
+import com.hhp227.yu_minigroup.databinding.ActivityCreateArticleBinding;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
@@ -43,14 +43,14 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class WriteActivity extends AppCompatActivity {
+public class CreateArticleActivity extends AppCompatActivity {
     public static final int CAMERA_PICK_IMAGE_REQUEST_CODE = 100;
 
     public static final int REQUEST_IMAGE_CAPTURE = 200;
 
     public static final int REQUEST_YOUTUBE_PICK = 300;
 
-    private static final String TAG = WriteActivity.class.getSimpleName();
+    private static final String TAG = CreateArticleActivity.class.getSimpleName();
 
     private boolean mIsAdmin;
 
@@ -72,12 +72,12 @@ public class WriteActivity extends AppCompatActivity {
 
     private YouTubeItem mYouTubeItem;
 
-    private ActivityWriteBinding mBinding;
+    private ActivityCreateArticleBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = ActivityWriteBinding.inflate(getLayoutInflater());
+        mBinding = ActivityCreateArticleBinding.inflate(getLayoutInflater());
 
         setContentView(mBinding.getRoot());
         mContents = new ArrayList<>();
@@ -339,7 +339,7 @@ public class WriteActivity extends AppCompatActivity {
                 boolean error = jsonObject.getBoolean("isError");
 
                 if (!error) {
-                    Intent intent = new Intent(WriteActivity.this, GroupActivity.class);
+                    Intent intent = new Intent(CreateArticleActivity.this, GroupActivity.class);
 
                     intent.putExtra("admin", mIsAdmin);
                     intent.putExtra("grp_id", grpId);

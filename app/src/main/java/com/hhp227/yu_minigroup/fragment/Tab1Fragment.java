@@ -21,7 +21,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.activity.ArticleActivity;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.activity.WriteActivity;
+import com.hhp227.yu_minigroup.activity.CreateArticleActivity;
 import com.hhp227.yu_minigroup.adapter.ArticleListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
@@ -145,7 +145,7 @@ public class Tab1Fragment extends Fragment {
             if (SystemClock.elapsedRealtime() - mLastClickTime < 1000)
                 return;
             mLastClickTime = SystemClock.elapsedRealtime();
-            Intent intent = new Intent(getActivity(), WriteActivity.class);
+            Intent intent = new Intent(getActivity(), CreateArticleActivity.class);
 
             intent.putExtra("admin", mIsAdmin);
             intent.putExtra("grp_id", mGroupId);
