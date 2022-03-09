@@ -1,4 +1,4 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
 import android.content.Intent;
 import android.os.Handler;
@@ -13,10 +13,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.YouTubeListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.ActivityListBinding;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import org.json.JSONArray;
 import org.json.JSONException;

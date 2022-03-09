@@ -1,4 +1,4 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
 import android.view.MenuItem;
 import androidx.annotation.NonNull;

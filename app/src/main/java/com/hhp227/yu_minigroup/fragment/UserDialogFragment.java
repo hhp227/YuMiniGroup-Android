@@ -16,11 +16,10 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
-import com.hhp227.yu_minigroup.ChatActivity;
+import com.hhp227.yu_minigroup.activity.ChatActivity;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.FragmentUserBinding;
 
 public class UserDialogFragment extends DialogFragment {
     private String mUid, mName, mValue;

@@ -1,4 +1,4 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -11,9 +11,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.android.volley.*;
 import com.android.volley.toolbox.StringRequest;
+import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.ActivitySplashBinding;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import com.hhp227.yu_minigroup.volley.util.SSLConnect;
@@ -61,7 +61,7 @@ public class SplashActivity extends AppCompatActivity {
             if (ssoToken != null) {
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
                 finish();
-                overridePendingTransition(R.anim.splash_in, R.anim.splash_out);
+                overridePendingTransition(com.hhp227.yu_minigroup.R.anim.splash_in, R.anim.splash_out);
             }
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());

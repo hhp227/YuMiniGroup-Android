@@ -1,4 +1,4 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
 import android.content.Intent;
 import android.util.Log;
@@ -14,10 +14,9 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.ads.MobileAds;
+import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.ActivityMainBinding;
-import com.hhp227.yu_minigroup.databinding.NavHeaderMainBinding;
 import com.hhp227.yu_minigroup.fragment.*;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 

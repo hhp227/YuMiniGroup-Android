@@ -1,4 +1,4 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -16,9 +16,9 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.snackbar.Snackbar;
+import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.ActivityProfileBinding;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
 import com.hhp227.yu_minigroup.volley.util.MultipartRequest;
@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.hhp227.yu_minigroup.CreateActivity.CAMERA_CAPTURE_IMAGE_REQUEST_CODE;
-import static com.hhp227.yu_minigroup.CreateActivity.CAMERA_PICK_IMAGE_REQUEST_CODE;
+import static com.hhp227.yu_minigroup.activity.CreateActivity.CAMERA_CAPTURE_IMAGE_REQUEST_CODE;
+import static com.hhp227.yu_minigroup.activity.CreateActivity.CAMERA_PICK_IMAGE_REQUEST_CODE;
 
 public class ProfileActivity extends AppCompatActivity {
     private static final String TAG = "프로필";
@@ -63,7 +63,7 @@ public class ProfileActivity extends AppCompatActivity {
                         .addHeader("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS))
                         .build()))
                 .apply(RequestOptions
-                        .errorOf(R.drawable.user_image_view)
+                        .errorOf(com.hhp227.yu_minigroup.R.drawable.user_image_view)
                         .circleCrop()
                         .skipMemoryCache(true)
                         .diskCacheStrategy(DiskCacheStrategy.NONE))
@@ -83,7 +83,7 @@ public class ProfileActivity extends AppCompatActivity {
                                         .addHeader("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS))
                                         .build()))
                                 .apply(RequestOptions
-                                        .errorOf(R.drawable.user_image_view_circle)
+                                        .errorOf(com.hhp227.yu_minigroup.R.drawable.user_image_view_circle)
                                         .circleCrop()
                                         .skipMemoryCache(true)
                                         .diskCacheStrategy(DiskCacheStrategy.NONE))
@@ -169,7 +169,7 @@ public class ProfileActivity extends AppCompatActivity {
             }
             Glide.with(getApplicationContext())
                     .load(mBitmap)
-                    .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle).circleCrop())
+                    .apply(RequestOptions.errorOf(com.hhp227.yu_minigroup.R.drawable.user_image_view_circle).circleCrop())
                     .into(mBinding.ivProfileImage);
             invalidateOptionsMenu();
         }
@@ -177,13 +177,13 @@ public class ProfileActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.modify, menu);
+        getMenuInflater().inflate(com.hhp227.yu_minigroup.R.menu.modify, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem menuItem = menu.findItem(R.id.action_send);
+        MenuItem menuItem = menu.findItem(com.hhp227.yu_minigroup.R.id.action_send);
 
         menuItem.setVisible(mIsVisible);
         return super.onPrepareOptionsMenu(menu);

@@ -12,9 +12,8 @@ import android.view.ViewGroup;
 
 import androidx.fragment.app.FragmentPagerAdapter;
 import com.google.android.material.tabs.TabLayout;
-import com.hhp227.yu_minigroup.MainActivity;
+import com.hhp227.yu_minigroup.activity.MainActivity;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.databinding.FragmentTabsBinding;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,29 +1,22 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
+import android.os.Bundle;
 import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
-import com.hhp227.yu_minigroup.databinding.ActivityNoticeBinding;
+import com.hhp227.yu_minigroup.databinding.ActivityVerInfoBinding;
 
-public class NoticeActivity extends AppCompatActivity {
-    private ActivityNoticeBinding mBinding;
+public class VerInfoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = ActivityNoticeBinding.inflate(getLayoutInflater());
+        ActivityVerInfoBinding binding = ActivityVerInfoBinding.inflate(getLayoutInflater());
 
-        setContentView(mBinding.getRoot());
-        setSupportActionBar(mBinding.toolbar);
+        setContentView(binding.getRoot());
+        setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mBinding = null;
     }
 
     @Override

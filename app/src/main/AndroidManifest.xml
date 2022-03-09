@@ -22,80 +22,80 @@
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
         <activity
-                android:name=".YouTubeSearchActivity"
+                android:name=".activity.YouTubeSearchActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".NoticeActivity"
+                android:name=".activity.NoticeActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".ReplyModifyActivity"
+                android:name=".activity.ReplyModifyActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".ModifyActivity"
+                android:name=".activity.ModifyActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".PictureActivity"
+                android:name=".activity.PictureActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".ProfileActivity"
+                android:name=".activity.ProfileActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".SettingsActivity"
+                android:name=".activity.SettingsActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".WriteActivity"
+                android:name=".activity.WriteActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".ArticleActivity"
+                android:name=".activity.ArticleActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".VerInfoActivity"
+                android:name=".activity.VerInfoActivity"
                 android:label="@string/title_activity_ver_info"
                 android:launchMode="singleTask"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".ChatActivity"
+                android:name=".activity.ChatActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".WebViewActivity">
+        <activity android:name=".activity.WebViewActivity">
         </activity>
         <activity
-                android:name=".RequestActivity"
+                android:name=".activity.RequestActivity"
                 android:label="@string/title_request"
                 android:launchMode="singleTask"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".FindActivity"
+                android:name=".activity.FindActivity"
                 android:label="@string/title_find"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".CreateActivity"
+                android:name=".activity.CreateActivity"
                 android:label="@string/title_create"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".GroupActivity"
+                android:name=".activity.GroupActivity"
                 android:configChanges="orientation|screenSize"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".SplashActivity"
+                android:name=".activity.SplashActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".LoginActivity"
+                android:name=".activity.LoginActivity"
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -104,7 +104,7 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".MainActivity"
+                android:name=".activity.MainActivity"
                 android:configChanges="orientation|screenSize"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>

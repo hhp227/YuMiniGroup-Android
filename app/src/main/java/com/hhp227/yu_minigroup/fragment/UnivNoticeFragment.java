@@ -5,12 +5,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.widget.ProgressBar;
+
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -19,18 +17,17 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.snackbar.Snackbar;
-import com.hhp227.yu_minigroup.MainActivity;
+import com.hhp227.yu_minigroup.activity.MainActivity;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.WebViewActivity;
+import com.hhp227.yu_minigroup.activity.WebViewActivity;
 import com.hhp227.yu_minigroup.adapter.BbsListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.FragmentListBinding;
 import com.hhp227.yu_minigroup.dto.BbsItem;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
@@ -142,7 +139,7 @@ public class UnivNoticeFragment extends Fragment {
 
     private void fetchDataList() {
         String tag_string_req = "req_yu_news";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.URL_YU_NOTICE.replace("{PAGE}", String.valueOf(mOffSet)), this::onResponse, this::onErrorResponse);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.URL_YU_NOTICE.replace("{OFFSET}", String.valueOf(mOffSet)), this::onResponse, this::onErrorResponse);
 
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
@@ -150,6 +147,7 @@ public class UnivNoticeFragment extends Fragment {
     private void onResponse(String response) {
         Source source = new Source(response);
 
+        Log.e("TEST", "source: " + source);
         try {
             Element boardList = source.getFirstElementByClass("boardList");
 

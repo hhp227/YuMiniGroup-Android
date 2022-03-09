@@ -1,4 +1,4 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,10 +17,9 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.*;
+import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.ActivityReplyModifyBinding;
-import com.hhp227.yu_minigroup.databinding.ModifyTextBinding;
 import com.hhp227.yu_minigroup.dto.ReplyItem;
 
 import java.util.HashMap;
@@ -85,7 +84,7 @@ public class ReplyModifyActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.write, menu);
+        getMenuInflater().inflate(com.hhp227.yu_minigroup.R.menu.write, menu);
         return true;
     }
 

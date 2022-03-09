@@ -25,7 +25,6 @@ import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.FragmentDefaultSettingBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.Source;
@@ -37,8 +36,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
-import static com.hhp227.yu_minigroup.CreateActivity.CAMERA_CAPTURE_IMAGE_REQUEST_CODE;
-import static com.hhp227.yu_minigroup.CreateActivity.CAMERA_PICK_IMAGE_REQUEST_CODE;
+import static com.hhp227.yu_minigroup.activity.CreateActivity.CAMERA_CAPTURE_IMAGE_REQUEST_CODE;
+import static com.hhp227.yu_minigroup.activity.CreateActivity.CAMERA_PICK_IMAGE_REQUEST_CODE;
 
 public class DefaultSettingFragment extends Fragment {
     private static String mGroupId, mGroupImage, mGroupKey;

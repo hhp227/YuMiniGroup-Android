@@ -1,4 +1,4 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
 import android.content.Intent;
 import android.text.Editable;
@@ -17,6 +17,7 @@ import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.firebase.database.*;
+import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.MessageListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;

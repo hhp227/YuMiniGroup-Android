@@ -6,9 +6,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.WebViewActivity;
+import com.hhp227.yu_minigroup.activity.WebViewActivity;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.SeatItemBinding;
 import com.hhp227.yu_minigroup.dto.SeatItem;
 
 import java.util.List;

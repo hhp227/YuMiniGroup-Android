@@ -1,4 +1,4 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -30,11 +30,10 @@ import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 import com.google.firebase.database.*;
+import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.ReplyListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.ActivityArticleBinding;
-import com.hhp227.yu_minigroup.databinding.ArticleDetailBinding;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.ReplyItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
@@ -53,7 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.hhp227.yu_minigroup.YouTubeSearchActivity.API_KEY;
+import static com.hhp227.yu_minigroup.activity.YouTubeSearchActivity.API_KEY;
 import static com.hhp227.yu_minigroup.fragment.Tab1Fragment.UPDATE_ARTICLE;
 
 public class ArticleActivity extends MyYouTubeBaseActivity {
@@ -139,7 +138,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mActivityArticleBinding.cvBtnSend.setCardBackgroundColor(getResources().getColor(s.length() > 0 ? R.color.colorAccent : androidx.cardview.R.color.cardview_light_background, null));
+                mActivityArticleBinding.cvBtnSend.setCardBackgroundColor(getResources().getColor(s.length() > 0 ? com.hhp227.yu_minigroup.R.color.colorAccent : androidx.cardview.R.color.cardview_light_background, null));
                 mActivityArticleBinding.tvBtnSend.setTextColor(getResources().getColor(s.length() > 0 ? android.R.color.white : android.R.color.darker_gray, null));
             }
 
@@ -386,7 +385,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 Glide.with(getApplicationContext())
                         .load(profileImg)
                         .apply(RequestOptions
-                                .errorOf(R.drawable.user_image_view_circle)
+                                .errorOf(com.hhp227.yu_minigroup.R.drawable.user_image_view_circle)
                                 .circleCrop()
                                 .skipMemoryCache(true)
                                 .diskCacheStrategy(DiskCacheStrategy.NONE))
@@ -417,7 +416,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                         });
                         Glide.with(this)
                                 .load(mImageList.get(i))
-                                .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
+                                .apply(RequestOptions.errorOf(com.hhp227.yu_minigroup.R.drawable.ic_launcher_background))
                                 .into(articleImage);
                         mArticleDetailBinding.llImage.addView(articleImage);
                     }

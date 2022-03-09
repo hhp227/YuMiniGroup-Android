@@ -23,6 +23,8 @@ import net.htmlparser.jericho.Source;
 
 import java.util.*;
 
+import static com.hhp227.yu_minigroup.app.EndPoint.URL_SCHEDULE;
+
 public class Tab2Fragment extends Fragment {
     private static final int TYPE_CALENDAR = 0;
 
@@ -97,13 +99,13 @@ public class Tab2Fragment extends Fragment {
         String year = String.valueOf(mCalendar.get(Calendar.YEAR));
         String month = String.format("%02d", mCalendar.get(Calendar.MONTH) + 1);
 
-        AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, "http://m.yu.ac.kr/_mobile/info/?c=info_01_01&year=" + year, response -> {
+        AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, URL_SCHEDULE.replace("{YEAR}", year), response -> {
             Source source = new Source(response);
 
             try {
                 mList.clear();
                 addHeaderView();
-                Element infoCalendar = source.getFirstElementByClass("info_calendar case");
+                /*Element infoCalendar = source.getFirstElementByClass("info_calendar case");
 
                 for (int i = 0; i < infoCalendar.getAllElements(HTMLElementName.A).size(); i++) {
                     if (infoCalendar.getAllElements(HTMLElementName.A).get(i).getAttributeValue("id").equals("list_" + year + month))
@@ -114,7 +116,8 @@ public class Tab2Fragment extends Fragment {
                             map.put("내용", element.getFirstElement(HTMLElementName.STRONG).getTextExtractor().toString());
                             mList.add(map);
                         });
-                }
+                }*/
+                Log.e("TEST", "source: " + source);
                 mAdapter.notifyDataSetChanged();
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());

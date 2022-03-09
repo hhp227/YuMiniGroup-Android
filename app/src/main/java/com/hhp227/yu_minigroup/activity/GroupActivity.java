@@ -1,4 +1,4 @@
-package com.hhp227.yu_minigroup;
+package com.hhp227.yu_minigroup.activity;
 
 import android.content.Intent;
 import android.view.Menu;
@@ -6,7 +6,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import com.hhp227.yu_minigroup.databinding.ActivityGroupBinding;
+
+import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.fragment.TabHostLayoutFragment;
 
 public class GroupActivity extends AppCompatActivity {
