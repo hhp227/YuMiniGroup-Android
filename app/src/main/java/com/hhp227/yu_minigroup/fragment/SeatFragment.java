@@ -2,26 +2,25 @@ package com.hhp227.yu_minigroup.fragment;
 
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.hhp227.yu_minigroup.activity.MainActivity;
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.activity.MainActivity;
 import com.hhp227.yu_minigroup.adapter.SeatListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.FragmentSeatBinding;
 import com.hhp227.yu_minigroup.dto.SeatItem;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,8 +30,6 @@ import java.util.List;
 
 public class SeatFragment extends Fragment {
     public static final String TAG = "도서관 좌석";
-
-    private AppCompatActivity mActivity;
 
     private List<SeatItem> mSeatItemList;
 
@@ -52,17 +49,14 @@ public class SeatFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mActivity = (AppCompatActivity) getActivity();
         mSeatItemList = new ArrayList<>();
         mAdapter = new SeatListAdapter(mSeatItemList);
 
-        mActivity.setTitle(getString(R.string.library_seat));
-        mActivity.setSupportActionBar(mBinding.toolbar);
+        ((MainActivity) requireActivity()).setAppBar(mBinding.toolbar, getString(R.string.library_seat));
         mBinding.collapsingToolbar.setTitleEnabled(false);
         mBinding.rvSeat.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvSeat.setAdapter(mAdapter);
         mBinding.srlSeat.setOnRefreshListener(() -> new Handler().postDelayed(this::refresh, 1000));
-        setDrawerToggle();
         showProgressBar();
         fetchDataTask();
     }
@@ -99,14 +93,6 @@ public class SeatFragment extends Fragment {
             if (error.getMessage() != null)
                 VolleyLog.e(error.getMessage());
         }));
-    }
-
-    private void setDrawerToggle() {
-        DrawerLayout drawerLayout = ((MainActivity) mActivity).mBinding.drawerLayout;
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(mActivity, drawerLayout, mBinding.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-
-        drawerLayout.addDrawerListener(drawerToggle);
-        drawerToggle.syncState();
     }
 
     private void refresh() {

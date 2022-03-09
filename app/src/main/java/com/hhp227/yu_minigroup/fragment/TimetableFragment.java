@@ -25,8 +25,6 @@ public class TimetableFragment extends Fragment {
 
     private static final String[] TAB_NAMES = {"학기시간표", "모의시간표 작성"};
 
-    private AppCompatActivity mActivity;
-
     private FragmentTabsBinding mBinding;
 
     public TimetableFragment() {
@@ -54,11 +52,8 @@ public class TimetableFragment extends Fragment {
                 return fragmentList.get(position);
             }
         };
-        mActivity = (AppCompatActivity) getActivity();
 
-        mActivity.setTitle(getString(R.string.timetable));
-        mActivity.setSupportActionBar(mBinding.toolbar);
-        setDrawerToggle();
+        ((MainActivity) requireActivity()).setAppBar(mBinding.toolbar, getString(R.string.timetable));
         fragmentList.add(SemesterTimeTableFragment.newInstance());
         fragmentList.add(MockTimeTableFragment.newInstance());
         Arrays.stream(TAB_NAMES).forEach(s -> mBinding.tabLayout.addTab(mBinding.tabLayout.newTab().setText(s)));
@@ -74,13 +69,5 @@ public class TimetableFragment extends Fragment {
         mBinding.tabLayout.clearOnTabSelectedListeners();
         mBinding.tabLayout.removeAllTabs();
         mBinding = null;
-    }
-
-    private void setDrawerToggle() {
-        DrawerLayout drawerLayout = ((MainActivity) mActivity).mBinding.drawerLayout;
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(mActivity, drawerLayout, mBinding.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-
-        drawerLayout.addDrawerListener(drawerToggle);
-        drawerToggle.syncState();
     }
 }

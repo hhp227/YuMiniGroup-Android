@@ -62,7 +62,7 @@ public class SplashActivity extends AppCompatActivity {
             if (ssoToken != null) {
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
                 finish();
-                overridePendingTransition(com.hhp227.yu_minigroup.R.anim.splash_in, R.anim.splash_out);
+                overridePendingTransition(R.anim.splash_in, R.anim.splash_out);
             }
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());

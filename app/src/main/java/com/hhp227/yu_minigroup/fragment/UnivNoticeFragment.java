@@ -5,16 +5,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,14 +18,15 @@ import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.snackbar.Snackbar;
-import com.hhp227.yu_minigroup.activity.MainActivity;
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.activity.MainActivity;
 import com.hhp227.yu_minigroup.activity.WebViewActivity;
 import com.hhp227.yu_minigroup.adapter.BbsListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.FragmentListBinding;
 import com.hhp227.yu_minigroup.dto.BbsItem;
+
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
@@ -45,8 +42,6 @@ public class UnivNoticeFragment extends Fragment {
     private boolean mHasRequestedMore; // 데이터 불러올때 중복안되게 하기위한 변수
 
     private int mOffSet;
-
-    private AppCompatActivity mActivity;
 
     private ArrayList<BbsItem> mBbsItemArrayList;
 
@@ -68,8 +63,6 @@ public class UnivNoticeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity);
-        mActivity = (AppCompatActivity) getActivity();
         mBbsItemArrayList = new ArrayList<>();
         mAdapter = new BbsListAdapter(mBbsItemArrayList);
         mOnScrollListener = new RecyclerView.OnScrollListener() {
@@ -96,9 +89,7 @@ public class UnivNoticeFragment extends Fragment {
         // 처음 offSet은 1이다, 파싱이 되는 동안 업데이트 될것
         mOffSet = 1;
 
-        mActivity.setTitle(getString(R.string.yu_news));
-        mActivity.setSupportActionBar(mBinding.toolbar);
-        setDrawerToggle();
+        ((MainActivity) requireActivity()).setAppBar(mBinding.toolbar, getString(R.string.yu_news));
         mBinding.srl.setOnRefreshListener(() -> new Handler(Looper.getMainLooper()).postDelayed(() -> {
             mOffSet = 1; // offSet 초기화
 
@@ -107,7 +98,7 @@ public class UnivNoticeFragment extends Fragment {
             fetchDataList();
         }, 1000));
         mBinding.recyclerView.addOnScrollListener(mOnScrollListener);
-        mBinding.recyclerView.setLayoutManager(linearLayoutManager);
+        mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         mBinding.recyclerView.setAdapter(mAdapter);
         mAdapter.setOnItemClickListener((v, p) -> {
             BbsItem bbsItem = mBbsItemArrayList.get(p);
@@ -128,14 +119,6 @@ public class UnivNoticeFragment extends Fragment {
             mBinding.recyclerView.removeOnScrollListener(mOnScrollListener);
         mOnScrollListener = null;
         mBinding = null;
-    }
-
-    private void setDrawerToggle() {
-        DrawerLayout drawerLayout = ((MainActivity) mActivity).mBinding.drawerLayout;
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(mActivity, drawerLayout, mBinding.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-
-        drawerLayout.addDrawerListener(drawerToggle);
-        drawerToggle.syncState();
     }
 
     private void fetchDataList() {
