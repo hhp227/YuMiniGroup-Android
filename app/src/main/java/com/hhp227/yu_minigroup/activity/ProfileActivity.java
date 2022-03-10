@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.widget.ProgressBar;
 
+import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -53,41 +54,18 @@ public class ProfileActivity extends AppCompatActivity {
 
     private ActivityProfileBinding mBinding;
 
-    private final ActivityResultLauncher<Intent> mCameraPickImageActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-            mIsVisible = true;
-            mBitmap = new BitmapUtil(getBaseContext()).bitmapResize(result.getData().getData(), 200);
-
-            Glide.with(getApplicationContext())
-                    .load(mBitmap)
-                    .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle).circleCrop())
-                    .into(mBinding.ivProfileImage);
-            invalidateOptionsMenu();
-        }
-    });
-
-    private final ActivityResultLauncher<Intent> mCameraCaptureImageActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-            mIsVisible = true;
-            mBitmap = (Bitmap) result.getData().getExtras().get("data");
-
-            Glide.with(getApplicationContext())
-                    .load(mBitmap)
-                    .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle).circleCrop())
-                    .into(mBinding.ivProfileImage);
-            invalidateOptionsMenu();
-        }
-    });
+    private ActivityResultLauncher<Intent> mCameraPickImageActivityResultLauncher, mCameraCaptureImageActivityResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityProfileBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
+        mCameraPickImageActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
+        mCameraCaptureImageActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
         mCookieManager = AppController.getInstance().getCookieManager();
         User user = AppController.getInstance().getPreferenceManager().getUser();
 
+        setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -157,6 +135,8 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mBinding = null;
+        mCameraPickImageActivityResultLauncher = null;
+        mCameraCaptureImageActivityResultLauncher = null;
     }
 
     @Override
@@ -260,6 +240,23 @@ public class ProfileActivity extends AppCompatActivity {
 
         showProgressBar();
         AppController.getInstance().addToRequestQueue(multipartRequest);
+    }
+
+    private void onCameraActivityResult(ActivityResult result) {
+        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+            mIsVisible = true;
+
+            if (result.getData().getExtras().get("data") != null) {
+                mBitmap = (Bitmap) result.getData().getExtras().get("data");
+            } else if (result.getData().getData() != null) {
+                mBitmap = new BitmapUtil(getBaseContext()).bitmapResize(result.getData().getData(), 200);
+            }
+            Glide.with(getApplicationContext())
+                    .load(mBitmap)
+                    .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle).circleCrop())
+                    .into(mBinding.ivProfileImage);
+            invalidateOptionsMenu();
+        }
     }
 
     private void setProgressBar() {
