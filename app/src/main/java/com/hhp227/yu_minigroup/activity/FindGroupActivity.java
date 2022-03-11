@@ -52,8 +52,6 @@ public class FindGroupActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityListBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
         mGroupItemKeys = new ArrayList<>();
         mGroupItemValues = new ArrayList<>();
         mAdapter = new GroupListAdapter(this, mGroupItemKeys, mGroupItemValues);
@@ -75,6 +73,7 @@ public class FindGroupActivity extends AppCompatActivity {
             }
         };
 
+        setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);

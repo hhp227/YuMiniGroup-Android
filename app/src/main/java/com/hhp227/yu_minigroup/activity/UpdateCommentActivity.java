@@ -42,17 +42,15 @@ public class UpdateCommentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityUpdateCommentBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
-        Intent intent = getIntent();
-        mGroupId = intent.getStringExtra("grp_id");
-        mArticleId = intent.getStringExtra("artl_num");
-        mReplyId = intent.getStringExtra("cmmt_num");
-        mArticleKey = intent.getStringExtra("artl_key");
-        mReplyKey = intent.getStringExtra("cmmt_key");
-        mReply = intent.getStringExtra("cmt");
+        mGroupId = getIntent().getStringExtra("grp_id");
+        mArticleId = getIntent().getStringExtra("artl_num");
+        mReplyId = getIntent().getStringExtra("cmmt_num");
+        mArticleKey = getIntent().getStringExtra("artl_key");
+        mReplyKey = getIntent().getStringExtra("cmmt_key");
+        mReply = getIntent().getStringExtra("cmt");
         mReply = mReply.contains("※") ? mReply.substring(0, mReply.lastIndexOf("※")).trim() : mReply;
 
+        setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);

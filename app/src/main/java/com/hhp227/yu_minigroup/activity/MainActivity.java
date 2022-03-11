@@ -18,6 +18,8 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
@@ -43,13 +45,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityMainBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookieManager = AppController.getInstance().getCookieManager();
 
+        setContentView(mBinding.getRoot());
+
         // Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713
-        MobileAds.initialize(this, getString(R.string.admob_app_id));
+        MobileAds.initialize(this, initializationStatus -> getString(R.string.admob_app_id));
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new GroupFragment()).commit();
         mBinding.navView.setNavigationItemSelectedListener(item -> {
             Fragment fragment = null;

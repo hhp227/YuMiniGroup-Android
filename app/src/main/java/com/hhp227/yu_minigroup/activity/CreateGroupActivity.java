@@ -2,7 +2,6 @@ package com.hhp227.yu_minigroup.activity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -52,7 +51,7 @@ public class CreateGroupActivity extends AppCompatActivity {
 
     private ActivityCreateGroupBinding mBinding;
 
-    private ActivityResultLauncher<Intent> mCameraPickImageActivityResultLauncher, mCameraCaptureImageActivityResultLauncher;
+    private ActivityResultLauncher<Intent> mCameraPickActivityResultLauncher, mCameraCaptureActivityResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,8 +73,8 @@ public class CreateGroupActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
             }
         };
-        mCameraPickImageActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
-        mCameraCaptureImageActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
+        mCameraPickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
+        mCameraCaptureActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
 
         setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
@@ -98,8 +97,8 @@ public class CreateGroupActivity extends AppCompatActivity {
         super.onDestroy();
         mBinding.etTitle.removeTextChangedListener(mTextWatcher);
         mBinding = null;
-        mCameraPickImageActivityResultLauncher = null;
-        mCameraCaptureImageActivityResultLauncher = null;
+        mCameraPickActivityResultLauncher = null;
+        mCameraCaptureActivityResultLauncher = null;
     }
 
     @Override
@@ -208,14 +207,14 @@ public class CreateGroupActivity extends AppCompatActivity {
             case "카메라":
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-                mCameraCaptureImageActivityResultLauncher.launch(cameraIntent);
+                mCameraCaptureActivityResultLauncher.launch(cameraIntent);
                 break;
             case "갤러리":
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK);
 
                 galleryIntent.setType(MediaStore.Images.Media.CONTENT_TYPE);
                 galleryIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                mCameraPickImageActivityResultLauncher.launch(galleryIntent);
+                mCameraPickActivityResultLauncher.launch(galleryIntent);
                 break;
             case "이미지 없음":
                 mBitmap = null;

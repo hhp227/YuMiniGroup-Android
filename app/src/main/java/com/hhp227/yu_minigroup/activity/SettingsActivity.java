@@ -1,5 +1,6 @@
 package com.hhp227.yu_minigroup.activity;
 
+import android.os.Build;
 import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,6 +11,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.hhp227.yu_minigroup.databinding.ActivitySettingsBinding;
 import com.hhp227.yu_minigroup.fragment.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,16 +26,19 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivitySettingsBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
         String groupId = getIntent().getStringExtra("grp_id");
         String groupImage = getIntent().getStringExtra("grp_img");
         String key = getIntent().getStringExtra("key");
-        List<Fragment> fragmentList = Stream.<Fragment>builder()
-                .add(MemberManagementFragment.newInstance(groupId))
-                .add(DefaultSettingFragment.newInstance(groupId, groupImage, key))
-                .build()
-                .collect(Collectors.toList());
+        List<Fragment> fragmentList;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            fragmentList = Stream.<Fragment>builder()
+                    .add(MemberManagementFragment.newInstance(groupId))
+                    .add(DefaultSettingFragment.newInstance(groupId, groupImage, key))
+                    .build()
+                    .collect(Collectors.toList());
+        } else {
+            fragmentList = Arrays.asList(MemberManagementFragment.newInstance(groupId), DefaultSettingFragment.newInstance(groupId, groupImage, key));
+        }
         FragmentPagerAdapter adapter = new FragmentPagerAdapter(getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
             @Override
             public int getCount() {
@@ -47,12 +52,18 @@ public class SettingsActivity extends AppCompatActivity {
             }
         };
 
+        setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("소모임 설정");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        Arrays.stream(TAB_NAMES).forEach(s -> mBinding.tabLayout.addTab(mBinding.tabLayout.newTab().setText(s)));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Arrays.stream(TAB_NAMES).forEach(s -> mBinding.tabLayout.addTab(mBinding.tabLayout.newTab().setText(s)));
+        } else {
+            for (String s : TAB_NAMES)
+                mBinding.tabLayout.addTab(mBinding.tabLayout.newTab().setText(s));
+        }
         mBinding.tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mBinding.viewPager));
         mBinding.viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mBinding.tabLayout));
         mBinding.viewPager.setAdapter(adapter);

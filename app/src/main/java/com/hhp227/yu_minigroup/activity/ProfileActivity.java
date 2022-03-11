@@ -54,14 +54,14 @@ public class ProfileActivity extends AppCompatActivity {
 
     private ActivityProfileBinding mBinding;
 
-    private ActivityResultLauncher<Intent> mCameraPickImageActivityResultLauncher, mCameraCaptureImageActivityResultLauncher;
+    private ActivityResultLauncher<Intent> mCameraPickActivityResultLauncher, mCameraCaptureActivityResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityProfileBinding.inflate(getLayoutInflater());
-        mCameraPickImageActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
-        mCameraCaptureImageActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
+        mCameraPickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
+        mCameraCaptureActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
         mCookieManager = AppController.getInstance().getCookieManager();
         User user = AppController.getInstance().getPreferenceManager().getUser();
 
@@ -135,8 +135,8 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mBinding = null;
-        mCameraPickImageActivityResultLauncher = null;
-        mCameraCaptureImageActivityResultLauncher = null;
+        mCameraPickActivityResultLauncher = null;
+        mCameraCaptureActivityResultLauncher = null;
     }
 
     @Override
@@ -156,12 +156,12 @@ public class ProfileActivity extends AppCompatActivity {
 
                 intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
                 intent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                mCameraPickImageActivityResultLauncher.launch(intent);
+                mCameraPickActivityResultLauncher.launch(intent);
                 return true;
             case 1:
                 intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-                mCameraCaptureImageActivityResultLauncher.launch(intent);
+                mCameraCaptureActivityResultLauncher.launch(intent);
                 return true;
         }
         return super.onContextItemSelected(item);

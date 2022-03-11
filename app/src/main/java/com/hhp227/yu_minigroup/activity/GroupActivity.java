@@ -22,8 +22,6 @@ public class GroupActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityGroupBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
         Intent intent = getIntent();
         boolean isAdmin = intent.getBooleanExtra("admin", false);
         String groupId = intent.getStringExtra("grp_id");
@@ -33,6 +31,7 @@ public class GroupActivity extends AppCompatActivity {
         mKey = intent.getStringExtra("key");
         mFragMain = TabHostLayoutFragment.newInstance(isAdmin, groupId, mGroupName, groupImage, position, mKey);
 
+        setContentView(mBinding.getRoot());
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, mFragMain).commit();
     }
 

@@ -69,7 +69,7 @@ public class DefaultSettingFragment extends Fragment {
 
     private FragmentDefaultSettingBinding mBinding;
 
-    private ActivityResultLauncher<Intent> mCameraPickImageActivityResultLauncher, mCameraCaptureImageActivityResultLauncher;
+    private ActivityResultLauncher<Intent> mCameraPickActivityResultLauncher, mCameraCaptureActivityResultLauncher;
 
     public DefaultSettingFragment() {
     }
@@ -120,8 +120,8 @@ public class DefaultSettingFragment extends Fragment {
             public void afterTextChanged(Editable s) {
             }
         };
-        mCameraPickImageActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
-        mCameraCaptureImageActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
+        mCameraPickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
+        mCameraCaptureActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
 
         mBinding.ivGroupImage.setOnClickListener(v -> {
             registerForContextMenu(v);
@@ -165,8 +165,8 @@ public class DefaultSettingFragment extends Fragment {
         super.onDestroyView();
         mBinding.etTitle.removeTextChangedListener(mTextWatcher);
         mBinding = null;
-        mCameraPickImageActivityResultLauncher = null;
-        mCameraCaptureImageActivityResultLauncher = null;
+        mCameraPickActivityResultLauncher = null;
+        mCameraCaptureActivityResultLauncher = null;
     }
 
     @Override
@@ -268,14 +268,14 @@ public class DefaultSettingFragment extends Fragment {
             case "카메라":
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-                mCameraCaptureImageActivityResultLauncher.launch(cameraIntent);
+                mCameraCaptureActivityResultLauncher.launch(cameraIntent);
                 break;
             case "갤러리":
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK);
 
                 galleryIntent.setType(MediaStore.Images.Media.CONTENT_TYPE);
                 galleryIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                mCameraPickImageActivityResultLauncher.launch(galleryIntent);
+                mCameraPickActivityResultLauncher.launch(galleryIntent);
                 break;
             case "이미지 없음":
                 mBitmap = null;

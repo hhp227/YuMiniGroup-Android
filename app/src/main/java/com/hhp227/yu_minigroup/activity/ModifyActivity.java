@@ -12,6 +12,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -61,27 +66,66 @@ public class ModifyActivity extends AppCompatActivity {
 
     private ActivityCreateArticleBinding mBinding;
 
+    private ActivityResultLauncher<Intent> mCameraPickActivityResultLauncher, mCameraCaptureActivityResultLauncher, mYouTubeSearchActivityResultLauncher;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityCreateArticleBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
-        Intent intent = getIntent();
-        Map<String, Object> headerMap = new HashMap<>();
         mContents = new ArrayList<>();
         mAdapter = new WriteListAdapter(mContents);
         mCookie = AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS);
         mProgressDialog = new ProgressDialog(this);
-        mGrpId = intent.getStringExtra("grp_id");
-        mArtlNum = intent.getStringExtra("artl_num");
-        mTitle = intent.getStringExtra("sbjt");
-        mContent = intent.getStringExtra("txt");
-        mImageList = intent.getStringArrayListExtra("img");
-        mYouTubeItem = intent.getParcelableExtra("vid");
-        mGrpKey = intent.getStringExtra("grp_key");
-        mArtlKey = intent.getStringExtra("artl_key");
+        mGrpId = getIntent().getStringExtra("grp_id");
+        mArtlNum = getIntent().getStringExtra("artl_num");
+        mTitle = getIntent().getStringExtra("sbjt");
+        mContent = getIntent().getStringExtra("txt");
+        mImageList = getIntent().getStringArrayListExtra("img");
+        mYouTubeItem = getIntent().getParcelableExtra("vid");
+        mGrpKey = getIntent().getStringExtra("grp_key");
+        mArtlKey = getIntent().getStringExtra("artl_key");
+        mCameraPickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                Uri fileUri = result.getData().getData();
+                Bitmap bitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
 
+                mContents.add(bitmap);
+                mAdapter.notifyItemInserted(mContents.size() - 1);
+            }
+        });
+        mCameraCaptureActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                try {
+                    Bitmap bitmap = new BitmapUtil(this).bitmapResize(mPhotoUri, 200);
+
+                    if (bitmap != null) {
+                        ExifInterface ei = new ExifInterface(mCurrentPhotoPath);
+                        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+                        int angle = orientation == ExifInterface.ORIENTATION_ROTATE_90 ? 90
+                                : orientation == ExifInterface.ORIENTATION_ROTATE_180 ? 180
+                                : orientation == ExifInterface.ORIENTATION_ROTATE_270 ? 270
+                                : 0;
+                        Bitmap rotatedBitmap = new BitmapUtil(this).rotateImage(bitmap, angle);
+
+                        mContents.add(rotatedBitmap);
+                        mAdapter.notifyItemInserted(mContents.size() - 1);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        mYouTubeSearchActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                mYouTubeItem = result.getData().getParcelableExtra("youtube");
+
+                mContents.add(mYouTubeItem);
+                mAdapter.notifyItemInserted(mContents.size() - 1);
+            }
+        });
+        Map<String, Object> headerMap = new HashMap<>();
+
+        setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -106,6 +150,9 @@ public class ModifyActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mBinding = null;
+        mCameraPickActivityResultLauncher = null;
+        mCameraCaptureActivityResultLauncher = null;
+        mYouTubeSearchActivityResultLauncher = null;
     }
 
     @Override
@@ -190,7 +237,7 @@ public class ModifyActivity extends AppCompatActivity {
 
                 intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
                 intent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intent, CAMERA_PICK_IMAGE_REQUEST_CODE);
+                mCameraPickActivityResultLauncher.launch(intent);
                 return true;
             case 2:
                 intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -207,7 +254,7 @@ public class ModifyActivity extends AppCompatActivity {
                         mPhotoUri = FileProvider.getUriForFile(this, getPackageName(), photoFile);
 
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
-                        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+                        mCameraCaptureActivityResultLauncher.launch(intent);
                     }
                 }
                 return true;
@@ -218,49 +265,11 @@ public class ModifyActivity extends AppCompatActivity {
                     Intent ysIntent = new Intent(getApplicationContext(), YouTubeSearchActivity.class);
 
                     ysIntent.putExtra("type", 1);
-                    startActivityForResult(ysIntent, REQUEST_YOUTUBE_PICK);
+                    mYouTubeSearchActivityResultLauncher.launch(ysIntent);
                 }
                 return true;
         }
         return false;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Bitmap bitmap;
-
-        if (requestCode == CAMERA_PICK_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            Uri fileUri = data.getData();
-            bitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
-
-            mContents.add(bitmap);
-            mAdapter.notifyItemInserted(mContents.size() - 1);
-        } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            try {
-                bitmap = new BitmapUtil(this).bitmapResize(mPhotoUri, 200);
-
-                if (bitmap != null) {
-                    ExifInterface ei = new ExifInterface(mCurrentPhotoPath);
-                    int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-                    int angle = orientation == ExifInterface.ORIENTATION_ROTATE_90 ? 90
-                            : orientation == ExifInterface.ORIENTATION_ROTATE_180 ? 180
-                            : orientation == ExifInterface.ORIENTATION_ROTATE_270 ? 270
-                            : 0;
-                    Bitmap rotatedBitmap = new BitmapUtil(this).rotateImage(bitmap, angle);
-
-                    mContents.add(rotatedBitmap);
-                    mAdapter.notifyItemInserted(mContents.size() - 1);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (requestCode == REQUEST_YOUTUBE_PICK && resultCode == RESULT_OK) {//
-            mYouTubeItem = data.getParcelableExtra("youtube");
-
-            mContents.add(mYouTubeItem);
-            mAdapter.notifyItemInserted(mContents.size() - 1);
-        }
     }
 
     private void uploadImage(int position, Bitmap bitmap) { // 수정
