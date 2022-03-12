@@ -6,7 +6,7 @@ android {
     buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.hhp227.yu_minigroup"
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 32
         versionCode 19
         versionName "1.49"

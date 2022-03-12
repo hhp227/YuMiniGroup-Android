@@ -9,6 +9,7 @@ import android.util.Log;
 import android.webkit.CookieManager;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -137,6 +138,7 @@ public class Tab4Fragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == GroupFragment.UPDATE_GROUP && resultCode == Activity.RESULT_OK) {
+            ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
             String groupName = data.getStringExtra("grp_nm");
             String groupDescription = data.getStringExtra("grp_desc");
             String joinType = data.getStringExtra("join_div");
@@ -146,11 +148,13 @@ public class Tab4Fragment extends Fragment {
             intent.putExtra("grp_desc", groupDescription);
             intent.putExtra("join_div", joinType);
             intent.putExtra("pos", mPosition);
-            getActivity().setResult(Activity.RESULT_OK, intent);
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(groupName);
+            requireActivity().setResult(Activity.RESULT_OK, intent);
+            if (actionBar != null) {
+                actionBar.setTitle(groupName);
+            }
         } else if (requestCode == UPDATE_PROFILE && resultCode == Activity.RESULT_OK) {
             mBinding.recyclerView.getAdapter().notifyDataSetChanged();
-            getActivity().setResult(Activity.RESULT_OK);
+            requireActivity().setResult(Activity.RESULT_OK);
         }
     }
 
@@ -267,10 +271,8 @@ public class Tab4Fragment extends Fragment {
                         AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.POST, mIsAdmin ? EndPoint.DELETE_GROUP : EndPoint.WITHDRAWAL_GROUP, null, response -> {
                             try {
                                 if (!response.getBoolean("isError")) {
-                                    Intent intent = new Intent(getContext(), MainActivity.class);
-
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                    startActivity(intent);
+                                    requireActivity().setResult(Activity.RESULT_OK, new Intent(getContext(), MainActivity.class));
+                                    requireActivity().finish();
                                     Toast.makeText(getContext(), "소모임 " + (mIsAdmin ? "폐쇄" : "탈퇴") + " 완료", Toast.LENGTH_LONG).show();
                                 }
                             } catch (JSONException e) {
