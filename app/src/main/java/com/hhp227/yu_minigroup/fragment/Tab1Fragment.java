@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
+
+import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -189,8 +191,13 @@ public class Tab1Fragment extends Fragment {
             articleItem.setYoutube(data.getParcelableExtra("youtube"));
             mArticleItemValues.set(position, articleItem);
             mAdapter.notifyItemChanged(position);
-        } else if (resultCode == Activity.RESULT_OK)
+        }
+    }
+
+    public void onProfileActivityResult(ActivityResult result) {
+        if (result.getResultCode() == Activity.RESULT_OK) {
             mAdapter.notifyDataSetChanged();
+        }
     }
 
     private void fetchArticleList() {

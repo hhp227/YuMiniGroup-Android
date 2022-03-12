@@ -8,6 +8,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.webkit.CookieManager;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -30,6 +35,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.ads.AdRequest;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.activity.GroupActivity;
 import com.hhp227.yu_minigroup.activity.MainActivity;
 import com.hhp227.yu_minigroup.activity.NoticeActivity;
 import com.hhp227.yu_minigroup.activity.ProfileActivity;
@@ -49,8 +55,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Tab4Fragment extends Fragment {
-    public static final int UPDATE_PROFILE = 0;
-
     private static final String TAG = "설정";
 
     private static boolean mIsAdmin;
@@ -59,13 +63,13 @@ public class Tab4Fragment extends Fragment {
 
     private static String mGroupId, mGroupImage, mKey;
 
-    private long mLastClickTime;
-
     private CookieManager mCookieManager;
 
     private User mUser;
 
     private FragmentTab4Binding mBinding;
+
+    private ActivityResultLauncher<Intent> mProfileActivityResultLauncher;
 
     public Tab4Fragment() {
     }
@@ -105,6 +109,7 @@ public class Tab4Fragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mCookieManager = AppController.getInstance().getCookieManager();
+        mProfileActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> ((GroupActivity) requireActivity()).onProfileActivityResult(result));
 
         mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.recyclerView.setAdapter(new RecyclerView.Adapter<Tab4Holder>() {
@@ -132,6 +137,7 @@ public class Tab4Fragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         mBinding = null;
+        mProfileActivityResultLauncher = null;
     }
 
     @Override
@@ -152,9 +158,12 @@ public class Tab4Fragment extends Fragment {
             if (actionBar != null) {
                 actionBar.setTitle(groupName);
             }
-        } else if (requestCode == UPDATE_PROFILE && resultCode == Activity.RESULT_OK) {
+        }
+    }
+
+    public void onProfileActivityResult(ActivityResult result) {
+        if (result.getResultCode() == Activity.RESULT_OK) {
             mBinding.recyclerView.getAdapter().notifyDataSetChanged();
-            requireActivity().setResult(Activity.RESULT_OK);
         }
     }
 
@@ -261,7 +270,7 @@ public class Tab4Fragment extends Fragment {
         private void onClick(View v) {
             switch (v.getId()) {
                 case R.id.ll_profile:
-                    startActivityForResult(new Intent(getContext(), ProfileActivity.class), UPDATE_PROFILE);
+                    mProfileActivityResultLauncher.launch(new Intent(getContext(), ProfileActivity.class));
                     break;
                 case R.id.ll_withdrawal:
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());

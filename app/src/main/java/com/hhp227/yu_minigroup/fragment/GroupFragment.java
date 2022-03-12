@@ -150,6 +150,7 @@ public class GroupFragment extends Fragment {
                 mGroupItemKeys.clear();
                 mGroupItemValues.clear();
                 fetchDataTask();
+                ((MainActivity) requireActivity()).updateProfileImage();
             }
         });
 

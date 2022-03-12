@@ -1,11 +1,13 @@
 package com.hhp227.yu_minigroup.activity;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
+import androidx.activity.result.ActivityResult;
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
 
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.databinding.ActivityGroupBinding;
@@ -64,9 +66,8 @@ public class GroupActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        mFragMain.onActivityResult(requestCode, resultCode, data);
+    public void onProfileActivityResult(ActivityResult result) {
+        mFragMain.onProfileActivityResult(result);
+        setResult(RESULT_OK);
     }
 }

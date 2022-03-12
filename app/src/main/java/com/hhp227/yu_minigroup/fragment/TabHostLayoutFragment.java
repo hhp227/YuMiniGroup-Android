@@ -4,16 +4,18 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.WindowManager;
-import android.widget.LinearLayout;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
 
+import androidx.activity.result.ActivityResult;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.tabs.TabLayout;
@@ -184,13 +186,6 @@ public class TabHostLayoutFragment extends Fragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        for (Fragment fragment : getChildFragmentManager().getFragments())
-            fragment.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         switch (newConfig.orientation) {
@@ -199,6 +194,18 @@ public class TabHostLayoutFragment extends Fragment {
                 // 툴바, 탭레이아웃 간격 벌어짐 귀찮아서 나중에...
                 break;
         }
+    }
+
+    public void onProfileActivityResult(ActivityResult result) {
+        getChildFragmentManager().getFragments().forEach(fragment -> {
+            if (fragment instanceof Tab1Fragment) {
+                ((Tab1Fragment) fragment).onProfileActivityResult(result);
+            } else if (fragment instanceof Tab3Fragment) {
+                ((Tab3Fragment) fragment).onProfileActivityResult(result);
+            } else if (fragment instanceof Tab4Fragment) {
+                ((Tab4Fragment) fragment).onProfileActivityResult(result);
+            }
+        });
     }
 
     private int getStatusBarHeight() {
