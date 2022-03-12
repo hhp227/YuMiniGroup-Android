@@ -1,8 +1,12 @@
 package com.hhp227.yu_minigroup.activity;
 
+import static com.hhp227.yu_minigroup.activity.YouTubeSearchActivity.API_KEY;
+import static com.hhp227.yu_minigroup.fragment.Tab1Fragment.UPDATE_ARTICLE;
+
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.Html;
@@ -15,9 +19,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
-import android.widget.*;
-import android.os.Bundle;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
@@ -29,7 +38,11 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
-import com.google.firebase.database.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.ReplyListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
@@ -42,9 +55,11 @@ import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import com.hhp227.yu_minigroup.fragment.Tab1Fragment;
 import com.hhp227.yu_minigroup.helper.MyYouTubeBaseActivity;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
+
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -53,9 +68,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.hhp227.yu_minigroup.activity.YouTubeSearchActivity.API_KEY;
-import static com.hhp227.yu_minigroup.fragment.Tab1Fragment.UPDATE_ARTICLE;
 
 public class ArticleActivity extends MyYouTubeBaseActivity {
     private static final int UPDATE_REPLY = 10;
@@ -204,17 +216,8 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                         boolean error = jsonObject.getBoolean("isError");
 
                         if (!error) {
-                            Intent groupIntent = new Intent(ArticleActivity.this, GroupActivity.class);
-
-                            groupIntent.putExtra("admin", getIntent().getBooleanExtra("admin", false));
-                            groupIntent.putExtra("grp_id", mGroupId);
-                            groupIntent.putExtra("grp_nm", mGroupName);
-                            groupIntent.putExtra("grp_img", mGroupImage);
-                            groupIntent.putExtra("key", mGroupKey);
-
-                            // 모든 이전 activity 초기화
-                            groupIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(groupIntent);
+                            setResult(RESULT_OK);
+                            finish();
                             Toast.makeText(getApplicationContext(), "삭제완료", Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(getApplicationContext(), "삭제할수 없습니다.", Toast.LENGTH_LONG).show();

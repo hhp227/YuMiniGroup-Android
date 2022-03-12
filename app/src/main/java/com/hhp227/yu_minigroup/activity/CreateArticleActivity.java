@@ -341,7 +341,7 @@ public class CreateArticleActivity extends AppCompatActivity {
                 boolean error = jsonObject.getBoolean("isError");
 
                 if (!error) {
-                    Intent intent = new Intent(CreateArticleActivity.this, GroupActivity.class);
+                    /*Intent intent = new Intent(CreateArticleActivity.this, GroupActivity.class);
 
                     intent.putExtra("admin", mIsAdmin);
                     intent.putExtra("grp_id", grpId);
@@ -351,7 +351,9 @@ public class CreateArticleActivity extends AppCompatActivity {
 
                     // 이전 Activity 초기화
                     intent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
+                    startActivity(intent);*/
+                    setResult(RESULT_OK);
+                    finish();
                     Toast.makeText(getApplicationContext(), "전송완료", Toast.LENGTH_LONG).show();
                 }
             } catch (JSONException e) {
