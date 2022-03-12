@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+
+import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -129,11 +131,10 @@ public class Tab3Fragment extends Fragment {
         mBinding = null;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK)
+    public void onProfileActivityResult(ActivityResult result) {
+        if (result.getResultCode() == Activity.RESULT_OK) {
             mAdapter.notifyDataSetChanged();
+        }
     }
 
     private void fetchMemberList() {

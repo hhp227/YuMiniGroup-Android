@@ -93,8 +93,6 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
         super.onCreate(savedInstanceState);
         mActivityArticleBinding = ActivityArticleBinding.inflate(getLayoutInflater());
         mArticleDetailBinding = ArticleDetailBinding.inflate(getLayoutInflater());
-
-        setContentView(mActivityArticleBinding.getRoot());
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookieManager = AppController.getInstance().getCookieManager();
         Intent intent = getIntent();
@@ -112,6 +110,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
         mReplyItemValues = new ArrayList<>();
         mAdapter = new ReplyListAdapter(mReplyItemKeys, mReplyItemValues);
 
+        setContentView(mActivityArticleBinding.getRoot());
         setSupportActionBar(mActivityArticleBinding.toolbar);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -305,7 +304,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 Toast.makeText(getApplicationContext(), "클립보드에 복사되었습니다!", Toast.LENGTH_SHORT).show();
                 return true;
             case 2:
-                Intent intent = new Intent(getBaseContext(), ReplyModifyActivity.class);
+                Intent intent = new Intent(getBaseContext(), UpdateCommentActivity.class);
                 String reply = replyItem.getReply();
 
                 intent.putExtra("grp_id", mGroupId);

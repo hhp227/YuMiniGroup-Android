@@ -35,12 +35,11 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivitySplashBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
         Handler handler = new Handler(getMainLooper());
         Window window = getWindow();
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
 
+        setContentView(mBinding.getRoot());
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         window.setStatusBarColor(Color.TRANSPARENT);

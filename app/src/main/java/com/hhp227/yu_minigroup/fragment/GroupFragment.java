@@ -12,10 +12,9 @@ import android.util.TypedValue;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,8 +28,8 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.google.firebase.database.*;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.activity.CreateActivity;
-import com.hhp227.yu_minigroup.activity.FindActivity;
+import com.hhp227.yu_minigroup.activity.CreateGroupActivity;
+import com.hhp227.yu_minigroup.activity.FindGroupActivity;
 import com.hhp227.yu_minigroup.activity.GroupActivity;
 import com.hhp227.yu_minigroup.activity.LoginActivity;
 import com.hhp227.yu_minigroup.activity.MainActivity;
@@ -54,10 +53,6 @@ import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_AD;
 import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_GROUP;
 
 public class GroupFragment extends Fragment {
-    public static final int CREATE_CODE = 10;
-
-    public static final int REGISTER_CODE = 20;
-
     public static final int UPDATE_GROUP = 30;
 
     private static final int PORTAIT_SPAN_COUNT = 2;
@@ -88,6 +83,8 @@ public class GroupFragment extends Fragment {
 
     private FragmentGroupBinding mBinding;
 
+    private ActivityResultLauncher<Intent> mActivityResultLauncher;
+
     public GroupFragment() {
     }
 
@@ -114,9 +111,9 @@ public class GroupFragment extends Fragment {
         mGridLayoutManager = new GridLayoutManager(getContext(), mSpanCount);
         mItemDecoration = new RecyclerView.ItemDecoration() {
             @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                 super.getItemOffsets(outRect, view, parent, state);
-                if (parent.getAdapter().getItemViewType(parent.getChildAdapterPosition(view)) == TYPE_GROUP || parent.getAdapter().getItemViewType(parent.getChildAdapterPosition(view)) == TYPE_AD) {
+                if (parent.getAdapter() != null && parent.getAdapter().getItemViewType(parent.getChildAdapterPosition(view)) == TYPE_GROUP || parent.getAdapter().getItemViewType(parent.getChildAdapterPosition(view)) == TYPE_AD) {
                     outRect.top = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
                     outRect.bottom = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
                     if (parent.getChildAdapterPosition(view) % mSpanCount == 0) {
@@ -148,6 +145,14 @@ public class GroupFragment extends Fragment {
                 start();
             }
         };
+        mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == Activity.RESULT_OK) {
+                mGroupItemKeys.clear();
+                mGroupItemValues.clear();
+                fetchDataTask();
+                ((MainActivity) requireActivity()).updateProfileImage();
+            }
+        });
 
         ((MainActivity) requireActivity()).setAppBar(mBinding.toolbar, getString(R.string.main));
         mAdapter.setHasStableIds(true);
@@ -162,16 +167,16 @@ public class GroupFragment extends Fragment {
                 intent.putExtra("grp_img", groupItem.getImage()); // 경북대 소모임에는 없음
                 intent.putExtra("pos", position);
                 intent.putExtra("key", mAdapter.getKey(position));
-                startActivityForResult(intent, UPDATE_GROUP);
+                mActivityResultLauncher.launch(intent);
             }
         });
         mAdapter.setOnClickListener(v -> {
             switch (v.getId()) {
                 case R.id.b_find:
-                    startActivityForResult(new Intent(getContext(), FindActivity.class), REGISTER_CODE);
+                    mActivityResultLauncher.launch(new Intent(getContext(), FindGroupActivity.class));
                     return;
                 case R.id.b_create:
-                    startActivityForResult(new Intent(getContext(), CreateActivity.class), CREATE_CODE);
+                    mActivityResultLauncher.launch(new Intent(getContext(), CreateGroupActivity.class));
             }
         });
         mGridLayoutManager.setSpanSizeLookup(mSpanSizeLookup);
@@ -186,17 +191,17 @@ public class GroupFragment extends Fragment {
         }, 1700));
         mBinding.srlGroup.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light, android.R.color.holo_orange_light, android.R.color.holo_red_light);
         mBinding.bnvGroupButton.getMenu().getItem(0).setCheckable(false);
-        mBinding.bnvGroupButton.setOnNavigationItemSelectedListener(item -> {
+        mBinding.bnvGroupButton.setOnItemSelectedListener(item -> {
             item.setCheckable(false);
             switch (item.getItemId()) {
                 case R.id.navigation_find:
-                    startActivityForResult(new Intent(getContext(), FindActivity.class), REGISTER_CODE);
+                    mActivityResultLauncher.launch(new Intent(getContext(), FindGroupActivity.class));
                     return true;
                 case R.id.navigation_request:
                     startActivity(new Intent(getContext(), RequestActivity.class));
                     return true;
                 case R.id.navigation_create:
-                    startActivityForResult(new Intent(getContext(), CreateActivity.class), CREATE_CODE);
+                    mActivityResultLauncher.launch(new Intent(getContext(), CreateGroupActivity.class));
                     return true;
             }
             return false;
@@ -212,6 +217,7 @@ public class GroupFragment extends Fragment {
         super.onDestroyView();
         mBinding.rvGroup.removeItemDecoration(mItemDecoration);
         mBinding = null;
+        mActivityResultLauncher = null;
     }
 
     @Override
@@ -230,29 +236,7 @@ public class GroupFragment extends Fragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if ((requestCode == CREATE_CODE || requestCode == REGISTER_CODE) && resultCode == Activity.RESULT_OK) {
-            mGroupItemKeys.clear();
-            mGroupItemValues.clear();
-            fetchDataTask();
-        } else if (requestCode == UPDATE_GROUP && resultCode == Activity.RESULT_OK && data != null) {//
-            int position = data.getIntExtra("position", 0);
-
-            if (mGroupItemValues.get(position) instanceof GroupItem) {
-                GroupItem groupItem = (GroupItem) mGroupItemValues.get(position);
-
-                groupItem.setName(data.getStringExtra("grp_nm"));
-                groupItem.setDescription(data.getStringExtra("grp_desc"));
-                groupItem.setJoinType(data.getStringExtra("join_div"));
-                mGroupItemValues.set(position, groupItem);
-                mAdapter.notifyDataSetChanged();
-            }
-        }
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         switch (newConfig.orientation) {
             case Configuration.ORIENTATION_PORTRAIT:
@@ -268,7 +252,7 @@ public class GroupFragment extends Fragment {
     }
 
     private void fetchDataTask() {
-        getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.GROUP_LIST, response -> {
             Source source = new Source(response);
 
@@ -329,7 +313,7 @@ public class GroupFragment extends Fragment {
         mPreferenceManager.clear();
         mCookieManager.removeAllCookies(value -> Log.d(TAG, "onReceiveValue " + value));
         startActivity(new Intent(getContext(), LoginActivity.class));
-        getActivity().finish();
+        requireActivity().finish();
     }
 
     private void insertAdvertisement() {
@@ -370,8 +354,7 @@ public class GroupFragment extends Fragment {
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage());
                     } finally {
-                        if (getActivity() != null)
-                            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     }
                 } else {
                     if (dataSnapshot.hasChildren()) {
@@ -381,7 +364,7 @@ public class GroupFragment extends Fragment {
                             fetchDataTaskFromFirebase(databaseReference.child(snapshot.getKey()), true);
                         }
                     } else
-                        getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                 }
             }
 

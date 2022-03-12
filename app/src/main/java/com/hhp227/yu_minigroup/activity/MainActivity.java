@@ -1,17 +1,19 @@
 package com.hhp227.yu_minigroup.activity;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.webkit.CookieManager;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
-
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -23,10 +25,12 @@ import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.ActivityMainBinding;
 import com.hhp227.yu_minigroup.databinding.NavHeaderMainBinding;
-import com.hhp227.yu_minigroup.fragment.*;
+import com.hhp227.yu_minigroup.fragment.BusFragment;
+import com.hhp227.yu_minigroup.fragment.GroupFragment;
+import com.hhp227.yu_minigroup.fragment.SeatFragment;
+import com.hhp227.yu_minigroup.fragment.TimetableFragment;
+import com.hhp227.yu_minigroup.fragment.UnivNoticeFragment;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
-
-import static com.hhp227.yu_minigroup.fragment.GroupFragment.UPDATE_GROUP;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -39,17 +43,24 @@ public class MainActivity extends AppCompatActivity {
 
     private ActionBarDrawerToggle mDrawerToggle;
 
+    private ActivityResultLauncher<Intent> mProfileActivityResultLauncher;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityMainBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookieManager = AppController.getInstance().getCookieManager();
+        mProfileActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                updateProfileImage();
+            }
+        });
+
+        setContentView(mBinding.getRoot());
 
         // Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713
-        MobileAds.initialize(this, getString(R.string.admob_app_id));
+        MobileAds.initialize(this, initializationStatus -> getString(R.string.admob_app_id));
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new GroupFragment()).commit();
         mBinding.navView.setNavigationItemSelectedListener(item -> {
             Fragment fragment = null;
@@ -95,11 +106,7 @@ public class MainActivity extends AppCompatActivity {
                         .skipMemoryCache(true)
                         .diskCacheStrategy(DiskCacheStrategy.NONE))
                 .into(NavHeaderMainBinding.bind(mBinding.navView.getHeaderView(0)).ivProfileImage);
-        NavHeaderMainBinding.bind(mBinding.navView.getHeaderView(0)).ivProfileImage.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
-
-            startActivityForResult(intent, UPDATE_GROUP);
-        });
+        NavHeaderMainBinding.bind(mBinding.navView.getHeaderView(0)).ivProfileImage.setOnClickListener(v -> mProfileActivityResultLauncher.launch(new Intent(getApplicationContext(), ProfileActivity.class)));
         NavHeaderMainBinding.bind(mBinding.navView.getHeaderView(0)).tvName.setText(mPreferenceManager.getUser().getName());
     }
 
@@ -108,22 +115,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         mBinding.drawerLayout.removeDrawerListener(mDrawerToggle);
         mBinding = null;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            Glide.with(getApplicationContext())
-                    .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mPreferenceManager.getUser().getUid()), new LazyHeaders.Builder()
-                            .addHeader("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS))
-                            .build()))
-                    .apply(new RequestOptions().circleCrop()
-                            .error(R.drawable.user_image_view_circle)
-                            .skipMemoryCache(true)
-                            .diskCacheStrategy(DiskCacheStrategy.NONE))
-                    .into(NavHeaderMainBinding.bind(mBinding.navView.getHeaderView(0)).ivProfileImage);
-        }
+        mProfileActivityResultLauncher = null;
     }
 
     @Override
@@ -142,5 +134,17 @@ public class MainActivity extends AppCompatActivity {
         }
         mBinding.drawerLayout.addDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
+    }
+
+    public void updateProfileImage() {
+        Glide.with(getApplicationContext())
+                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mPreferenceManager.getUser().getUid()), new LazyHeaders.Builder()
+                        .addHeader("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS))
+                        .build()))
+                .apply(new RequestOptions().circleCrop()
+                        .error(R.drawable.user_image_view_circle)
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE))
+                .into(NavHeaderMainBinding.bind(mBinding.navView.getHeaderView(0)).ivProfileImage);
     }
 }

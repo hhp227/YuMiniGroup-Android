@@ -1,14 +1,17 @@
 package com.hhp227.yu_minigroup.activity;
 
+import android.os.Bundle;
 import android.view.MenuItem;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
+
 import com.google.android.material.tabs.TabLayout;
 import com.hhp227.yu_minigroup.databinding.ActivitySettingsBinding;
-import com.hhp227.yu_minigroup.fragment.*;
+import com.hhp227.yu_minigroup.fragment.DefaultSettingFragment;
+import com.hhp227.yu_minigroup.fragment.MemberManagementFragment;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,8 +27,6 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivitySettingsBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
         String groupId = getIntent().getStringExtra("grp_id");
         String groupImage = getIntent().getStringExtra("grp_img");
         String key = getIntent().getStringExtra("key");
@@ -47,6 +48,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         };
 
+        setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("소모임 설정");

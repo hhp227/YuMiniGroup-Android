@@ -39,10 +39,10 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityLoginBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookieManager = AppController.getInstance().getCookieManager();
+
+        setContentView(mBinding.getRoot());
 
         // 사용자가 이미 로그인되어있는지 아닌지 확인
         if (mPreferenceManager.getUser() != null) {

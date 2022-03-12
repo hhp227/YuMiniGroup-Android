@@ -1,5 +1,7 @@
 package com.hhp227.yu_minigroup.fragment;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -8,9 +10,19 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.*;
+import android.view.ContextMenu;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
@@ -21,14 +33,22 @@ import com.android.volley.toolbox.StringRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.firebase.database.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.FragmentDefaultSettingBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
+import com.hhp227.yu_minigroup.helper.BitmapUtil;
+
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.Source;
+
 import org.json.JSONException;
 
 import java.io.UnsupportedEncodingException;
@@ -36,20 +56,20 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import static android.app.Activity.RESULT_OK;
-import static com.hhp227.yu_minigroup.activity.CreateActivity.CAMERA_CAPTURE_IMAGE_REQUEST_CODE;
-import static com.hhp227.yu_minigroup.activity.CreateActivity.CAMERA_PICK_IMAGE_REQUEST_CODE;
-
 public class DefaultSettingFragment extends Fragment {
     private static String mGroupId, mGroupImage, mGroupKey;
 
     private boolean mJoinTypeCheck;
+
+    private Bitmap mBitmap;
 
     private CookieManager mCookieManager;
 
     private TextWatcher mTextWatcher;
 
     private FragmentDefaultSettingBinding mBinding;
+
+    private ActivityResultLauncher<Intent> mCameraPickActivityResultLauncher, mCameraCaptureActivityResultLauncher;
 
     public DefaultSettingFragment() {
     }
@@ -100,10 +120,12 @@ public class DefaultSettingFragment extends Fragment {
             public void afterTextChanged(Editable s) {
             }
         };
+        mCameraPickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
+        mCameraCaptureActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
 
         mBinding.ivGroupImage.setOnClickListener(v -> {
             registerForContextMenu(v);
-            getActivity().openContextMenu(v);
+            requireActivity().openContextMenu(v);
             unregisterForContextMenu(v);
         });
         mBinding.etTitle.addTextChangedListener(mTextWatcher);
@@ -143,6 +165,8 @@ public class DefaultSettingFragment extends Fragment {
         super.onDestroyView();
         mBinding.etTitle.removeTextChangedListener(mTextWatcher);
         mBinding = null;
+        mCameraPickActivityResultLauncher = null;
+        mCameraCaptureActivityResultLauncher = null;
     }
 
     @Override
@@ -168,8 +192,8 @@ public class DefaultSettingFragment extends Fragment {
                             intent.putExtra("grp_nm", response.getString("GRP_NM"));
                             intent.putExtra("grp_desc", groupDescription);
                             intent.putExtra("join_div", !mJoinTypeCheck ? "0" : "1");
-                            getActivity().setResult(RESULT_OK, intent);
-                            getActivity().finish();
+                            requireActivity().setResult(RESULT_OK, intent);
+                            requireActivity().finish();
                             Toast.makeText(getContext(), "소모임 변경 완료", Toast.LENGTH_LONG).show();
                         }
                     } catch (JSONException e) {
@@ -244,23 +268,34 @@ public class DefaultSettingFragment extends Fragment {
             case "카메라":
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-                startActivityForResult(cameraIntent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
+                mCameraCaptureActivityResultLauncher.launch(cameraIntent);
                 break;
             case "갤러리":
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK);
 
                 galleryIntent.setType(MediaStore.Images.Media.CONTENT_TYPE);
                 galleryIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(galleryIntent, CAMERA_PICK_IMAGE_REQUEST_CODE);
+                mCameraPickActivityResultLauncher.launch(galleryIntent);
                 break;
             case "이미지 없음":
-                mBinding.ivGroupImage.setImageResource(R.drawable.add_photo);
-                Bitmap bitmap = null;
+                mBitmap = null;
 
+                mBinding.ivGroupImage.setImageResource(R.drawable.add_photo);
                 Toast.makeText(getContext(), "이미지 없음 선택", Toast.LENGTH_LONG).show();
                 break;
         }
         return super.onContextItemSelected(item);
+    }
+
+    private void onCameraActivityResult(ActivityResult result) {
+        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+            if (result.getData().getExtras().get("data") != null) {
+                mBitmap = (Bitmap) result.getData().getExtras().get("data");
+            } else if (result.getData().getData() != null) {
+                mBitmap = new BitmapUtil(requireContext()).bitmapResize(result.getData().getData(), 200);
+            }
+            mBinding.ivGroupImage.setImageBitmap(mBitmap);
+        }
     }
 
     private void initFirebaseData() {

@@ -2,12 +2,15 @@ package com.hhp227.yu_minigroup.activity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.*;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.android.volley.Request;
@@ -19,7 +22,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.ActivityCreateBinding;
+import com.hhp227.yu_minigroup.databinding.ActivityCreateGroupBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
@@ -33,12 +36,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class CreateActivity extends AppCompatActivity {
-    public static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
-
-    public static final int CAMERA_PICK_IMAGE_REQUEST_CODE = 200;
-
-    private static final String TAG = CreateActivity.class.getSimpleName();
+public class CreateGroupActivity extends AppCompatActivity {
+    private static final String TAG = CreateGroupActivity.class.getSimpleName();
 
     private boolean mJoinTypeCheck;
 
@@ -50,14 +49,14 @@ public class CreateActivity extends AppCompatActivity {
 
     private TextWatcher mTextWatcher;
 
-    private ActivityCreateBinding mBinding;
+    private ActivityCreateGroupBinding mBinding;
+
+    private ActivityResultLauncher<Intent> mCameraPickActivityResultLauncher, mCameraCaptureActivityResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = ActivityCreateBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
+        mBinding = ActivityCreateGroupBinding.inflate(getLayoutInflater());
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookie = AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS);
         mTextWatcher = new TextWatcher() {
@@ -74,7 +73,10 @@ public class CreateActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
             }
         };
+        mCameraPickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
+        mCameraCaptureActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
 
+        setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -95,6 +97,8 @@ public class CreateActivity extends AppCompatActivity {
         super.onDestroy();
         mBinding.etTitle.removeTextChangedListener(mTextWatcher);
         mBinding = null;
+        mCameraPickActivityResultLauncher = null;
+        mCameraCaptureActivityResultLauncher = null;
     }
 
     @Override
@@ -203,42 +207,38 @@ public class CreateActivity extends AppCompatActivity {
             case "카메라":
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-                startActivityForResult(cameraIntent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
+                mCameraCaptureActivityResultLauncher.launch(cameraIntent);
                 break;
             case "갤러리":
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK);
 
                 galleryIntent.setType(MediaStore.Images.Media.CONTENT_TYPE);
                 galleryIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(galleryIntent, CAMERA_PICK_IMAGE_REQUEST_CODE);
+                mCameraPickActivityResultLauncher.launch(galleryIntent);
                 break;
             case "이미지 없음":
-                mBinding.ivGroupImage.setImageResource(R.drawable.add_photo);
                 mBitmap = null;
 
+                mBinding.ivGroupImage.setImageResource(R.drawable.add_photo);
                 Snackbar.make(getCurrentFocus(), "이미지 없음 선택", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 break;
         }
         return super.onContextItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            mBitmap = (Bitmap) data.getExtras().get("data");
-
-            mBinding.ivGroupImage.setImageBitmap(mBitmap);
-        } else if (requestCode == CAMERA_PICK_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            Uri fileUri = data.getData();
-            mBitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
-
+    private void onCameraActivityResult(ActivityResult result) {
+        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+            if (result.getData().getExtras().get("data") != null) {
+                mBitmap = (Bitmap) result.getData().getExtras().get("data");
+            } else if (result.getData().getData() != null) {
+                mBitmap = new BitmapUtil(this).bitmapResize(result.getData().getData(), 200);
+            }
             mBinding.ivGroupImage.setImageBitmap(mBitmap);
         }
     }
 
     private void createGroupSuccess(String groupId, String groupName) {
-        Intent intent = new Intent(CreateActivity.this, GroupActivity.class);
+        Intent intent = new Intent(CreateGroupActivity.this, GroupActivity.class);
 
         intent.putExtra("admin", true);
         intent.putExtra("grp_id", groupId);

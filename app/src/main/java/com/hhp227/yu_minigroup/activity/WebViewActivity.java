@@ -13,12 +13,11 @@ public class WebViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityWebViewBinding binding = ActivityWebViewBinding.inflate(getLayoutInflater());
-
-        setContentView(binding.getRoot());
         ActionBar actionBar = getSupportActionBar();
         WebSettings webSettings = binding.wvNews.getSettings();
         String url = getIntent().getStringExtra("url");
 
+        setContentView(binding.getRoot());
         if (actionBar != null) {
             actionBar.setTitle(getIntent().getStringExtra("title"));
             actionBar.setDisplayHomeAsUpEnabled(true);

@@ -58,17 +58,14 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityChatBinding.inflate(getLayoutInflater());
-
-        setContentView(mBinding.getRoot());
-        Intent intent = getIntent();
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mDatabaseReference = FirebaseDatabase.getInstance().getReference("Messages");
         mMessageItemList = new ArrayList<>();
         mUser = AppController.getInstance().getPreferenceManager().getUser();
         mSender = mUser.getUid();
-        mReceiver = intent.getStringExtra("uid");
-        mValue = intent.getStringExtra("value");
-        mIsGroupChat = intent.getBooleanExtra("grp_chat", false);
+        mReceiver = getIntent().getStringExtra("uid");
+        mValue = getIntent().getStringExtra("value");
+        mIsGroupChat = getIntent().getBooleanExtra("grp_chat", false);
         mAdapter = new MessageListAdapter(mMessageItemList, mSender);
         mOnLayoutChangeListener = (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
             if (bottom < oldBottom && mHasSelection)
@@ -90,10 +87,11 @@ public class ChatActivity extends AppCompatActivity {
             }
         };
 
+        setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(intent.getStringExtra("chat_nm") + (mIsGroupChat ? " 그룹채팅방" : ""));
+            getSupportActionBar().setTitle(getIntent().getStringExtra("chat_nm") + (mIsGroupChat ? " 그룹채팅방" : ""));
         }
         mBinding.cvBtnSend.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(mBinding.etInputMsg.getText().toString().trim())) {
