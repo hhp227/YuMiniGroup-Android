@@ -354,7 +354,9 @@ public class GroupFragment extends Fragment {
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage());
                     } finally {
-                        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        if (getActivity() != null) {
+                            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        }
                     }
                 } else {
                     if (dataSnapshot.hasChildren()) {
@@ -363,8 +365,11 @@ public class GroupFragment extends Fragment {
 
                             fetchDataTaskFromFirebase(databaseReference.child(snapshot.getKey()), true);
                         }
-                    } else
-                        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                    } else {
+                        if (getActivity() != null) {
+                            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        }
+                    }
                 }
             }
 

@@ -51,8 +51,6 @@ import java.util.Map;
 public class Tab1Fragment extends Fragment {
     public static final int LIMIT = 10;
 
-    public static final int UPDATE_ARTICLE = 20;
-
     public static boolean mIsAdmin;
 
     public static String mGroupId, mGroupName, mGroupImage, mKey;
@@ -180,11 +178,11 @@ public class Tab1Fragment extends Fragment {
             mLastClickTime = SystemClock.elapsedRealtime();
             Intent intent = new Intent(getActivity(), CreateArticleActivity.class);
 
-            intent.putExtra("admin", mIsAdmin);
             intent.putExtra("grp_id", mGroupId);
             intent.putExtra("grp_nm", mGroupName);
             intent.putExtra("grp_img", mGroupImage);
-            intent.putExtra("key", mKey);
+            intent.putExtra("grp_key", mKey);
+            intent.putExtra("type", 0);
             ((TabHostLayoutFragment) requireParentFragment()).mCreateArticleResultLauncher.launch(intent);
         });
         mBinding.srlArticleList.setOnRefreshListener(() -> new Handler(Looper.getMainLooper()).postDelayed(() -> {

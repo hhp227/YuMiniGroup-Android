@@ -35,10 +35,6 @@
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".activity.ModifyActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
-        <activity
             android:name=".activity.PictureActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>

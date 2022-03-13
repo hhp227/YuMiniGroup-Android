@@ -1,7 +1,6 @@
 package com.hhp227.yu_minigroup.activity;
 
 import static com.hhp227.yu_minigroup.activity.YouTubeSearchActivity.API_KEY;
-import static com.hhp227.yu_minigroup.fragment.Tab1Fragment.UPDATE_ARTICLE;
 
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -70,7 +69,9 @@ import java.util.List;
 import java.util.Map;
 
 public class ArticleActivity extends MyYouTubeBaseActivity {
-    private static final int UPDATE_REPLY = 10;
+    private static final int UPDATE_ARTICLE = 10;
+
+    private static final int UPDATE_REPLY = 20;
 
     private static final String TAG = ArticleActivity.class.getSimpleName();
 
@@ -91,6 +92,8 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
     private ReplyListAdapter mAdapter;
 
     private Source mSource;
+
+    private TextWatcher mTextWatcher;
 
     private YouTubeItem mYouTubeItem;
 
@@ -121,6 +124,21 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
         mReplyItemKeys = new ArrayList<>();
         mReplyItemValues = new ArrayList<>();
         mAdapter = new ReplyListAdapter(mReplyItemKeys, mReplyItemValues);
+        mTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mActivityArticleBinding.cvBtnSend.setCardBackgroundColor(getResources().getColor(s.length() > 0 ? com.hhp227.yu_minigroup.R.color.colorAccent : androidx.cardview.R.color.cardview_light_background, null));
+                mActivityArticleBinding.tvBtnSend.setTextColor(getResources().getColor(s.length() > 0 ? android.R.color.white : android.R.color.darker_gray, null));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        };
 
         setContentView(mActivityArticleBinding.getRoot());
         setSupportActionBar(mActivityArticleBinding.toolbar);
@@ -144,21 +162,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
             } else
                 Toast.makeText(getApplicationContext(), "댓글을 입력하세요.", Toast.LENGTH_LONG).show();
         });
-        mActivityArticleBinding.etReply.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mActivityArticleBinding.cvBtnSend.setCardBackgroundColor(getResources().getColor(s.length() > 0 ? com.hhp227.yu_minigroup.R.color.colorAccent : androidx.cardview.R.color.cardview_light_background, null));
-                mActivityArticleBinding.tvBtnSend.setTextColor(getResources().getColor(s.length() > 0 ? android.R.color.white : android.R.color.darker_gray, null));
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
+        mActivityArticleBinding.etReply.addTextChangedListener(mTextWatcher);
         mActivityArticleBinding.etReply.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus)
                 mActivityArticleBinding.lvArticle.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
@@ -174,6 +178,8 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mActivityArticleBinding.etReply.removeTextChangedListener(mTextWatcher);
+        mTextWatcher = null;
         mActivityArticleBinding = null;
         mArticleDetailBinding = null;
     }
@@ -196,7 +202,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 finish();
                 return true;
             case 1:
-                Intent modifyIntent = new Intent(this, ModifyActivity.class);
+                Intent modifyIntent = new Intent(this, CreateArticleActivity.class);
 
                 modifyIntent.putExtra("grp_id", mGroupId);
                 modifyIntent.putExtra("artl_num", mArticleId);
@@ -206,6 +212,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 modifyIntent.putExtra("vid", mYouTubeItem);
                 modifyIntent.putExtra("grp_key", mGroupKey);
                 modifyIntent.putExtra("artl_key", mArticleKey);
+                modifyIntent.putExtra("type", 1);
                 startActivityForResult(modifyIntent, UPDATE_ARTICLE);
                 return true;
             case 2:
@@ -389,15 +396,15 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 Glide.with(getApplicationContext())
                         .load(profileImg)
                         .apply(RequestOptions
-                                .errorOf(com.hhp227.yu_minigroup.R.drawable.user_image_view_circle)
+                                .errorOf(R.drawable.user_image_view_circle)
                                 .circleCrop()
                                 .skipMemoryCache(true)
                                 .diskCacheStrategy(DiskCacheStrategy.NONE))
                         .into(mArticleDetailBinding.ivProfileImage);
                 mArticleDetailBinding.tvTitle.setText(title + " - " + name);
                 mArticleDetailBinding.tvTimestamp.setText(timeStamp);
+                mArticleDetailBinding.tvContent.setText(content);
                 if (!TextUtils.isEmpty(content)) {
-                    mArticleDetailBinding.tvContent.setText(content);
                     mArticleDetailBinding.tvContent.setVisibility(View.VISIBLE);
                 } else
                     mArticleDetailBinding.tvContent.setVisibility(View.GONE);
@@ -420,7 +427,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                         });
                         Glide.with(this)
                                 .load(mImageList.get(i))
-                                .apply(RequestOptions.errorOf(com.hhp227.yu_minigroup.R.drawable.ic_launcher_background))
+                                .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
                                 .into(articleImage);
                         mArticleDetailBinding.llImage.addView(articleImage);
                     }

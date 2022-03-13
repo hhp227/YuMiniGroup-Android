@@ -31,8 +31,6 @@ public class YouTubeSearchActivity extends AppCompatActivity {
 
     private static final int LIMIT = 50;
 
-    private int mType;
-
     private YouTubeListAdapter mAdapter;
 
     private List<YouTubeItem> mYouTubeItemList;
@@ -48,13 +46,12 @@ public class YouTubeSearchActivity extends AppCompatActivity {
         mYouTubeItemList = new ArrayList<>();
         mAdapter = new YouTubeListAdapter(mYouTubeItemList);
         mSearchText = "";
-        mType = getIntent().getIntExtra("type", 0);
 
         setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
         mAdapter.setOnItemClickListener((v, position) -> {//리팩토링 요망
             YouTubeItem youTubeItem = mYouTubeItemList.get(position);
-            Intent intent = new Intent(this, mType == 0 ? CreateArticleActivity.class : ModifyActivity.class);
+            Intent intent = new Intent(this, CreateArticleActivity.class);
 
             intent.putExtra("youtube", youTubeItem);
             setResult(RESULT_OK, intent);

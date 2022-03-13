@@ -145,11 +145,11 @@ public class TabHostLayoutFragment extends Fragment {
             if (mBinding.tabLayout.getSelectedTabPosition() == 0) {
                 Intent intent = new Intent(getActivity(), CreateArticleActivity.class);
 
-                intent.putExtra("admin", mIsAdmin);
                 intent.putExtra("grp_id", mGroupId);
                 intent.putExtra("grp_nm", mGroupName);
                 intent.putExtra("grp_img", mGroupImage);
-                intent.putExtra("key", mKey);
+                intent.putExtra("grp_key", mKey);
+                intent.putExtra("type", 0);
                 mCreateArticleResultLauncher.launch(intent);
             }
         });
