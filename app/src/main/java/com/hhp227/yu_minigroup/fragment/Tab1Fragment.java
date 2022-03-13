@@ -7,22 +7,30 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
-
-import androidx.activity.result.ActivityResult;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
-import com.google.firebase.database.*;
-import com.hhp227.yu_minigroup.activity.ArticleActivity;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.activity.ArticleActivity;
 import com.hhp227.yu_minigroup.activity.CreateArticleActivity;
 import com.hhp227.yu_minigroup.adapter.ArticleListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
@@ -30,6 +38,7 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.FragmentTab1Binding;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
+
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
@@ -41,8 +50,6 @@ import java.util.Map;
 
 public class Tab1Fragment extends Fragment {
     public static final int LIMIT = 10;
-
-    public static final int UPDATE_ARTICLE = 20;
 
     public static boolean mIsAdmin;
 
@@ -63,6 +70,8 @@ public class Tab1Fragment extends Fragment {
     private List<ArticleItem> mArticleItemValues;
 
     private FragmentTab1Binding mBinding;
+
+    private ActivityResultLauncher<Intent> mArticleActivityResultLauncher;
 
     public Tab1Fragment() {
     }
@@ -105,6 +114,26 @@ public class Tab1Fragment extends Fragment {
         mArticleItemValues = new ArrayList<>();
         mAdapter = new ArticleListAdapter(mArticleItemKeys, mArticleItemValues, mKey);
         mOffSet = 1;
+        mArticleActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == Activity.RESULT_OK) {
+                if (result.getData() != null) {
+                    int position = result.getData().getIntExtra("position", 0) - 1;
+                    ArticleItem articleItem = mArticleItemValues.get(position);
+
+                    articleItem.setTitle(result.getData().getStringExtra("sbjt"));
+                    articleItem.setContent(result.getData().getStringExtra("txt"));
+                    articleItem.setImages(result.getData().getStringArrayListExtra("img")); // firebase data
+                    articleItem.setReplyCount(result.getData().getStringExtra("cmmt_cnt"));
+                    articleItem.setYoutube(result.getData().getParcelableExtra("youtube"));
+                    mArticleItemValues.set(position, articleItem);
+                    mAdapter.notifyItemChanged(position);
+                } else {
+                    refreshArticleList();
+                    mBinding.rvArticle.scrollToPosition(0);
+                    ((TabHostLayoutFragment) requireParentFragment()).appbarLayoutExpand();
+                }
+            }
+        });
 
         mBinding.rvArticle.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvArticle.setAdapter(mAdapter);
@@ -141,7 +170,7 @@ public class Tab1Fragment extends Fragment {
             intent.putExtra("isbottom", v.getId() == R.id.ll_reply);
             intent.putExtra("grp_key", mKey);
             intent.putExtra("artl_key", mAdapter.getKey(position));
-            startActivityForResult(intent, UPDATE_ARTICLE);
+            mArticleActivityResultLauncher.launch(intent);
         });
         mBinding.rlWrite.setOnClickListener(v -> {
             if (SystemClock.elapsedRealtime() - mLastClickTime < 1000)
@@ -149,22 +178,16 @@ public class Tab1Fragment extends Fragment {
             mLastClickTime = SystemClock.elapsedRealtime();
             Intent intent = new Intent(getActivity(), CreateArticleActivity.class);
 
-            intent.putExtra("admin", mIsAdmin);
             intent.putExtra("grp_id", mGroupId);
             intent.putExtra("grp_nm", mGroupName);
             intent.putExtra("grp_img", mGroupImage);
-            intent.putExtra("key", mKey);
-            startActivity(intent);
+            intent.putExtra("grp_key", mKey);
+            intent.putExtra("type", 0);
+            ((TabHostLayoutFragment) requireParentFragment()).mCreateArticleResultLauncher.launch(intent);
         });
         mBinding.srlArticleList.setOnRefreshListener(() -> new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            mMinId = 0;
-            mOffSet = 1;
-
-            mArticleItemKeys.clear();
-            mArticleItemValues.clear();
-            mAdapter.addFooterView();
+            refreshArticleList();
             mBinding.srlArticleList.setRefreshing(false);
-            fetchArticleList();
         }, 2000));
         mBinding.srlArticleList.setColorSchemeResources(android.R.color.holo_red_light, android.R.color.holo_orange_light, android.R.color.holo_green_light, android.R.color.holo_blue_bright);
         showProgressBar();
@@ -175,22 +198,14 @@ public class Tab1Fragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         mBinding = null;
+        mArticleActivityResultLauncher = null;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == UPDATE_ARTICLE && resultCode == Activity.RESULT_OK) {
-            int position = data.getIntExtra("position", 0) - 1;
-            ArticleItem articleItem = mArticleItemValues.get(position);
-
-            articleItem.setTitle(data.getStringExtra("sbjt"));
-            articleItem.setContent(data.getStringExtra("txt"));
-            articleItem.setImages(data.getStringArrayListExtra("img")); // firebase data
-            articleItem.setReplyCount(data.getStringExtra("cmmt_cnt"));
-            articleItem.setYoutube(data.getParcelableExtra("youtube"));
-            mArticleItemValues.set(position, articleItem);
-            mAdapter.notifyItemChanged(position);
+    public void onCreateArticleActivityResult(ActivityResult result) {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            refreshArticleList();
+            mBinding.rvArticle.scrollToPosition(0);
+            ((TabHostLayoutFragment) requireParentFragment()).appbarLayoutExpand();
         }
     }
 
@@ -277,6 +292,16 @@ public class Tab1Fragment extends Fragment {
             }
         };
         AppController.getInstance().addToRequestQueue(stringRequest);
+    }
+
+    private void refreshArticleList() {
+        mMinId = 0;
+        mOffSet = 1;
+
+        mArticleItemKeys.clear();
+        mArticleItemValues.clear();
+        mAdapter.addFooterView();
+        fetchArticleList();
     }
 
     private void initFirebaseData() {

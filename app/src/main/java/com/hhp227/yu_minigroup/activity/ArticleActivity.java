@@ -1,8 +1,11 @@
 package com.hhp227.yu_minigroup.activity;
 
+import static com.hhp227.yu_minigroup.activity.YouTubeSearchActivity.API_KEY;
+
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.Html;
@@ -15,9 +18,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
-import android.widget.*;
-import android.os.Bundle;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
@@ -29,7 +37,11 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
-import com.google.firebase.database.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.ReplyListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
@@ -42,9 +54,11 @@ import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import com.hhp227.yu_minigroup.fragment.Tab1Fragment;
 import com.hhp227.yu_minigroup.helper.MyYouTubeBaseActivity;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
+
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -54,11 +68,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.hhp227.yu_minigroup.activity.YouTubeSearchActivity.API_KEY;
-import static com.hhp227.yu_minigroup.fragment.Tab1Fragment.UPDATE_ARTICLE;
-
 public class ArticleActivity extends MyYouTubeBaseActivity {
-    private static final int UPDATE_REPLY = 10;
+    private static final int UPDATE_ARTICLE = 10;
+
+    private static final int UPDATE_REPLY = 20;
 
     private static final String TAG = ArticleActivity.class.getSimpleName();
 
@@ -79,6 +92,8 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
     private ReplyListAdapter mAdapter;
 
     private Source mSource;
+
+    private TextWatcher mTextWatcher;
 
     private YouTubeItem mYouTubeItem;
 
@@ -109,6 +124,21 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
         mReplyItemKeys = new ArrayList<>();
         mReplyItemValues = new ArrayList<>();
         mAdapter = new ReplyListAdapter(mReplyItemKeys, mReplyItemValues);
+        mTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mActivityArticleBinding.cvBtnSend.setCardBackgroundColor(getResources().getColor(s.length() > 0 ? com.hhp227.yu_minigroup.R.color.colorAccent : androidx.cardview.R.color.cardview_light_background, null));
+                mActivityArticleBinding.tvBtnSend.setTextColor(getResources().getColor(s.length() > 0 ? android.R.color.white : android.R.color.darker_gray, null));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        };
 
         setContentView(mActivityArticleBinding.getRoot());
         setSupportActionBar(mActivityArticleBinding.toolbar);
@@ -132,21 +162,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
             } else
                 Toast.makeText(getApplicationContext(), "댓글을 입력하세요.", Toast.LENGTH_LONG).show();
         });
-        mActivityArticleBinding.etReply.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mActivityArticleBinding.cvBtnSend.setCardBackgroundColor(getResources().getColor(s.length() > 0 ? com.hhp227.yu_minigroup.R.color.colorAccent : androidx.cardview.R.color.cardview_light_background, null));
-                mActivityArticleBinding.tvBtnSend.setTextColor(getResources().getColor(s.length() > 0 ? android.R.color.white : android.R.color.darker_gray, null));
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
+        mActivityArticleBinding.etReply.addTextChangedListener(mTextWatcher);
         mActivityArticleBinding.etReply.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus)
                 mActivityArticleBinding.lvArticle.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
@@ -162,6 +178,8 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mActivityArticleBinding.etReply.removeTextChangedListener(mTextWatcher);
+        mTextWatcher = null;
         mActivityArticleBinding = null;
         mArticleDetailBinding = null;
     }
@@ -184,7 +202,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 finish();
                 return true;
             case 1:
-                Intent modifyIntent = new Intent(this, ModifyActivity.class);
+                Intent modifyIntent = new Intent(this, CreateArticleActivity.class);
 
                 modifyIntent.putExtra("grp_id", mGroupId);
                 modifyIntent.putExtra("artl_num", mArticleId);
@@ -194,6 +212,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 modifyIntent.putExtra("vid", mYouTubeItem);
                 modifyIntent.putExtra("grp_key", mGroupKey);
                 modifyIntent.putExtra("artl_key", mArticleKey);
+                modifyIntent.putExtra("type", 1);
                 startActivityForResult(modifyIntent, UPDATE_ARTICLE);
                 return true;
             case 2:
@@ -204,17 +223,8 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                         boolean error = jsonObject.getBoolean("isError");
 
                         if (!error) {
-                            Intent groupIntent = new Intent(ArticleActivity.this, GroupActivity.class);
-
-                            groupIntent.putExtra("admin", getIntent().getBooleanExtra("admin", false));
-                            groupIntent.putExtra("grp_id", mGroupId);
-                            groupIntent.putExtra("grp_nm", mGroupName);
-                            groupIntent.putExtra("grp_img", mGroupImage);
-                            groupIntent.putExtra("key", mGroupKey);
-
-                            // 모든 이전 activity 초기화
-                            groupIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(groupIntent);
+                            setResult(RESULT_OK);
+                            finish();
                             Toast.makeText(getApplicationContext(), "삭제완료", Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(getApplicationContext(), "삭제할수 없습니다.", Toast.LENGTH_LONG).show();
@@ -386,15 +396,15 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 Glide.with(getApplicationContext())
                         .load(profileImg)
                         .apply(RequestOptions
-                                .errorOf(com.hhp227.yu_minigroup.R.drawable.user_image_view_circle)
+                                .errorOf(R.drawable.user_image_view_circle)
                                 .circleCrop()
                                 .skipMemoryCache(true)
                                 .diskCacheStrategy(DiskCacheStrategy.NONE))
                         .into(mArticleDetailBinding.ivProfileImage);
                 mArticleDetailBinding.tvTitle.setText(title + " - " + name);
                 mArticleDetailBinding.tvTimestamp.setText(timeStamp);
+                mArticleDetailBinding.tvContent.setText(content);
                 if (!TextUtils.isEmpty(content)) {
-                    mArticleDetailBinding.tvContent.setText(content);
                     mArticleDetailBinding.tvContent.setVisibility(View.VISIBLE);
                 } else
                     mArticleDetailBinding.tvContent.setVisibility(View.GONE);
@@ -417,7 +427,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                         });
                         Glide.with(this)
                                 .load(mImageList.get(i))
-                                .apply(RequestOptions.errorOf(com.hhp227.yu_minigroup.R.drawable.ic_launcher_background))
+                                .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
                                 .into(articleImage);
                         mArticleDetailBinding.llImage.addView(articleImage);
                     }

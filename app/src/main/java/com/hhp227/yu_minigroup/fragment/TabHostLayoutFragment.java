@@ -11,6 +11,9 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -36,6 +39,8 @@ public class TabHostLayoutFragment extends Fragment {
     private static final String POSITION = "pos";
     private static final String KEY = "key";
     private static final String[] TAB_NAMES = {"소식", "일정", "맴버", "설정"};
+
+    public ActivityResultLauncher<Intent> mCreateArticleResultLauncher;
 
     private boolean mIsAdmin;
 
@@ -84,9 +89,11 @@ public class TabHostLayoutFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Tab1Fragment tab1Fragment = Tab1Fragment.newInstance(mIsAdmin, mGroupId, mGroupName, mGroupImage, mKey);
+        mCreateArticleResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), tab1Fragment::onCreateArticleActivityResult);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         List<Fragment> fragmentList = Stream.<Fragment>builder()
-                .add(Tab1Fragment.newInstance(mIsAdmin, mGroupId, mGroupName, mGroupImage, mKey))
+                .add(tab1Fragment)
                 .add(new Tab2Fragment())
                 .add(Tab3Fragment.newInstance(mGroupId))
                 .add(Tab4Fragment.newInstance(mIsAdmin, mGroupId, mGroupImage, mPosition, mKey))
@@ -138,12 +145,12 @@ public class TabHostLayoutFragment extends Fragment {
             if (mBinding.tabLayout.getSelectedTabPosition() == 0) {
                 Intent intent = new Intent(getActivity(), CreateArticleActivity.class);
 
-                intent.putExtra("admin", mIsAdmin);
                 intent.putExtra("grp_id", mGroupId);
                 intent.putExtra("grp_nm", mGroupName);
                 intent.putExtra("grp_img", mGroupImage);
-                intent.putExtra("key", mKey);
-                startActivity(intent);
+                intent.putExtra("grp_key", mKey);
+                intent.putExtra("type", 0);
+                mCreateArticleResultLauncher.launch(intent);
             }
         });
 
@@ -183,6 +190,7 @@ public class TabHostLayoutFragment extends Fragment {
         mBinding.tabLayout.clearOnTabSelectedListeners();
         mBinding.tabLayout.removeAllTabs();
         mBinding = null;
+        mCreateArticleResultLauncher = null;
     }
 
     @Override
@@ -206,6 +214,10 @@ public class TabHostLayoutFragment extends Fragment {
                 ((Tab4Fragment) fragment).onProfileActivityResult(result);
             }
         });
+    }
+
+    public void appbarLayoutExpand() {
+        mBinding.appbarLayout.setExpanded(true);
     }
 
     private int getStatusBarHeight() {

@@ -1,6 +1,6 @@
 package com.hhp227.yu_minigroup.activity;
 
-import android.content.Intent;
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -8,15 +8,21 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.firebase.database.*;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.MessageListAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
@@ -24,6 +30,7 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.ActivityChatBinding;
 import com.hhp227.yu_minigroup.dto.MessageItem;
 import com.hhp227.yu_minigroup.dto.User;
+
 import org.json.JSONException;
 
 import java.io.UnsupportedEncodingException;
