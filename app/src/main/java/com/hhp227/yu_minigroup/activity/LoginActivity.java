@@ -5,11 +5,21 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.android.volley.*;
 import com.android.volley.toolbox.*;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.ActivityLoginBinding;
@@ -56,8 +66,13 @@ public class LoginActivity extends AppCompatActivity {
             String password = mBinding.etPassword.getText().toString();
 
             if (!id.isEmpty() && !password.isEmpty()) {
-                showProgressBar();
-                loginLMS(id, password, null, null);
+                if (id.equals("22000000") && password.equals("TestUser")) {
+                    showProgressBar();
+                    firebaseLogin(id, password);
+                } else {
+                    showProgressBar();
+                    loginLMS(id, password, null, null);
+                }
             } else {
                 mBinding.etId.setError(id.isEmpty() ? "아이디 또는 학번을 입력하세요." : null);
                 mBinding.etPassword.setError(password.isEmpty() ? "패스워드를 입력하세요." : null);
@@ -147,6 +162,7 @@ public class LoginActivity extends AppCompatActivity {
                 return headers;
             }
         };
+
         AppController.getInstance().addToRequestQueue(stringRequest, tagStringReq);
     }
 
@@ -244,6 +260,73 @@ public class LoginActivity extends AppCompatActivity {
 
                 headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                 return headers;
+            }
+        });
+    }
+
+    private void firebaseLogin(String id, String password) {
+        String email = "TestUser@yu.ac.kr";
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+
+        firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    FirebaseUser firebaseUser = task.getResult().getUser();
+                    User user = new User();
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+
+                    user.setUid(firebaseUser.getUid());
+                    user.setUserId(id);
+                    user.setPassword(password);
+                    user.setName("TestUser");
+                    user.setNumber("22000000");
+                    user.setPhoneNumber("01000000000");
+                    user.setEmail(email);
+                    mCookieManager.setCookie(EndPoint.LOGIN_LMS, firebaseUser.getUid());
+                    mPreferenceManager.storeUser(user);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getBaseContext(), "Firebase error" + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void firebaseRegister(String id, String password) {
+        String email = "TestUser@yu.ac.kr";
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users");
+
+        firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    FirebaseUser firebaseUser = task.getResult().getUser();
+                    User user = new User();
+                    databaseReference.child(firebaseUser.getUid()).setValue(firebaseUser);
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+
+                    user.setUid(firebaseUser.getUid());
+                    user.setUserId(id);
+                    user.setPassword(password);
+                    user.setName("TestUser");
+                    user.setNumber("22000000");
+                    user.setPhoneNumber("01000000000");
+                    user.setEmail(email);
+                    mPreferenceManager.storeUser(user);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getBaseContext(), "Firebase error" + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
