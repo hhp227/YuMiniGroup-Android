@@ -37,12 +37,11 @@ public interface EndPoint {
     // 학교 URL
     String URL_YU = "https://www.yu.ac.kr";
     String URL_YU_MOBILE = "http://m.yu.ac.kr";
-    String URL_YU_NOTICE = URL_YU + "/main/intro/yu-news.do?mode=list&&articleLimit=10&article.offset={OFFSET}";
-    String URL_YU_MOBILE_NOTICE = URL_YU_MOBILE + "/_mobile/notice/?c=notice_01_view&seq={ID}";
+    String URL_YU_NOTICE = URL_YU + "/main/intro/yu-news.do?mode={MODE}";
     String URL_YU_LIBRARY_SEAT = "https://slib.yu.ac.kr";
     String URL_YU_LIBRARY_SEAT_ROOMS = URL_YU_LIBRARY_SEAT + "/Clicker/GetClickerReadingRooms";
     String URL_YU_LIBRARY_SEAT_DETAIL = URL_YU_LIBRARY_SEAT + "/clicker/UserSeat/{ID}";
-    String URL_YU_SHUTTLE_BUS = URL_YU_MOBILE + "/_mobile/life/?c=life_02_02";
+    String URL_YU_SHUTTLE_BUS = "https://hcms.yu.ac.kr/main/life/information-on-the-school-bus.do";
     String URL_SCHEDULE = URL_YU + "/main/bachelor/calendar.do?mode=calendar&srYear={YEAR}";
 
     // 유튜브 API

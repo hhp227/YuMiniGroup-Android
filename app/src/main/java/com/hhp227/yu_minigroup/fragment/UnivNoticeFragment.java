@@ -72,7 +72,7 @@ public class UnivNoticeFragment extends Fragment {
                 if (!mHasRequestedMore && !recyclerView.canScrollVertically(1)) {
                     if (mOffSet != MAX_PAGE) {
                         mHasRequestedMore = true;
-                        mOffSet++; // offSet 증가
+                        mOffSet += MAX_PAGE; // offSet 증가
                         fetchDataList();
                         Snackbar.make(recyclerView, "게시판 정보 불러오는 중...", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                     } else
@@ -104,7 +104,7 @@ public class UnivNoticeFragment extends Fragment {
             BbsItem bbsItem = mBbsItemArrayList.get(p);
             Intent intent = new Intent(getContext(), WebViewActivity.class);
 
-            intent.putExtra("url", EndPoint.URL_YU_MOBILE_NOTICE.replace("{ID}", bbsItem.getId()));
+            intent.putExtra("url", EndPoint.URL_YU_NOTICE.replace("{MODE}", "view") + "&articleNo={ARTICLE_NO}".replace("{ARTICLE_NO}", bbsItem.getId()));
             intent.putExtra("title", getString(R.string.yu_news));
             startActivity(intent);
         });
@@ -123,7 +123,7 @@ public class UnivNoticeFragment extends Fragment {
 
     private void fetchDataList() {
         String tag_string_req = "req_yu_news";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.URL_YU_NOTICE.replace("{OFFSET}", String.valueOf(mOffSet)), this::onResponse, this::onErrorResponse);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.URL_YU_NOTICE.replace("{MODE}", "list") + "&articleLimit={LIMIT}&article.offset={OFFSET}".replace("{LIMIT}", String.valueOf(MAX_PAGE)).replace("{OFFSET}", String.valueOf(mOffSet)), this::onResponse, this::onErrorResponse);
 
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
@@ -131,14 +131,13 @@ public class UnivNoticeFragment extends Fragment {
     private void onResponse(String response) {
         Source source = new Source(response);
 
-        Log.e("TEST", "source: " + source);
         try {
-            Element boardList = source.getFirstElementByClass("boardList");
+            Element boardList = source.getFirstElementByClass("board-table");
 
             for (Element tr : boardList.getFirstElement(HTMLElementName.TBODY).getAllElements(HTMLElementName.TR)) {
                 BbsItem bbsItem = new BbsItem();
                 List<Element> tds = tr.getChildElements();
-                String id = tds.get(0).getContent().toString();
+                String id = tds.get(1).getFirstElement(HTMLElementName.A).getAttributeValue("href").split("=|&")[3];
                 String title = tds.get(1).getTextExtractor().toString();
                 String writer = tds.get(2).getContent().toString();
                 String date = tds.get(3).getContent().toString();

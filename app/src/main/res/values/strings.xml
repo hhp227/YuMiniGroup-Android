@@ -10,7 +10,7 @@
     <string name="yu_news">영대소식</string>
     <string name="timetable">시간표</string>
     <string name="library_seat">도서관 좌석</string>
-    <string name="shuttle_bus">통학버스 시간표</string>
+    <string name="shuttle_bus">순환버스 시간표</string>
     <string name="logout">로그아웃</string>
     <string name="action_group_menu1">Test1</string>
     <string name="action_group_menu2">Test2</string>
