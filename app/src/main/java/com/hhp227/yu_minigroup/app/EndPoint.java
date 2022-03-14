@@ -42,7 +42,8 @@ public interface EndPoint {
     String URL_YU_LIBRARY_SEAT_ROOMS = URL_YU_LIBRARY_SEAT + "/Clicker/GetClickerReadingRooms";
     String URL_YU_LIBRARY_SEAT_DETAIL = URL_YU_LIBRARY_SEAT + "/clicker/UserSeat/{ID}";
     String URL_YU_SHUTTLE_BUS = "https://hcms.yu.ac.kr/main/life/information-on-the-school-bus.do";
-    String URL_SCHEDULE = URL_YU + "/main/bachelor/calendar.do?mode=calendar&srYear={YEAR}";
+    //String URL_SCHEDULE = URL_YU + "/main/bachelor/calendar.do?mode=table&srYear={YEAR}";
+    String URL_SCHEDULE = "https://homep.yu.ac.kr/_app/calendarxml_u.php";
 
     // 유튜브 API
     String URL_YOUTUBE_API = "https://www.googleapis.com/youtube/v3/search";
