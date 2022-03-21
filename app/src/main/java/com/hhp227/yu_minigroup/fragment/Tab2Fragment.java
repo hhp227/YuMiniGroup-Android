@@ -111,6 +111,8 @@ public class Tab2Fragment extends Fragment {
             DocumentBuilder documentBuilder;
             Document document;
 
+            mList.clear();
+            addHeaderView();
             try {
                 documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                 document = documentBuilder.parse(new InputSource(new StringReader(response)));
@@ -124,14 +126,15 @@ public class Tab2Fragment extends Fragment {
                         Element element2 = (Element) element.getElementsByTagName("Date").item(0);
                         Element element3 = (Element) element.getElementsByTagName("Author").item(0);
                         Element element4 = (Element) element.getElementsByTagName("Text").item(0);
-                        Element element5 = (Element) element.getElementsByTagName("Date").item(0);
-                        Element element6 = (Element) element.getElementsByTagName("Link").item(0);
+                        Element element5 = (Element) element.getElementsByTagName("Link").item(0);
+                        Map<String, String> map = new HashMap<>();
 
-                        Log.e("TEST", "element1: " + getParsing(element1) + ", element2: " + getParsing(element2) + ", element3: " + getParsing(element3) + ", element4: " + getParsing(element4) + ", element5: " + getParsing(element5) + ", element6: " + getParsing(element6));
+                        map.put("날짜", getParsing(element2));
+                        map.put("내용", getParsing(element1));
+                        mList.add(map);
+                        Log.e("TEST", "element1: " + getParsing(element1) + ", element2: " + getParsing(element2) + ", element3: " + getParsing(element3) + ", element4: " + getParsing(element4) + ", element5: " + getParsing(element5));
                     }
                 }
-                mList.clear();
-                addHeaderView();
                 /*Element infoCalendar = source.getFirstElementByClass("info_calendar case");
 
                 for (int i = 0; i < infoCalendar.getAllElements(HTMLElementName.A).size(); i++) {
