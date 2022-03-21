@@ -128,11 +128,14 @@ public class Tab2Fragment extends Fragment {
                         Element element4 = (Element) element.getElementsByTagName("Text").item(0);
                         Element element5 = (Element) element.getElementsByTagName("Link").item(0);
                         Map<String, String> map = new HashMap<>();
+                        String date = getParsing(element2);
 
-                        map.put("날짜", getParsing(element2));
-                        map.put("내용", getParsing(element1));
-                        mList.add(map);
-                        Log.e("TEST", "element1: " + getParsing(element1) + ", element2: " + getParsing(element2) + ", element3: " + getParsing(element3) + ", element4: " + getParsing(element4) + ", element5: " + getParsing(element5));
+                        if (date.substring(0, 4).equals(year) && date.substring(date.indexOf("-") + 1).substring(0, 2).equals(month)) {
+                            map.put("날짜", getParsing(element2));
+                            map.put("내용", getParsing(element1));
+                            mList.add(map);
+                            Log.e("TEST", "element1: " + getParsing(element1) + ", element2: " + getParsing(element2) + ", element3: " + getParsing(element3) + ", element4: " + getParsing(element4) + ", element5: " + getParsing(element5));
+                        }
                     }
                 }
                 /*Element infoCalendar = source.getFirstElementByClass("info_calendar case");
