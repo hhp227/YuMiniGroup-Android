@@ -3,6 +3,8 @@ package com.hhp227.yu_minigroup.activity;
 import android.os.Bundle;
 import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.hhp227.yu_minigroup.BuildConfig;
 import com.hhp227.yu_minigroup.databinding.ActivityVerInfoBinding;
 
 public class VerInfoActivity extends AppCompatActivity {
@@ -11,6 +13,7 @@ public class VerInfoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityVerInfoBinding binding = ActivityVerInfoBinding.inflate(getLayoutInflater());
+        binding.textView2.append(BuildConfig.VERSION_NAME);
 
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolbar);

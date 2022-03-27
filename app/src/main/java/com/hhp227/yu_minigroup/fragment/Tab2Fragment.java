@@ -17,13 +17,19 @@ import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.databinding.FragmentTab2Binding;
 import com.hhp227.yu_minigroup.databinding.HeaderCalendarBinding;
 import com.hhp227.yu_minigroup.databinding.ScheduleItemBinding;
-import net.htmlparser.jericho.Element;
-import net.htmlparser.jericho.HTMLElementName;
-import net.htmlparser.jericho.Source;
 
+import java.io.StringReader;
 import java.util.*;
 
 import static com.hhp227.yu_minigroup.app.EndPoint.URL_SCHEDULE;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 public class Tab2Fragment extends Fragment {
     private static final int TYPE_CALENDAR = 0;
@@ -99,12 +105,39 @@ public class Tab2Fragment extends Fragment {
         String year = String.valueOf(mCalendar.get(Calendar.YEAR));
         String month = String.format("%02d", mCalendar.get(Calendar.MONTH) + 1);
 
-        AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, URL_SCHEDULE.replace("{YEAR}", year), response -> {
-            Source source = new Source(response);
+        //URL_SCHEDULE.replace("{YEAR}", year)
+        AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, URL_SCHEDULE, response -> {
+            //Source source = new Source(response);
+            DocumentBuilder documentBuilder;
+            Document document;
 
+            mList.clear();
+            addHeaderView();
             try {
-                mList.clear();
-                addHeaderView();
+                documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                document = documentBuilder.parse(new InputSource(new StringReader(response)));
+                Element documentElement = document.getDocumentElement();
+                NodeList elementsByTagName = documentElement.getElementsByTagName("Items");
+
+                if (elementsByTagName != null && elementsByTagName.getLength() > 0) {
+                    for (int i = 0; i < elementsByTagName.getLength(); i++) {
+                        Element element = (Element) elementsByTagName.item(i);
+                        Element element1 = (Element) element.getElementsByTagName("Subject").item(0);
+                        Element element2 = (Element) element.getElementsByTagName("Date").item(0);
+                        Element element3 = (Element) element.getElementsByTagName("Author").item(0);
+                        Element element4 = (Element) element.getElementsByTagName("Text").item(0);
+                        Element element5 = (Element) element.getElementsByTagName("Link").item(0);
+                        Map<String, String> map = new HashMap<>();
+                        String date = getParsing(element2);
+
+                        if (date.substring(0, 4).equals(year) && date.substring(date.indexOf("-") + 1).substring(0, 2).equals(month)) {
+                            map.put("날짜", getParsing(element2));
+                            map.put("내용", getParsing(element1));
+                            mList.add(map);
+                            Log.e("TEST", "element1: " + getParsing(element1) + ", element2: " + getParsing(element2) + ", element3: " + getParsing(element3) + ", element4: " + getParsing(element4) + ", element5: " + getParsing(element5));
+                        }
+                    }
+                }
                 /*Element infoCalendar = source.getFirstElementByClass("info_calendar case");
 
                 for (int i = 0; i < infoCalendar.getAllElements(HTMLElementName.A).size(); i++) {
@@ -117,7 +150,6 @@ public class Tab2Fragment extends Fragment {
                             mList.add(map);
                         });
                 }*/
-                Log.e("TEST", "source: " + source);
                 mAdapter.notifyDataSetChanged();
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
@@ -130,6 +162,18 @@ public class Tab2Fragment extends Fragment {
 
     public void addHeaderView() {
         mList.add(new HashMap<>());
+    }
+
+    private String getParsing(Element element) {
+        if (element != null) {
+            try {
+                return element.getFirstChild().getNodeValue();
+            } catch (Exception unused2) {
+                return "error";
+            }
+        } else {
+            return "error";
+        }
     }
 
     public class HeaderHolder extends RecyclerView.ViewHolder {

@@ -154,6 +154,7 @@ public class RequestActivity extends AppCompatActivity {
             mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             mAdapter.notifyDataSetChanged();
             hideProgressBar();
+            mBinding.text.setText("가입신청중인 그룹이 없습니다.");
             mBinding.rlGroup.setVisibility(mGroupItemValues.size() > 1 ? View.GONE : View.VISIBLE);
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
