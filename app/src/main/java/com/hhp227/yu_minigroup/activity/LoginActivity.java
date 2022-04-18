@@ -8,6 +8,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+
 import android.os.Bundle;
 import com.android.volley.*;
 import com.android.volley.toolbox.*;
@@ -25,6 +27,8 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.ActivityLoginBinding;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
+import com.hhp227.yu_minigroup.viewmodel.LoginViewModel;
+import com.hhp227.yu_minigroup.viewmodel.SplashViewModel;
 import com.hhp227.yu_minigroup.volley.util.SSLConnect;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
@@ -45,12 +49,15 @@ public class LoginActivity extends AppCompatActivity {
 
     private ActivityLoginBinding mBinding;
 
+    private LoginViewModel mViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityLoginBinding.inflate(getLayoutInflater());
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookieManager = AppController.getInstance().getCookieManager();
+        mViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
 
         setContentView(mBinding.getRoot());
 

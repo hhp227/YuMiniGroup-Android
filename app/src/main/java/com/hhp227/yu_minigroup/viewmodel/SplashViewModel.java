@@ -1,7 +1,5 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
-import android.util.Log;
-
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
