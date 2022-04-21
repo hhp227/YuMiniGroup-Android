@@ -37,7 +37,7 @@ import com.hhp227.yu_minigroup.activity.RequestActivity;
 import com.hhp227.yu_minigroup.adapter.GroupGridAdapter;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
-import com.hhp227.yu_minigroup.databinding.FragmentGroupBinding;
+import com.hhp227.yu_minigroup.databinding.FragmentGroupMainBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import net.htmlparser.jericho.Element;
@@ -52,14 +52,14 @@ import java.util.Map;
 import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_AD;
 import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_GROUP;
 
-public class GroupFragment extends Fragment {
+public class GroupMainFragment extends Fragment {
     public static final int UPDATE_GROUP = 30;
 
     private static final int PORTAIT_SPAN_COUNT = 2;
 
     private static final int LANDSCAPE_SPAN_COUNT = 4;
 
-    private static final String TAG = GroupFragment.class.getSimpleName();
+    private static final String TAG = GroupMainFragment.class.getSimpleName();
 
     private int mSpanCount;
 
@@ -81,16 +81,13 @@ public class GroupFragment extends Fragment {
 
     private RecyclerView.ItemDecoration mItemDecoration;
 
-    private FragmentGroupBinding mBinding;
+    private FragmentGroupMainBinding mBinding;
 
     private ActivityResultLauncher<Intent> mActivityResultLauncher;
 
-    public GroupFragment() {
-    }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mBinding = FragmentGroupBinding.inflate(inflater, container, false);
+        mBinding = FragmentGroupMainBinding.inflate(inflater, container, false);
         return mBinding.getRoot();
     }
 

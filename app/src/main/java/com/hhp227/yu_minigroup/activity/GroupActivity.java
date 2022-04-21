@@ -8,10 +8,12 @@ import android.view.MenuItem;
 
 import androidx.activity.result.ActivityResult;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.databinding.ActivityGroupBinding;
 import com.hhp227.yu_minigroup.fragment.TabHostLayoutFragment;
+import com.hhp227.yu_minigroup.viewmodel.GroupViewModel;
 
 public class GroupActivity extends AppCompatActivity {
     private String mGroupName, mKey;
@@ -20,10 +22,13 @@ public class GroupActivity extends AppCompatActivity {
 
     private ActivityGroupBinding mBinding;
 
+    private GroupViewModel mViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityGroupBinding.inflate(getLayoutInflater());
+        mViewModel = new ViewModelProvider(this).get(GroupViewModel.class);
         Intent intent = getIntent();
         boolean isAdmin = intent.getBooleanExtra("admin", false);
         String groupId = intent.getStringExtra("grp_id");

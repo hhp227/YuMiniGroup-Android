@@ -10,7 +10,6 @@ import android.webkit.CookieManager;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -143,12 +142,12 @@ public class Tab4Fragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == GroupFragment.UPDATE_GROUP && resultCode == Activity.RESULT_OK) {
+        if (requestCode == GroupMainFragment.UPDATE_GROUP && resultCode == Activity.RESULT_OK) {
             ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
             String groupName = data.getStringExtra("grp_nm");
             String groupDescription = data.getStringExtra("grp_desc");
             String joinType = data.getStringExtra("join_div");
-            Intent intent = new Intent(getContext(), GroupFragment.class);
+            Intent intent = new Intent(getContext(), GroupMainFragment.class);
 
             intent.putExtra("grp_nm", groupName);
             intent.putExtra("grp_desc", groupDescription);
@@ -344,7 +343,7 @@ public class Tab4Fragment extends Fragment {
                     intent.putExtra("grp_id", mGroupId);
                     intent.putExtra("grp_img", mGroupImage);
                     intent.putExtra("key", mKey);
-                    startActivityForResult(intent, GroupFragment.UPDATE_GROUP);
+                    startActivityForResult(intent, GroupMainFragment.UPDATE_GROUP);
                     break;
                 case R.id.ll_notice:
                     startActivity(new Intent(getContext(), NoticeActivity.class));
