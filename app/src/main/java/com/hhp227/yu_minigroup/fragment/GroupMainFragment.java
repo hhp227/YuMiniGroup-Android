@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,6 +41,8 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.FragmentGroupMainBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
+import com.hhp227.yu_minigroup.viewmodel.GroupMainViewModel;
+
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
@@ -73,15 +76,13 @@ public class GroupMainFragment extends Fragment {
 
     private GroupGridAdapter mAdapter;
 
-    private List<String> mGroupItemKeys;
-
-    private List<Object> mGroupItemValues;
-
     private PreferenceManager mPreferenceManager;
 
     private RecyclerView.ItemDecoration mItemDecoration;
 
     private FragmentGroupMainBinding mBinding;
+
+    private GroupMainViewModel mViewModel;
 
     private ActivityResultLauncher<Intent> mActivityResultLauncher;
 
@@ -94,6 +95,7 @@ public class GroupMainFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mViewModel = new ViewModelProvider(this).get(GroupMainViewModel.class);
         mSpanCount = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? PORTAIT_SPAN_COUNT :
                      getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? LANDSCAPE_SPAN_COUNT :
                      0;
@@ -126,9 +128,7 @@ public class GroupMainFragment extends Fragment {
                 }
             }
         };
-        mGroupItemKeys = new ArrayList<>();
-        mGroupItemValues = new ArrayList<>();
-        mAdapter = new GroupGridAdapter(mGroupItemKeys, mGroupItemValues);
+        mAdapter = new GroupGridAdapter(mViewModel.mGroupItemKeys, mViewModel.mGroupItemValues);
         mCookieManager = AppController.getInstance().getCookieManager();
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCountDownTimer = new CountDownTimer(80000, 8000) {
@@ -144,8 +144,7 @@ public class GroupMainFragment extends Fragment {
         };
         mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == Activity.RESULT_OK) {
-                mGroupItemKeys.clear();
-                mGroupItemValues.clear();
+                mViewModel.refresh();
                 fetchDataTask();
                 ((MainActivity) requireActivity()).updateProfileImage();
             }
@@ -154,8 +153,8 @@ public class GroupMainFragment extends Fragment {
         ((MainActivity) requireActivity()).setAppBar(mBinding.toolbar, getString(R.string.main));
         mAdapter.setHasStableIds(true);
         mAdapter.setOnItemClickListener((v, position) -> {
-            if (mGroupItemValues.get(position) instanceof GroupItem) {
-                GroupItem groupItem = (GroupItem) mGroupItemValues.get(position);
+            if (mViewModel.mGroupItemValues.get(position) instanceof GroupItem) {
+                GroupItem groupItem = (GroupItem) mViewModel.mGroupItemValues.get(position);
                 Intent intent = new Intent(getContext(), GroupActivity.class);
 
                 intent.putExtra("admin", groupItem.isAdmin());
@@ -181,8 +180,7 @@ public class GroupMainFragment extends Fragment {
         mBinding.rvGroup.setAdapter(mAdapter);
         mBinding.rvGroup.addItemDecoration(mItemDecoration);
         mBinding.srlGroup.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
-            mGroupItemKeys.clear();
-            mGroupItemValues.clear();
+            mViewModel.refresh();
             mBinding.srlGroup.setRefreshing(false);
             fetchDataTask();
         }, 1700));
@@ -268,8 +266,7 @@ public class GroupMainFragment extends Fragment {
                         groupItem.setAdmin(isAdmin);
                         groupItem.setImage(image);
                         groupItem.setName(name);
-                        mGroupItemKeys.add(id);
-                        mGroupItemValues.add(groupItem);
+                        mViewModel.test(id, groupItem);
                     } catch (NullPointerException e) {
                         e.printStackTrace();
                     }
@@ -314,14 +311,14 @@ public class GroupMainFragment extends Fragment {
     }
 
     private void insertAdvertisement() {
-        if (!mGroupItemValues.isEmpty()) {
+        if (!mViewModel.mGroupItemValues.isEmpty()) {
             mAdapter.addHeaderView("가입중인 그룹", 0);
-            if (mGroupItemValues.size() % 2 == 0)
-                mGroupItemValues.add("광고");
+            if (mViewModel.mGroupItemValues.size() % 2 == 0)
+                mViewModel.mGroupItemValues.add("광고");
         } else {
-            mGroupItemValues.add("없음");
+            mViewModel.mGroupItemValues.add("없음");
             mAdapter.addHeaderView("인기 모임");
-            mGroupItemValues.add("뷰페이져");
+            mViewModel.mGroupItemValues.add("뷰페이져");
         }
         hideProgressBar();
     }
@@ -341,11 +338,11 @@ public class GroupMainFragment extends Fragment {
                         String key = dataSnapshot.getKey();
                         GroupItem value = dataSnapshot.getValue(GroupItem.class);
                         assert value != null;
-                        int index = mGroupItemKeys.indexOf(value.getId());
+                        int index = mViewModel.mGroupItemKeys.indexOf(value.getId());
 
                         if (index > -1) {
                             //mGroupItemValues.set(index, value); //isAdmin값때문에 주석처리
-                            mGroupItemKeys.set(index, key);
+                            mViewModel.mGroupItemKeys.set(index, key);
                         }
                         mAdapter.notifyDataSetChanged();
                     } catch (Exception e) {
