@@ -4,55 +4,34 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.Request;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.snackbar.Snackbar;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.activity.MainActivity;
 import com.hhp227.yu_minigroup.activity.WebViewActivity;
 import com.hhp227.yu_minigroup.adapter.BbsListAdapter;
-import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.FragmentListBinding;
 import com.hhp227.yu_minigroup.dto.BbsItem;
-
-import net.htmlparser.jericho.Element;
-import net.htmlparser.jericho.HTMLElementName;
-import net.htmlparser.jericho.Source;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.hhp227.yu_minigroup.viewmodel.UnivNoticeViewModel;
 
 public class UnivNoticeFragment extends Fragment {
-    private static final int MAX_PAGE = 10; // 최대볼수 있는 페이지 수
-
-    private static final String TAG = "영대소식";
-
-    private boolean mHasRequestedMore; // 데이터 불러올때 중복안되게 하기위한 변수
-
-    private int mOffSet;
-
-    private ArrayList<BbsItem> mBbsItemArrayList;
-
     private BbsListAdapter mAdapter;
 
     private RecyclerView.OnScrollListener mOnScrollListener;
 
     private FragmentListBinding mBinding;
 
-    public UnivNoticeFragment() {
-    }
+    private UnivNoticeViewModel mViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -63,53 +42,51 @@ public class UnivNoticeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mBbsItemArrayList = new ArrayList<>();
-        mAdapter = new BbsListAdapter(mBbsItemArrayList);
+        mViewModel = new ViewModelProvider(this).get(UnivNoticeViewModel.class);
+        mAdapter = new BbsListAdapter(mViewModel.mBbsItemArrayList);
         mOnScrollListener = new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (!mHasRequestedMore && !recyclerView.canScrollVertically(1)) {
-                    if (mOffSet != MAX_PAGE) {
-                        mHasRequestedMore = true;
-                        mOffSet += MAX_PAGE; // offSet 증가
-                        fetchDataList();
-                        Snackbar.make(recyclerView, "게시판 정보 불러오는 중...", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                    } else
-                        mHasRequestedMore = false;
-                }
-            }
-
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+                if (!recyclerView.canScrollVertically(RecyclerView.LAYOUT_DIRECTION_RTL)) {
+                    mViewModel.fetchNextPage();
+                }
             }
         };
 
-        // 처음 offSet은 1이다, 파싱이 되는 동안 업데이트 될것
-        mOffSet = 1;
-
         ((MainActivity) requireActivity()).setAppBar(mBinding.toolbar, getString(R.string.yu_news));
         mBinding.srl.setOnRefreshListener(() -> new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            mOffSet = 1; // offSet 초기화
-
-            mBbsItemArrayList.clear();
+            mViewModel.refresh();
             mBinding.srl.setRefreshing(false);
-            fetchDataList();
         }, 1000));
         mBinding.recyclerView.addOnScrollListener(mOnScrollListener);
         mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         mBinding.recyclerView.setAdapter(mAdapter);
         mAdapter.setOnItemClickListener((v, p) -> {
-            BbsItem bbsItem = mBbsItemArrayList.get(p);
+            BbsItem bbsItem = mViewModel.mBbsItemArrayList.get(p);
             Intent intent = new Intent(getContext(), WebViewActivity.class);
 
             intent.putExtra("url", EndPoint.URL_YU_NOTICE.replace("{MODE}", "view") + "&articleNo={ARTICLE_NO}".replace("{ARTICLE_NO}", bbsItem.getId()));
             intent.putExtra("title", getString(R.string.yu_news));
             startActivity(intent);
         });
-        showProgressBar();
-        fetchDataList();
+        mViewModel.mState.observe(getViewLifecycleOwner(), state -> {
+            if (state.isLoading) {
+                if (state.hasRequestedMore) {
+                    Snackbar.make(requireView(), "게시판 정보 불러오는 중...", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                } else {
+                    showProgressBar();
+                }
+            } else if (state.isSuccess) {
+                hideProgressBar();
+                mAdapter.notifyDataSetChanged();
+            } else if (state.hasRequestedMore) {
+                mViewModel.fetchDataList(state.offset);
+            } else if (state.message != null && !state.message.isEmpty()) {
+                hideProgressBar();
+                Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+            }
+        });
     }
 
     @Override
@@ -119,48 +96,6 @@ public class UnivNoticeFragment extends Fragment {
             mBinding.recyclerView.removeOnScrollListener(mOnScrollListener);
         mOnScrollListener = null;
         mBinding = null;
-    }
-
-    private void fetchDataList() {
-        String tag_string_req = "req_yu_news";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.URL_YU_NOTICE.replace("{MODE}", "list") + "&articleLimit={LIMIT}&article.offset={OFFSET}".replace("{LIMIT}", String.valueOf(MAX_PAGE)).replace("{OFFSET}", String.valueOf(mOffSet)), this::onResponse, this::onErrorResponse);
-
-        AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
-    }
-
-    private void onResponse(String response) {
-        Source source = new Source(response);
-
-        try {
-            Element boardList = source.getFirstElementByClass("board-table");
-
-            for (Element tr : boardList.getFirstElement(HTMLElementName.TBODY).getAllElements(HTMLElementName.TR)) {
-                BbsItem bbsItem = new BbsItem();
-                List<Element> tds = tr.getChildElements();
-                String id = tds.get(1).getFirstElement(HTMLElementName.A).getAttributeValue("href").split("=|&")[3];
-                String title = tds.get(1).getTextExtractor().toString();
-                String writer = tds.get(2).getContent().toString();
-                String date = tds.get(3).getContent().toString();
-
-                bbsItem.setId(id);
-                bbsItem.setTitle(title);
-                bbsItem.setWriter(writer);
-                bbsItem.setDate(date);
-                mBbsItemArrayList.add(bbsItem);
-            }
-            mAdapter.notifyDataSetChanged();
-            mHasRequestedMore = false;
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        } finally {
-            hideProgressBar();
-        }
-    }
-
-    private void onErrorResponse(VolleyError error) {
-        if (error.getMessage() != null)
-            Log.e(TAG, error.getMessage());
-        hideProgressBar();
     }
 
     private void showProgressBar() {

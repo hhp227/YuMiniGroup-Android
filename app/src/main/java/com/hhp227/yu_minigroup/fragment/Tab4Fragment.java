@@ -54,6 +54,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Tab4Fragment extends Fragment {
+    public static final int UPDATE_GROUP = 30;
+
     private static final String TAG = "설정";
 
     private static boolean mIsAdmin;
@@ -142,7 +144,7 @@ public class Tab4Fragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == GroupMainFragment.UPDATE_GROUP && resultCode == Activity.RESULT_OK) {
+        if (requestCode == UPDATE_GROUP && resultCode == Activity.RESULT_OK) {
             ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
             String groupName = data.getStringExtra("grp_nm");
             String groupDescription = data.getStringExtra("grp_desc");
@@ -343,7 +345,7 @@ public class Tab4Fragment extends Fragment {
                     intent.putExtra("grp_id", mGroupId);
                     intent.putExtra("grp_img", mGroupImage);
                     intent.putExtra("key", mKey);
-                    startActivityForResult(intent, GroupMainFragment.UPDATE_GROUP);
+                    startActivityForResult(intent, UPDATE_GROUP);
                     break;
                 case R.id.ll_notice:
                     startActivity(new Intent(getContext(), NoticeActivity.class));
