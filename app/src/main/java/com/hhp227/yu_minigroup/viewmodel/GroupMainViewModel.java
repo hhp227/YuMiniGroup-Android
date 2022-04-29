@@ -39,7 +39,7 @@ public class GroupMainViewModel extends ViewModel {
 
     public final MutableLiveData<Long> mTick = new MutableLiveData<>();
 
-    public final MutableLiveData<State> mState = new MutableLiveData<>(null);
+    public final MutableLiveData<State> mState = new MutableLiveData<>();
 
     private static final String TAG = GroupMainViewModel.class.getSimpleName();
 

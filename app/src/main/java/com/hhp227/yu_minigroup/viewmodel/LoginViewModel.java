@@ -32,13 +32,13 @@ import java.util.List;
 import java.util.Map;
 
 public class LoginViewModel extends ViewModel {
+    public MutableLiveData<State> mState = new MutableLiveData<>();
+
     private static final String TAG = "로그인화면";
 
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
     private final PreferenceManager mPreferenceManager = AppController.getInstance().getPreferenceManager();
-
-    public MutableLiveData<State> mState = new MutableLiveData<>(null);
 
     public void login(String id, String password) {
         if (!id.isEmpty() && !password.isEmpty()) {
