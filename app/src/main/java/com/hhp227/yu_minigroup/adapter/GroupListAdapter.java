@@ -69,11 +69,6 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return mGroupItemValues.get(position) != null ? TYPE_GROUP : TYPE_LOADER;
     }
 
-    public void addFooterView() {
-        mGroupItemKeys.add("");
-        mGroupItemValues.add(null);
-    }
-
     public void setFooterProgressBarVisibility(int visibility) {
         this.mProgressBarVisibility = visibility;
     }

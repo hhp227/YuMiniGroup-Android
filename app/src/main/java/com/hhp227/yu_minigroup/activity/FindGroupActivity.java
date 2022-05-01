@@ -59,19 +59,10 @@ public class FindGroupActivity extends AppCompatActivity {
         });
         mBinding.recyclerView.addOnScrollListener(mOnScrollListener);
         mBinding.srlList.setOnRefreshListener(() -> new Handler(getMainLooper()).postDelayed(() -> {
-            /*mMinId = 0;
-            mOffSet = 1;
-
-            mGroupItemKeys.clear();
-            mGroupItemValues.clear();
-            mAdapter.addFooterView();
-            mBinding.srlList.setRefreshing(false);
-            fetchGroupList();*/
             mBinding.srlList.setRefreshing(false);
             mViewModel.refresh();
         }, 1000));
         mViewModel.mState.observe(this, state -> {
-            // TODO list의 size가 1 이하일때 그룹이 없습니다 처리를 해줘야한다.
             if (state.isLoading) {
                 if (!state.hasRequestedMore) {
                     showProgressBar();
@@ -85,6 +76,8 @@ public class FindGroupActivity extends AppCompatActivity {
                 hideProgressBar();
                 mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
                 mAdapter.notifyDataSetChanged();
+                mBinding.text.setText("가입신청중인 그룹이 없습니다.");
+                mBinding.rlGroup.setVisibility(mViewModel.mGroupItemValues.size() > 1 ? View.GONE : View.VISIBLE);
             } else if (state.message != null && !state.message.isEmpty()) {
                 Snackbar.make(mBinding.recyclerView, state.message, Snackbar.LENGTH_LONG).show();
                 hideProgressBar();
