@@ -2,63 +2,45 @@ package com.hhp227.yu_minigroup.activity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.view.*;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.WindowManager;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
-import com.android.volley.Request;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonObjectRequest;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.app.AppController;
-import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.ActivityCreateGroupBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
-import com.hhp227.yu_minigroup.helper.PreferenceManager;
-import com.hhp227.yu_minigroup.volley.util.MultipartRequest;
-import org.json.JSONException;
+import com.hhp227.yu_minigroup.viewmodel.CreateGroupViewModel;
 
-import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class CreateGroupActivity extends AppCompatActivity {
-    private static final String TAG = CreateGroupActivity.class.getSimpleName();
-
-    private boolean mJoinTypeCheck;
-
-    private String mCookie, mPushId;
-
-    private Bitmap mBitmap;
-
-    private PreferenceManager mPreferenceManager;
-
     private TextWatcher mTextWatcher;
 
     private ActivityCreateGroupBinding mBinding;
 
     private ActivityResultLauncher<Intent> mCameraPickActivityResultLauncher, mCameraCaptureActivityResultLauncher;
 
+    private CreateGroupViewModel mViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityCreateGroupBinding.inflate(getLayoutInflater());
-        mPreferenceManager = AppController.getInstance().getPreferenceManager();
-        mCookie = AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS);
+        mViewModel = new ViewModelProvider(this).get(CreateGroupViewModel.class);
         mTextWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -88,8 +70,28 @@ public class CreateGroupActivity extends AppCompatActivity {
             openContextMenu(v);
             unregisterForContextMenu(v);
         });
-        mBinding.rgJointype.setOnCheckedChangeListener((group, checkedId) -> mJoinTypeCheck = checkedId != R.id.rb_auto);
+        mBinding.rgJointype.setOnCheckedChangeListener((group, checkedId) -> mViewModel.setJoinType(checkedId != R.id.rb_auto));
         mBinding.rgJointype.check(R.id.rb_auto);
+        mViewModel.mState.observe(this, state -> {
+            if (state.isLoading) {
+                showProgressLayout();
+            } else if (state.groupItemEntry != null) {
+                createGroupSuccess(state.groupItemEntry);
+            } else if (state.message != null && !state.message.isEmpty()) {
+                hideProgressLayout();
+                Snackbar.make(getCurrentFocus(), state.message, Snackbar.LENGTH_LONG).show();
+            } else if (state.createGroupFormState != null) {
+                mBinding.etTitle.setError(state.createGroupFormState.titleError);
+                mBinding.etDescription.setError(state.createGroupFormState.descriptionError);
+            }
+        });
+        mViewModel.mBitmap.observe(this, bitmap -> {
+            if (bitmap != null) {
+                mBinding.ivGroupImage.setImageBitmap(bitmap);
+            } else {
+                mBinding.ivGroupImage.setImageResource(R.drawable.add_photo);
+            }
+        });
     }
 
     @Override
@@ -116,78 +118,8 @@ public class CreateGroupActivity extends AppCompatActivity {
             case R.id.action_send:
                 String title = mBinding.etTitle.getText().toString().trim();
                 String description = mBinding.etDescription.getText().toString().trim();
-                String join = !mJoinTypeCheck ? "0" : "1";
 
-                if (!title.isEmpty() && !description.isEmpty()) {
-                    showProgressLayout();
-                    AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.POST, EndPoint.CREATE_GROUP, null, response -> {
-                        try {
-                            if (!response.getBoolean("isError")) {
-                                String groupId = response.getString("CLUB_GRP_ID").trim();
-                                String groupName = response.getString("GRP_NM");
-
-                                if (mBitmap != null)
-                                    groupImageUpdate(groupId, groupName, description, join);
-                                else {
-                                    insertGroupToFirebase(groupId, groupName, description, join);
-                                    createGroupSuccess(groupId, groupName);
-                                }
-                            }
-                        } catch (JSONException e) {
-                            Log.e(TAG, e.getMessage());
-                            hideProgressLayout();
-                        }
-                    }, error -> {
-                        VolleyLog.e(error.getMessage());
-                        hideProgressLayout();
-                    }) {
-                        @Override
-                        public Map<String, String> getHeaders() {
-                            Map<String, String> headers = new HashMap<>();
-
-                            headers.put("Cookie", mCookie);
-                            return headers;
-                        }
-
-                        @Override
-                        public String getBodyContentType() {
-                            return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
-                        }
-
-                        @Override
-                        public byte[] getBody() {
-                            Map<String, String> params = new HashMap<>();
-
-                            params.put("GRP_NM", title);
-                            params.put("TXT", description);
-                            params.put("JOIN_DIV", join);
-                            if (params.size() > 0) {
-                                StringBuilder encodedParams = new StringBuilder();
-
-                                try {
-                                    params.forEach((k, v) -> {
-                                        try {
-                                            encodedParams.append(URLEncoder.encode(k, getParamsEncoding()));
-                                            encodedParams.append('=');
-                                            encodedParams.append(URLEncoder.encode(v, getParamsEncoding()));
-                                            encodedParams.append("&");
-                                        } catch (UnsupportedEncodingException e) {
-                                            e.printStackTrace();
-                                        }
-                                    });
-                                    return encodedParams.toString().getBytes(getParamsEncoding());
-                                } catch (UnsupportedEncodingException uee) {
-                                    throw new RuntimeException("Encoding not supported: " + getParamsEncoding(), uee);
-                                }
-                            }
-                            return super.getBody();
-                        }
-                    });
-                } else {
-                    mBinding.etTitle.setError(title.isEmpty() ? "그룹명을 입력하세요." : null);
-                    if (description.isEmpty())
-                        Snackbar.make(getCurrentFocus(), "그룹설명을 입력해주세요.", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                }
+                mViewModel.createGroup(title, description);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -217,9 +149,7 @@ public class CreateGroupActivity extends AppCompatActivity {
                 mCameraPickActivityResultLauncher.launch(galleryIntent);
                 break;
             case "이미지 없음":
-                mBitmap = null;
-
-                mBinding.ivGroupImage.setImageResource(R.drawable.add_photo);
+                mViewModel.setBitmap(null);
                 Snackbar.make(getCurrentFocus(), "이미지 없음 선택", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 break;
         }
@@ -229,92 +159,27 @@ public class CreateGroupActivity extends AppCompatActivity {
     private void onCameraActivityResult(ActivityResult result) {
         if (result.getResultCode() == RESULT_OK && result.getData() != null) {
             if (result.getData().getExtras().get("data") != null) {
-                mBitmap = (Bitmap) result.getData().getExtras().get("data");
+                mViewModel.setBitmap((Bitmap) result.getData().getExtras().get("data"));
             } else if (result.getData().getData() != null) {
-                mBitmap = new BitmapUtil(this).bitmapResize(result.getData().getData(), 200);
+                mViewModel.setBitmap(new BitmapUtil(this).bitmapResize(result.getData().getData(), 200));
             }
-            mBinding.ivGroupImage.setImageBitmap(mBitmap);
         }
     }
 
-    private void createGroupSuccess(String groupId, String groupName) {
+    private void createGroupSuccess(Map.Entry<String, GroupItem> groupItemEntry) {
         Intent intent = new Intent(CreateGroupActivity.this, GroupActivity.class);
+        GroupItem groupItem = groupItemEntry.getValue();
 
         intent.putExtra("admin", true);
-        intent.putExtra("grp_id", groupId);
-        intent.putExtra("grp_nm", groupName);
-        intent.putExtra("grp_img", EndPoint.BASE_URL + (mBitmap != null ? "/ilosfiles/club/photo/" + groupId.concat(".jpg") : "/ilos/images/community/share_nophoto.gif")); // 경북대 소모임에는 없음
-        intent.putExtra("key", mPushId);
+        intent.putExtra("grp_id", groupItem.getId());
+        intent.putExtra("grp_nm", groupItem.getName());
+        intent.putExtra("grp_img", groupItem.getImage());
+        intent.putExtra("key", groupItemEntry.getKey());
         setResult(RESULT_OK, intent);
         startActivity(intent);
         finish();
         hideProgressLayout();
         Snackbar.make(getCurrentFocus(), "그룹이 생성되었습니다.", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-    }
-
-    private void groupImageUpdate(String clubGrpId, String grpNm, String txt, String joinDiv) {
-        AppController.getInstance().addToRequestQueue(new MultipartRequest(Request.Method.POST, EndPoint.GROUP_IMAGE_UPDATE, response -> {
-            insertGroupToFirebase(clubGrpId, grpNm, txt, joinDiv);
-            createGroupSuccess(clubGrpId, grpNm);
-        }, error -> {
-            VolleyLog.e(TAG, error.getMessage());
-            hideProgressLayout();
-        }) {
-            @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-
-                headers.put("Cookie", mCookie);
-                return headers;
-            }
-
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-
-                params.put("CLUB_GRP_ID", clubGrpId);
-                return params;
-            }
-
-            @Override
-            protected Map<String, DataPart> getByteData() {
-                Map<String, DataPart> params = new HashMap<>();
-
-                params.put("file", new DataPart(UUID.randomUUID().toString().replace("-", "").concat(".jpg"), getFileDataFromDrawable(mBitmap)));
-                return params;
-            }
-
-            private byte[] getFileDataFromDrawable(Bitmap bitmap) {
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-                bitmap.compress(Bitmap.CompressFormat.PNG, 80, byteArrayOutputStream);
-                return byteArrayOutputStream.toByteArray();
-            }
-        });
-    }
-
-    private void insertGroupToFirebase(String groupId, String groupName, String description, String joinType) {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        Map<String, Boolean> members = new HashMap<>();
-        GroupItem groupItem = new GroupItem();
-
-        members.put(mPreferenceManager.getUser().getUid(), true);
-        groupItem.setId(groupId);
-        groupItem.setTimestamp(System.currentTimeMillis());
-        groupItem.setAuthor(mPreferenceManager.getUser().getName());
-        groupItem.setAuthorUid(mPreferenceManager.getUser().getUid());
-        groupItem.setImage(EndPoint.BASE_URL + (mBitmap != null ? "/ilosfiles/club/photo/" + groupId.concat(".jpg") : "/ilos/images/community/share_nophoto.gif"));
-        groupItem.setName(groupName);
-        groupItem.setDescription(description);
-        groupItem.setJoinType(joinType);
-        groupItem.setMembers(members);
-        groupItem.setMemberCount(members.size());
-        mPushId = databaseReference.push().getKey();
-        Map<String, Object> childUpdates = new HashMap<>();
-
-        childUpdates.put("Groups/" + mPushId, groupItem);
-        childUpdates.put("UserGroupList/" + mPreferenceManager.getUser().getUid() + "/" + mPushId, true);
-        databaseReference.updateChildren(childUpdates);
     }
 
     private void showProgressLayout() {
