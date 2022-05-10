@@ -28,13 +28,13 @@ import com.hhp227.yu_minigroup.viewmodel.CreateGroupViewModel;
 import java.util.Map;
 
 public class CreateGroupActivity extends AppCompatActivity {
-    private TextWatcher mTextWatcher;
-
     private ActivityCreateGroupBinding mBinding;
 
     private ActivityResultLauncher<Intent> mCameraPickActivityResultLauncher, mCameraCaptureActivityResultLauncher;
 
     private CreateGroupViewModel mViewModel;
+
+    private TextWatcher mTextWatcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

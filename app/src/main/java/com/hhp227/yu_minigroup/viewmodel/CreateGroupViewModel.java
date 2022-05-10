@@ -55,11 +55,12 @@ public class CreateGroupViewModel extends ViewModel {
                     if (!response.getBoolean("isError")) {
                         String groupId = response.getString("CLUB_GRP_ID").trim();
                         String groupName = response.getString("GRP_NM");
+                        Bitmap bitmap = mBitmap.getValue();
 
-                        if (mBitmap.getValue() != null)
-                            groupImageUpdate(groupId, groupName, description);
+                        if (bitmap != null)
+                            groupImageUpdate(groupId, groupName, description, bitmap);
                         else {
-                            insertGroupToFirebase(groupId, groupName, description);
+                            insertGroupToFirebase(groupId, groupName, description, null);
                         }
                     }
                 } catch (JSONException e) {
@@ -113,8 +114,8 @@ public class CreateGroupViewModel extends ViewModel {
         }
     }
 
-    private void groupImageUpdate(final String clubGrpId, final String grpNm, final String txt) {
-        AppController.getInstance().addToRequestQueue(new MultipartRequest(Request.Method.POST, EndPoint.GROUP_IMAGE_UPDATE, response -> insertGroupToFirebase(clubGrpId, grpNm, txt), error -> mState.postValue(new State(false, null, null, error.getMessage()))) {
+    private void groupImageUpdate(final String clubGrpId, final String grpNm, final String txt, final Bitmap bitmap) {
+        AppController.getInstance().addToRequestQueue(new MultipartRequest(Request.Method.POST, EndPoint.GROUP_IMAGE_UPDATE, response -> insertGroupToFirebase(clubGrpId, grpNm, txt, bitmap), error -> mState.postValue(new State(false, null, null, error.getMessage()))) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
@@ -135,8 +136,8 @@ public class CreateGroupViewModel extends ViewModel {
             protected Map<String, DataPart> getByteData() {
                 Map<String, DataPart> params = new HashMap<>();
 
-                if (mBitmap.getValue() != null) {
-                    params.put("file", new DataPart(UUID.randomUUID().toString().replace("-", "").concat(".jpg"), getFileDataFromDrawable(mBitmap.getValue())));
+                if (bitmap != null) {
+                    params.put("file", new DataPart(UUID.randomUUID().toString().replace("-", "").concat(".jpg"), getFileDataFromDrawable(bitmap)));
                 }
                 return params;
             }
@@ -150,7 +151,7 @@ public class CreateGroupViewModel extends ViewModel {
         });
     }
 
-    private void insertGroupToFirebase(String groupId, String groupName, String description) {
+    private void insertGroupToFirebase(String groupId, String groupName, String description, Bitmap bitmap) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         Map<String, Boolean> members = new HashMap<>();
         GroupItem groupItem = new GroupItem();
@@ -162,7 +163,7 @@ public class CreateGroupViewModel extends ViewModel {
         groupItem.setTimestamp(System.currentTimeMillis());
         groupItem.setAuthor(mPreferenceManager.getUser().getName());
         groupItem.setAuthorUid(mPreferenceManager.getUser().getUid());
-        groupItem.setImage(mBitmap.getValue() != null ? GROUP_IMAGE.replace("{FILE}", groupId.concat(".jpg")) : EndPoint.BASE_URL + "/ilos/images/community/share_nophoto.gif");
+        groupItem.setImage(bitmap != null ? GROUP_IMAGE.replace("{FILE}", groupId.concat(".jpg")) : EndPoint.BASE_URL + "/ilos/images/community/share_nophoto.gif");
         groupItem.setName(groupName);
         groupItem.setDescription(description);
         groupItem.setJoinType(mType);
