@@ -161,7 +161,6 @@ public class RequestViewModel extends ViewModel {
         mGroupItemValues.clear();
         mGroupItemKeys.add("");
         mGroupItemValues.add(null);
-        mState.postValue(new State(false, true, 1, false, null));
         Executors.newSingleThreadExecutor().execute(() -> mState.postValue(new State(false, false, 1, true, null)));
     }
 

@@ -63,7 +63,7 @@ public class RequestActivity extends AppCompatActivity {
             } else if (state.isSuccess) {
                 hideProgressBar();
                 mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
-                mAdapter.notifyDataSetChanged();
+                mAdapter.notifyItemRangeChanged(0, mAdapter.getItemCount());
                 mBinding.text.setText("가입신청중인 그룹이 없습니다.");
                 mBinding.rlGroup.setVisibility(mViewModel.mGroupItemValues.size() > 1 ? View.GONE : View.VISIBLE);
             } else if (state.message != null && !state.message.isEmpty()) {
