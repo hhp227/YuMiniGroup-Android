@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 
+// TODO FindGroupViewModel 참고하여 Paging처리 하기
 public class UnivNoticeViewModel extends ViewModel {
     public final ArrayList<BbsItem> mBbsItemArrayList = new ArrayList<>();
 
