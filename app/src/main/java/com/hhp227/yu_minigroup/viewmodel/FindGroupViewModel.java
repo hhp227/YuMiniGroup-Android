@@ -49,9 +49,7 @@ public class FindGroupViewModel extends ViewModel {
     private int mMinId;
 
     public FindGroupViewModel() {
-        if (mState.getValue() != null) {
-            fetchGroupList(mState.getValue().offset);
-        }
+        fetchNextPage();
     }
 
     public void fetchGroupList(int offset) {

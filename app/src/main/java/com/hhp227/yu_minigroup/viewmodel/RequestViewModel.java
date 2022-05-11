@@ -49,9 +49,7 @@ public class RequestViewModel extends ViewModel {
     private int mMinId;
 
     public RequestViewModel() {
-        if (mState.getValue() != null) {
-            fetchGroupList(mState.getValue().offset);
-        }
+        fetchNextPage();
     }
 
     public void fetchGroupList(int offset) {
