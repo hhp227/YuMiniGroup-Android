@@ -110,7 +110,6 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 args.putString("type", groupItem.getJoinType());
                 args.putInt("btn_type", mButtonType);
                 args.putString("key", mGroupItemKeys.get(getAdapterPosition()));
-                Log.e("TEST", "key: " + mGroupItemKeys.get(getAdapterPosition()));
 
                 GroupInfoFragment newFragment = GroupInfoFragment.newInstance();
                 newFragment.setArguments(args);
