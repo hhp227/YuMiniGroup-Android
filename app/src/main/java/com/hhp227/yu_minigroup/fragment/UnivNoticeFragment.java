@@ -77,8 +77,9 @@ public class UnivNoticeFragment extends Fragment {
                 } else {
                     showProgressBar();
                 }
-            } else if (state.isSuccess) {
+            } else if (!state.bbsItems.isEmpty()) {
                 hideProgressBar();
+                mViewModel.addAll(state.bbsItems);
                 mAdapter.notifyDataSetChanged();
             } else if (state.hasRequestedMore) {
                 mViewModel.fetchDataList(state.offset);

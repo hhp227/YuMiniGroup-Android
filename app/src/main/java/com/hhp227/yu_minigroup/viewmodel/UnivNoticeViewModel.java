@@ -15,35 +15,33 @@ import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-// TODO FindGroupViewModel 참고하여 Paging처리 하기
 public class UnivNoticeViewModel extends ViewModel {
     public final ArrayList<BbsItem> mBbsItemArrayList = new ArrayList<>();
 
-    public final MutableLiveData<State> mState = new MutableLiveData<>(new State(false, false, 0, false, null));
+    public final MutableLiveData<State> mState = new MutableLiveData<>(new State(false, Collections.emptyList(), 0, false, null));
 
     private static final int MAX_PAGE = 100;
 
     private static final int ITEM_COUNT = 10;
 
     public UnivNoticeViewModel() {
-        if (mState.getValue() != null) {
-            fetchDataList(mState.getValue().offset);
-        }
+        fetchNextPage();
     }
 
     public void fetchNextPage() {
         if (mState.getValue() != null && mState.getValue().offset < MAX_PAGE) {
-            mState.postValue(new State(false, false, mState.getValue().offset, true, null));
+            mState.postValue(new State(false, Collections.emptyList(), mState.getValue().offset, true, null));
         }
     }
 
     public void refresh() {
         Executors.newSingleThreadExecutor().execute(() -> {
             mBbsItemArrayList.clear();
-            mState.postValue(new State(false, false, 0, true, null));
+            mState.postValue(new State(false, Collections.emptyList(), 0, true, null));
         });
     }
 
@@ -51,12 +49,17 @@ public class UnivNoticeViewModel extends ViewModel {
         String tag_string_req = "req_yu_news";
         StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.URL_YU_NOTICE.replace("{MODE}", "list") + "&articleLimit={LIMIT}&article.offset={OFFSET}".replace("{LIMIT}", String.valueOf(ITEM_COUNT)).replace("{OFFSET}", String.valueOf(offset)), this::onResponse, this::onErrorResponse);
 
-        mState.postValue(new State(true, false, offset, mState.getValue() != null && mState.getValue().hasRequestedMore, null));
+        mState.postValue(new State(true, Collections.emptyList(), offset, offset > 0, null));
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
+    }
+
+    public void addAll(List<BbsItem> bbsItems) {
+        mBbsItemArrayList.addAll(bbsItems);
     }
 
     private void onResponse(String response) {
         Source source = new Source(response);
+        List<BbsItem> itemList = new ArrayList<>();
 
         try {
             Element boardList = source.getFirstElementByClass("board-table");
@@ -73,24 +76,24 @@ public class UnivNoticeViewModel extends ViewModel {
                 bbsItem.setTitle(title);
                 bbsItem.setWriter(writer);
                 bbsItem.setDate(date);
-                mBbsItemArrayList.add(bbsItem);
+                itemList.add(bbsItem);
             }
             if (mState.getValue() != null) {
-                mState.postValue(new State(false, true, mState.getValue().offset + ITEM_COUNT, false, null));
+                mState.postValue(new State(false, itemList, mState.getValue().offset + ITEM_COUNT, false, null));
             }
         } catch (Exception e) {
-            mState.postValue(new State(false, false, 0, false, e.getMessage()));
+            mState.postValue(new State(false, Collections.emptyList(), 0, false, e.getMessage()));
         }
     }
 
     private void onErrorResponse(VolleyError error) {
-        mState.postValue(new State(false, false, 0, false, error.getMessage()));
+        mState.postValue(new State(false, Collections.emptyList(), 0, false, error.getMessage()));
     }
 
     public static final class State {
         public boolean isLoading;
 
-        public boolean isSuccess;
+        public List<BbsItem> bbsItems;
 
         public int offset;
 
@@ -98,9 +101,9 @@ public class UnivNoticeViewModel extends ViewModel {
 
         public String message;
 
-        public State(boolean isLoading, boolean isSuccess, int offset, boolean hasRequestedMore, String message) {
+        public State(boolean isLoading, List<BbsItem> bbsItems, int offset, boolean hasRequestedMore, String message) {
             this.isLoading = isLoading;
-            this.isSuccess = isSuccess;
+            this.bbsItems = bbsItems;
             this.offset = offset;
             this.hasRequestedMore = hasRequestedMore;
             this.message = message;
