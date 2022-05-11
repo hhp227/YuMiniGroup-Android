@@ -68,8 +68,9 @@ public class FindGroupActivity extends AppCompatActivity {
                 }
             } else if (state.hasRequestedMore) {
                 mViewModel.fetchGroupList(state.offset);
-            } else if (state.isSuccess) {
+            } else if (!state.groupItemKeys.isEmpty() && !state.groupItemValues.isEmpty()) {
                 hideProgressBar();
+                mViewModel.addAll(state.groupItemKeys, state.groupItemValues);
                 mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             } else if (state.message != null && !state.message.isEmpty()) {
                 hideProgressBar();

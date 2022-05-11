@@ -1,5 +1,6 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
+import android.util.Log;
 import android.webkit.CookieManager;
 
 import androidx.annotation.NonNull;
@@ -26,13 +27,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
 public class FindGroupViewModel extends ViewModel {
-    public final MutableLiveData<State> mState = new MutableLiveData<>(new State(false, false, 1, false, null));
+    public final MutableLiveData<State> mState = new MutableLiveData<>(new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, null));
 
     public final List<String> mGroupItemKeys = new ArrayList<>(Arrays.asList(""));
 
@@ -56,6 +58,8 @@ public class FindGroupViewModel extends ViewModel {
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.GROUP_LIST, response -> {
             Source source = new Source(response);
             List<Element> list = source.getAllElements("id", "accordion", false);
+            List<String> groupItemKeys = new ArrayList<>();
+            List<GroupItem> groupItemValues = new ArrayList<>();
 
             for (Element element : list) {
                 try {
@@ -88,16 +92,19 @@ public class FindGroupViewModel extends ViewModel {
                         groupItem.setInfo(info.toString().trim());
                         groupItem.setDescription(description);
                         groupItem.setJoinType(joinType.equals("가입방식: 자동 승인") ? "0" : "1");
-                        mGroupItemKeys.add(mGroupItemKeys.size() - 1, String.valueOf(id));
-                        mGroupItemValues.add(mGroupItemValues.size() - 1, groupItem);
+                        groupItemKeys.add(String.valueOf(id));
+                        groupItemValues.add(groupItem);
                     }
                 } catch (Exception e) {
-                    mState.postValue(new State(false, false, offset, false, e.getMessage()));
-                } finally {
-                    initFireBaseData();
+                    Log.e(FindGroupViewModel.class.getSimpleName(), e.getMessage());
                 }
             }
-        }, error -> mState.postValue(new State(false, false, offset, false, error.getMessage()))) {
+            if (!groupItemKeys.isEmpty() && !groupItemValues.isEmpty()) {
+                initFireBaseData(groupItemKeys, groupItemValues);
+            } else {
+                mState.postValue(new State(false, groupItemKeys, groupItemValues, offset, false, "데이터가 없습니다."));
+            }
+        }, error -> mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), offset, false, error.getMessage()))) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
@@ -146,7 +153,7 @@ public class FindGroupViewModel extends ViewModel {
 
     public void fetchNextPage() {
         if (mState.getValue() != null && !mStopRequestMore) {
-            mState.postValue(new State(false, false, mState.getValue().offset, true, null));
+            mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), mState.getValue().offset, true, null));
         }
     }
 
@@ -157,17 +164,23 @@ public class FindGroupViewModel extends ViewModel {
         mGroupItemValues.clear();
         mGroupItemKeys.add("");
         mGroupItemValues.add(null);
-        //mState.postValue(new State(false, true, 1, false, null));
-        Executors.newSingleThreadExecutor().execute(() -> mState.postValue(new State(false, false, 1, true, null)));
+        Executors.newSingleThreadExecutor().execute(() -> mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 1, true, null)));
     }
 
-    private void initFireBaseData() {
+    public void addAll(List<String> groupItemKeys, List<GroupItem> groupItemValues) {
+        if (groupItemKeys.size() == groupItemValues.size()) {
+            mGroupItemKeys.addAll(mGroupItemKeys.size() - 1, groupItemKeys);
+            mGroupItemValues.addAll(mGroupItemValues.size() - 1, groupItemValues);
+        }
+    }
+
+    private void initFireBaseData(List<String> groupItemKeys, List<GroupItem> groupItemValues) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Groups");
 
-        fetchGroupListFromFireBase(databaseReference.orderByKey());
+        fetchGroupListFromFireBase(databaseReference.orderByKey(), groupItemKeys, groupItemValues);
     }
 
-    private void fetchGroupListFromFireBase(Query query) {
+    private void fetchGroupListFromFireBase(Query query, List<String> groupItemKeys, List<GroupItem> groupItemValues) {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -176,22 +189,22 @@ public class FindGroupViewModel extends ViewModel {
                     GroupItem value = snapshot.getValue(GroupItem.class);
 
                     if (value != null) {
-                        int index = mGroupItemKeys.indexOf(value.getId());
+                        int index = groupItemKeys.indexOf(value.getId());
 
                         if (index > -1) {
-                            //mGroupItemValues.set(index, value); //getInfo 구현이 덜되어 주석처리
-                            mGroupItemKeys.set(index, key);
+                            groupItemKeys.set(index, key);
+                            //groupItemValues.set(index, value); //getInfo 구현이 덜되어 주석처리
                         }
                     }
                 }
                 if (mState.getValue() != null) {
-                    mState.postValue(new State(false, true, mState.getValue().offset + LIMIT, false, null));
+                    mState.postValue(new State(false, groupItemKeys, groupItemValues, mState.getValue().offset + LIMIT, false, null));
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                mState.postValue(new State(false, false, 0, false, databaseError.getMessage()));
+                mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 0, false, databaseError.getMessage()));
             }
         });
     }
@@ -203,7 +216,9 @@ public class FindGroupViewModel extends ViewModel {
     public static final class State {
         public boolean isLoading;
 
-        public boolean isSuccess;
+        public List<String> groupItemKeys;
+
+        public List<GroupItem> groupItemValues;
 
         public int offset;
 
@@ -211,9 +226,10 @@ public class FindGroupViewModel extends ViewModel {
 
         public String message;
 
-        public State(boolean isLoading, boolean isSuccess, int offset, boolean hasRequestedMore, String message) {
+        public State(boolean isLoading, List<String> groupItemKeys, List<GroupItem> groupItemValues, int offset, boolean hasRequestedMore, String message) {
             this.isLoading = isLoading;
-            this.isSuccess = isSuccess;
+            this.groupItemKeys = groupItemKeys;
+            this.groupItemValues = groupItemValues;
             this.offset = offset;
             this.hasRequestedMore = hasRequestedMore;
             this.message = message;
