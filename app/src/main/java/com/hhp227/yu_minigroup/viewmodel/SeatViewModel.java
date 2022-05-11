@@ -22,16 +22,16 @@ public class SeatViewModel extends ViewModel {
     public List<SeatItem> mSeatItemList = new ArrayList<>();
 
     public SeatViewModel() {
-        mState.postValue(new State(true, false, null));
-        fetchDataTask();
+        fetchDataTask(false);
     }
 
     public void refresh() {
         mSeatItemList.clear();
-        fetchDataTask();
+        fetchDataTask(true);
     }
 
-    private void fetchDataTask() {
+    private void fetchDataTask(boolean isRefresh) {
+        mState.postValue(new State(!isRefresh, false, null));
         AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.GET, EndPoint.URL_YU_LIBRARY_SEAT_ROOMS, null, response -> {
             try {
                 JSONArray jsonArray = response.getJSONArray("_Model_lg_clicker_reading_room_brief_list");
