@@ -49,14 +49,11 @@ public class FindGroupActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+        mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
+        mAdapter.setButtonType(GroupInfoFragment.TYPE_REQUEST);
         mBinding.recyclerView.setHasFixedSize(true);
         mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         mBinding.recyclerView.setAdapter(mAdapter);
-        mBinding.recyclerView.post(() -> {
-            mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
-            mAdapter.notifyDataSetChanged();
-            mAdapter.setButtonType(GroupInfoFragment.TYPE_REQUEST);
-        });
         mBinding.recyclerView.addOnScrollListener(mOnScrollListener);
         mBinding.srlList.setOnRefreshListener(() -> new Handler(getMainLooper()).postDelayed(() -> {
             mBinding.srlList.setRefreshing(false);
@@ -68,19 +65,18 @@ public class FindGroupActivity extends AppCompatActivity {
                     showProgressBar();
                 } else {
                     mAdapter.setFooterProgressBarVisibility(View.VISIBLE);
-                    mAdapter.notifyItemChanged(mAdapter.getItemCount() - 1);
                 }
             } else if (state.hasRequestedMore) {
                 mViewModel.fetchGroupList(state.offset);
             } else if (state.isSuccess) {
                 hideProgressBar();
                 mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
-                mAdapter.notifyItemRangeChanged(0, mAdapter.getItemCount());
-                mBinding.text.setText("가입신청중인 그룹이 없습니다.");
-                mBinding.rlGroup.setVisibility(mViewModel.mGroupItemValues.size() > 1 ? View.GONE : View.VISIBLE);
             } else if (state.message != null && !state.message.isEmpty()) {
-                Snackbar.make(mBinding.recyclerView, state.message, Snackbar.LENGTH_LONG).show();
                 hideProgressBar();
+                mAdapter.setFooterProgressBarVisibility(View.GONE);
+                Snackbar.make(mBinding.recyclerView, state.message, Snackbar.LENGTH_LONG).show();
+                mBinding.text.setText("가입신청중인 그룹이 없습니다.");
+                mBinding.rlGroup.setVisibility(mAdapter.getItemCount() > 1 ? View.GONE : View.VISIBLE);
             }
         });
     }

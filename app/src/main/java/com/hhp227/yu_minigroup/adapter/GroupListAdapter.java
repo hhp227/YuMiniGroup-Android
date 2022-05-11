@@ -2,6 +2,7 @@ package com.hhp227.yu_minigroup.adapter;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
@@ -71,6 +72,8 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public void setFooterProgressBarVisibility(int visibility) {
         this.mProgressBarVisibility = visibility;
+
+        notifyDataSetChanged();
     }
 
     public void setButtonType(int type) {
@@ -107,6 +110,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 args.putString("type", groupItem.getJoinType());
                 args.putInt("btn_type", mButtonType);
                 args.putString("key", mGroupItemKeys.get(getAdapterPosition()));
+                Log.e("TEST", "key: " + mGroupItemKeys.get(getAdapterPosition()));
 
                 GroupInfoFragment newFragment = GroupInfoFragment.newInstance();
                 newFragment.setArguments(args);
