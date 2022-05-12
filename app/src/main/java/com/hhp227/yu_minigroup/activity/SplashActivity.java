@@ -41,11 +41,9 @@ public class SplashActivity extends AppCompatActivity {
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
                 finish();
                 overridePendingTransition(R.anim.splash_in, R.anim.splash_out);
-            } else {
-                if (state.message != null) {
-                    Toast.makeText(getApplicationContext(), state.message, Toast.LENGTH_LONG).show();
-                    finish();
-                }
+            } else if (state.message != null && !state.message.isEmpty()) {
+                Toast.makeText(getApplicationContext(), state.message, Toast.LENGTH_LONG).show();
+                finish();
             }
         });
     }

@@ -1,5 +1,7 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
+import android.webkit.CookieManager;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -11,6 +13,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.User;
+import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import com.hhp227.yu_minigroup.volley.util.SSLConnect;
 
 import java.util.HashMap;
@@ -18,6 +21,10 @@ import java.util.Map;
 
 public class SplashViewModel extends ViewModel {
     public MutableLiveData<State> mState = new MutableLiveData<>(new State());
+
+    private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
+
+    private final PreferenceManager mPreferenceManager = AppController.getInstance().getPreferenceManager();
 
     public void loginLMS(String ssoToken, String lmsToken) {
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.LOGIN_LMS, response -> {
@@ -30,9 +37,11 @@ public class SplashViewModel extends ViewModel {
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                response.allHeaders.stream()
-                        .filter(header -> header.getName().equals("Set-Cookie") && header.getValue().contains("SESSION_IMAX"))
-                        .forEach(header -> loginSSOyuPortal(header.getValue()));
+                if (response.allHeaders != null) {
+                    response.allHeaders.stream()
+                            .filter(header -> header.getName().equals("Set-Cookie") && header.getValue().contains("SESSION_IMAX"))
+                            .forEach(header -> loginSSOyuPortal(header.getValue()));
+                }
                 return super.parseNetworkResponse(response);
             }
 
@@ -51,16 +60,18 @@ public class SplashViewModel extends ViewModel {
         String tagStringReq = "req_login_SSO";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.YU_PORTAL_LOGIN_URL, response -> {
             VolleyLog.d(SplashViewModel.class.getSimpleName(), "로그인 응답 : " + response);
-            AppController.getInstance().getCookieManager().setCookie(EndPoint.LOGIN_LMS, cookie);
+            mCookieManager.setCookie(EndPoint.LOGIN_LMS, cookie);
         }, error -> {
             VolleyLog.e(SplashViewModel.class.getSimpleName(), "로그인 에러 : " + error.getMessage());
             mState.postValue(new State(false, error.getMessage()));
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                response.allHeaders.stream()
-                        .filter(header -> header.getName().equals("Set-Cookie") && header.getValue().contains("ssotoken"))
-                        .forEach(header -> loginLMS(header.getValue(), cookie));
+                if (response.allHeaders != null) {
+                    response.allHeaders.stream()
+                            .filter(header -> header.getName().equals("Set-Cookie") && header.getValue().contains("ssotoken"))
+                            .forEach(header -> loginLMS(header.getValue(), cookie));
+                }
                 return super.parseNetworkResponse(response);
             }
 
@@ -74,7 +85,7 @@ public class SplashViewModel extends ViewModel {
 
             @Override
             protected Map<String, String> getParams() {
-                User user = AppController.getInstance().getPreferenceManager().getUser();
+                User user = mPreferenceManager.getUser();
                 String id = user.getUserId();
                 String password = user.getPassword();
                 Map<String, String> params = new HashMap<>();
@@ -91,6 +102,10 @@ public class SplashViewModel extends ViewModel {
 
         new SSLConnect().postHttps(EndPoint.YU_PORTAL_LOGIN_URL, 1000, 1000);
         AppController.getInstance().addToRequestQueue(stringRequest, tagStringReq);
+    }
+
+    public void clearUser() {
+
     }
 
     public static final class State {

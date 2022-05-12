@@ -314,7 +314,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 Toast.makeText(getApplicationContext(), "클립보드에 복사되었습니다!", Toast.LENGTH_SHORT).show();
                 return true;
             case 2:
-                Intent intent = new Intent(getBaseContext(), UpdateCommentActivity.class);
+                Intent intent = new Intent(getBaseContext(), UpdateReplyActivity.class);
                 String reply = replyItem.getReply();
 
                 intent.putExtra("grp_id", mGroupId);
