@@ -196,11 +196,12 @@ public class RequestViewModel extends ViewModel {
                                 //groupItemValues.set(index, value); //isAdmin값때문에 주석처리
                             }
                         }
+                    } catch (Exception e) {
+                        mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 0, false, e.getMessage()));
+                    } finally {
                         if (mState.getValue() != null && mState.getValue().groupItemKeys.size() != groupItemKeys.size() && mState.getValue().groupItemValues.size() != groupItemValues.size()) {
                             mState.postValue(new State(false, groupItemKeys, groupItemValues, mState.getValue().offset + LIMIT, false, null));
                         }
-                    } catch (Exception e) {
-                        mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 0, false, e.getMessage()));
                     }
                 } else {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {

@@ -139,21 +139,23 @@ public class GroupMainViewModel extends ViewModel {
     }
 
     private void insertAdvertisement() {
-        if (!mGroupItemValues.isEmpty()) {
-            Map<String, String> headerMap = new HashMap<>();
+        Map<String, String> headerMap = new HashMap<>();
 
+        if (!mGroupItemValues.isEmpty()) {
             headerMap.put("text", "가입중인 그룹");
             mGroupItemKeys.add(0, "가입중인 그룹");
             mGroupItemValues.add(0, headerMap);
-            if (mGroupItemValues.size() % 2 == 0)
+            if (mGroupItemValues.size() % 2 == 0) {
+                mGroupItemKeys.add("광고");
                 mGroupItemValues.add("광고");
+            }
         } else {
+            mGroupItemKeys.add("없음");
             mGroupItemValues.add("없음");
-            Map<String, String> headerMap = new HashMap<>();
-
             headerMap.put("text", "인기 모임");
             mGroupItemKeys.add("인기 모임");
             mGroupItemValues.add(headerMap);
+            mGroupItemKeys.add("뷰페이져");
             mGroupItemValues.add("뷰페이져");
         }
     }
