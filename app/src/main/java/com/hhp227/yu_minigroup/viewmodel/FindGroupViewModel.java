@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 public class FindGroupViewModel extends ViewModel {
-    public final MutableLiveData<State> mState = new MutableLiveData<>(new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, null));
+    public final MutableLiveData<State> mState = new MutableLiveData<>(new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, null));
 
     public final List<String> mGroupItemKeys = new ArrayList<>(Arrays.asList(""));
 
@@ -53,6 +53,7 @@ public class FindGroupViewModel extends ViewModel {
     }
 
     public void fetchGroupList(int offset) {
+        mState.postValue(new State(true, Collections.emptyList(), Collections.emptyList(), offset, offset > 1, false, null));
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.GROUP_LIST, response -> {
             Source source = new Source(response);
             List<Element> list = source.getAllElements("id", "accordion", false);
@@ -97,12 +98,8 @@ public class FindGroupViewModel extends ViewModel {
                     Log.e(FindGroupViewModel.class.getSimpleName(), e.getMessage());
                 }
             }
-            if (!groupItemKeys.isEmpty() && !groupItemValues.isEmpty()) {
-                initFireBaseData(groupItemKeys, groupItemValues);
-            } else {
-                mState.postValue(new State(false, groupItemKeys, groupItemValues, offset, false, "데이터가 없습니다."));
-            }
-        }, error -> mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), offset, false, error.getMessage()))) {
+            initFireBaseData(groupItemKeys, groupItemValues);
+        }, error -> mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), offset, false, false, error.getMessage()))) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
@@ -151,7 +148,7 @@ public class FindGroupViewModel extends ViewModel {
 
     public void fetchNextPage() {
         if (mState.getValue() != null && !mStopRequestMore) {
-            mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), mState.getValue().offset, true, null));
+            mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), mState.getValue().offset, true, false, null));
         }
     }
 
@@ -162,7 +159,7 @@ public class FindGroupViewModel extends ViewModel {
         mGroupItemValues.clear();
         mGroupItemKeys.add("");
         mGroupItemValues.add(null);
-        Executors.newSingleThreadExecutor().execute(() -> mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 1, true, null)));
+        Executors.newSingleThreadExecutor().execute(() -> mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 1, true, false, null)));
     }
 
     public void addAll(List<String> groupItemKeys, List<GroupItem> groupItemValues) {
@@ -196,13 +193,13 @@ public class FindGroupViewModel extends ViewModel {
                     }
                 }
                 if (mState.getValue() != null) {
-                    mState.postValue(new State(false, groupItemKeys, groupItemValues, mState.getValue().offset + LIMIT, false, null));
+                    mState.postValue(new State(false, groupItemKeys, groupItemValues, mState.getValue().offset + LIMIT, false, groupItemKeys.isEmpty() && groupItemValues.isEmpty(), null));
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 0, false, databaseError.getMessage()));
+                mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, databaseError.getMessage()));
             }
         });
     }
@@ -222,14 +219,17 @@ public class FindGroupViewModel extends ViewModel {
 
         public boolean hasRequestedMore;
 
+        public boolean isEndReached;
+
         public String message;
 
-        public State(boolean isLoading, List<String> groupItemKeys, List<GroupItem> groupItemValues, int offset, boolean hasRequestedMore, String message) {
+        public State(boolean isLoading, List<String> groupItemKeys, List<GroupItem> groupItemValues, int offset, boolean hasRequestedMore, boolean isEndReached, String message) {
             this.isLoading = isLoading;
             this.groupItemKeys = groupItemKeys;
             this.groupItemValues = groupItemValues;
             this.offset = offset;
             this.hasRequestedMore = hasRequestedMore;
+            this.isEndReached = isEndReached;
             this.message = message;
         }
     }

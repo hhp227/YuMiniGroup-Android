@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 public class RequestViewModel extends ViewModel {
-    public final MutableLiveData<State> mState = new MutableLiveData<>(new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, null));
+    public final MutableLiveData<State> mState = new MutableLiveData<>(new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, null));
 
     public List<String> mGroupItemKeys = new ArrayList<>(Arrays.asList(""));
 
@@ -98,12 +98,8 @@ public class RequestViewModel extends ViewModel {
                     Log.e(RequestViewModel.class.getSimpleName(), e.getMessage());
                 }
             }
-            if (!groupItemKeys.isEmpty() && !groupItemValues.isEmpty()) {
-                initFirebaseData(groupItemKeys, groupItemValues);
-            } else {
-                mState.postValue(new State(false, groupItemKeys, groupItemValues, offset, false, "데이터가 없습니다."));
-            }
-        }, error -> mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), offset, false, error.getMessage()))) {
+            initFirebaseData(groupItemKeys, groupItemValues);
+        }, error -> mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), offset, false, false, error.getMessage()))) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
@@ -152,7 +148,7 @@ public class RequestViewModel extends ViewModel {
 
     public void fetchNextPage() {
         if (mState.getValue() != null && !mStopRequestMore) {
-            mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), mState.getValue().offset, true, null));
+            mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), mState.getValue().offset, true, false, null));
         }
     }
 
@@ -163,7 +159,7 @@ public class RequestViewModel extends ViewModel {
         mGroupItemValues.clear();
         mGroupItemKeys.add("");
         mGroupItemValues.add(null);
-        Executors.newSingleThreadExecutor().execute(() -> mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 1, true, null)));
+        Executors.newSingleThreadExecutor().execute(() -> mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 1, true, false, null)));
     }
 
     public void addAll(List<String> groupItemKeys, List<GroupItem> groupItemValues) {
@@ -197,27 +193,31 @@ public class RequestViewModel extends ViewModel {
                             }
                         }
                     } catch (Exception e) {
-                        mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 0, false, e.getMessage()));
+                        mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, e.getMessage()));
                     } finally {
                         if (mState.getValue() != null && mState.getValue().groupItemKeys.size() != groupItemKeys.size() && mState.getValue().groupItemValues.size() != groupItemValues.size()) {
-                            mState.postValue(new State(false, groupItemKeys, groupItemValues, mState.getValue().offset + LIMIT, false, null));
+                            mState.postValue(new State(false, groupItemKeys, groupItemValues, mState.getValue().offset + LIMIT, false, groupItemKeys.isEmpty() && groupItemValues.isEmpty(), null));
                         }
                     }
                 } else {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Groups");
-                        String key = snapshot.getKey();
+                    if (dataSnapshot.hasChildren()) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Groups");
+                            String key = snapshot.getKey();
 
-                        if (key != null) {
-                            fetchDataTaskFromFirebase(databaseReference.child(key), true, groupItemKeys, groupItemValues);
+                            if (key != null) {
+                                fetchDataTaskFromFirebase(databaseReference.child(key), true, groupItemKeys, groupItemValues);
+                            }
                         }
+                    } else {
+                        mState.postValue(new State(false, groupItemKeys, groupItemValues, 1, false, groupItemKeys.isEmpty() && groupItemValues.isEmpty(), null));
                     }
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 0, false, databaseError.getMessage()));
+                mState.postValue(new State(false, Collections.emptyList(), Collections.emptyList(), 0, false, false, databaseError.getMessage()));
             }
         });
     }
@@ -238,14 +238,17 @@ public class RequestViewModel extends ViewModel {
 
         public boolean hasRequestedMore;
 
+        public boolean isEndReached;
+
         public String message;
 
-        public State(boolean isLoading, List<String> groupItemKeys, List<GroupItem> groupItemValues, int offset, boolean hasRequestedMore, String message) {
+        public State(boolean isLoading, List<String> groupItemKeys, List<GroupItem> groupItemValues, int offset, boolean hasRequestedMore, boolean isEndReached, String message) {
             this.isLoading = isLoading;
             this.groupItemKeys = groupItemKeys;
             this.groupItemValues = groupItemValues;
             this.offset = offset;
             this.hasRequestedMore = hasRequestedMore;
+            this.isEndReached = isEndReached;
             this.message = message;
         }
     }

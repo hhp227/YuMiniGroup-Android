@@ -72,12 +72,15 @@ public class FindGroupActivity extends AppCompatActivity {
                 hideProgressBar();
                 mViewModel.addAll(state.groupItemKeys, state.groupItemValues);
                 mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
+            } else if (state.isEndReached) {
+                hideProgressBar();
+                mAdapter.setFooterProgressBarVisibility(View.GONE);
+                mBinding.text.setText("가입신청중인 그룹이 없습니다.");
+                mBinding.rlGroup.setVisibility(mAdapter.getItemCount() > 1 ? View.GONE : View.VISIBLE);
             } else if (state.message != null && !state.message.isEmpty()) {
                 hideProgressBar();
                 mAdapter.setFooterProgressBarVisibility(View.GONE);
                 Snackbar.make(mBinding.recyclerView, state.message, Snackbar.LENGTH_LONG).show();
-                mBinding.text.setText("가입신청중인 그룹이 없습니다.");
-                mBinding.rlGroup.setVisibility(mAdapter.getItemCount() > 1 ? View.GONE : View.VISIBLE);
             }
         });
     }
