@@ -26,7 +26,6 @@ import net.htmlparser.jericho.Source;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,9 +35,9 @@ import java.util.concurrent.Executors;
 public class RequestViewModel extends ViewModel {
     public final MutableLiveData<State> mState = new MutableLiveData<>(new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, null));
 
-    public List<String> mGroupItemKeys = new ArrayList<>(Arrays.asList(""));
+    public List<String> mGroupItemKeys = new ArrayList<>(Collections.singletonList(""));
 
-    public List<GroupItem> mGroupItemValues = new ArrayList<>(Arrays.asList((GroupItem) null));
+    public List<GroupItem> mGroupItemValues = new ArrayList<>(Collections.singletonList((GroupItem) null));
 
     private static final int LIMIT = 100;
 

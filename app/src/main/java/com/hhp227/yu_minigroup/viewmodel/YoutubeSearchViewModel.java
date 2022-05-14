@@ -14,7 +14,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 public class YoutubeSearchViewModel extends ViewModel {
     public static final String API_KEY = "AIzaSyCHF6p97aduruLMxgCuEVfFaKUiGPcMuOQ";
@@ -23,30 +26,36 @@ public class YoutubeSearchViewModel extends ViewModel {
 
     public final List<YouTubeItem> mYouTubeItemList = new ArrayList<>();
 
+    public final MutableLiveData<String> mQuery = new MutableLiveData<>();
+
     private static final int LIMIT = 50;
 
-    private String mQuery = "";
-
     public YoutubeSearchViewModel() {
-        mState.postValue(new State(true, false, null));
-        fetchDataTask(mQuery);
+        setQuery("");
     }
 
     public void setQuery(String query) {
-        this.mQuery = query;
-
-        mState.postValue(new State(true, false, null));
-        refresh();
+        mQuery.postValue(query);
     }
 
     public void refresh() {
+        setQuery(mQuery.getValue());
+    }
+
+    public void requestData(String query) {
         mYouTubeItemList.clear();
-        fetchDataTask(mQuery);
+        Executors.newSingleThreadExecutor().execute(() -> fetchDataTask(query));
+    }
+
+    public void addAll(List<YouTubeItem> youTubeItems) {
+        mYouTubeItemList.addAll(youTubeItems);
     }
 
     private void fetchDataTask(String query) {
+        mState.postValue(new State(true, Collections.emptyList(), null));
         AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.GET, EndPoint.URL_YOUTUBE_API + "?part=snippet&key=" + API_KEY + "&q=" + query + "&maxResults=" + LIMIT, null, response -> {
             try {
+                List<YouTubeItem> youTubeItems = new ArrayList<>();
                 JSONArray items = response.getJSONArray("items");
 
                 for (int i = 0; i < items.length(); i++) {
@@ -59,25 +68,25 @@ public class YoutubeSearchViewModel extends ViewModel {
                     String channelTitle = snippet.getString("channelTitle");
                     YouTubeItem youTubeItem = new YouTubeItem(id, publishedAt, title, thumbnail, channelTitle);
 
-                    mYouTubeItemList.add(youTubeItem);
+                    youTubeItems.add(youTubeItem);
                 }
-                mState.postValue(new State(false, true, null));
+                mState.postValue(new State(false, youTubeItems, null));
             } catch (JSONException e) {
-                mState.postValue(new State(false, false, e.getMessage()));
+                mState.postValue(new State(false, Collections.emptyList(), e.getMessage()));
             }
-        }, error -> mState.postValue(new State(false, false, error.getMessage()))));
+        }, error -> mState.postValue(new State(false, Collections.emptyList(), error.getMessage()))));
     }
 
     public static final class State {
         public boolean isLoading;
 
-        public boolean isSuccess;
+        public List<YouTubeItem> youTubeItems;
 
         public String message;
 
-        public State(boolean isLoading, boolean isSuccess, String message) {
+        public State(boolean isLoading, List<YouTubeItem> youTubeItems, String message) {
             this.isLoading = isLoading;
-            this.isSuccess = isSuccess;
+            this.youTubeItems = youTubeItems;
             this.message = message;
         }
     }
