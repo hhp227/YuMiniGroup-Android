@@ -17,6 +17,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,6 +39,7 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.FragmentTab1Binding;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
+import com.hhp227.yu_minigroup.viewmodel.Tab1ViewModel;
 
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
@@ -73,8 +75,7 @@ public class Tab1Fragment extends Fragment {
 
     private ActivityResultLauncher<Intent> mArticleActivityResultLauncher;
 
-    public Tab1Fragment() {
-    }
+    private Tab1ViewModel mViewModel;
 
     public static Tab1Fragment newInstance(boolean isAdmin, String grpId, String grpNm, String grpImg, String key) {
         Tab1Fragment fragment = new Tab1Fragment();
@@ -110,6 +111,7 @@ public class Tab1Fragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mViewModel = new ViewModelProvider(this).get(Tab1ViewModel.class);
         mArticleItemKeys = new ArrayList<>();
         mArticleItemValues = new ArrayList<>();
         mAdapter = new ArticleListAdapter(mArticleItemKeys, mArticleItemValues, mKey);
