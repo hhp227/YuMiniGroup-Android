@@ -76,13 +76,10 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         return mArticleItemValues.get(position) != null ? TYPE_ARTICLE : TYPE_LOADER;
     }
 
-    public void addFooterView() {
-        mArticleItemKeys.add("");
-        mArticleItemValues.add(null);
-    }
-
     public void setFooterProgressBarVisibility(int visibility) {
         this.mProgressBarVisibility = visibility;
+
+        notifyDataSetChanged();
     }
 
     public void setOnItemClickListener(BiConsumer<View, Integer> onItemClickListener) {
