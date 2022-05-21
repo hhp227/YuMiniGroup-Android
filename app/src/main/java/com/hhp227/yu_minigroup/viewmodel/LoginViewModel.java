@@ -32,7 +32,9 @@ import java.util.List;
 import java.util.Map;
 
 public class LoginViewModel extends ViewModel {
-    public MutableLiveData<State> mState = new MutableLiveData<>();
+    public final MutableLiveData<State> mState = new MutableLiveData<>();
+
+    public final MutableLiveData<LoginFormState> mLoginFormState = new MutableLiveData<>();
 
     private static final String TAG = "로그인화면";
 
@@ -42,14 +44,14 @@ public class LoginViewModel extends ViewModel {
 
     public void login(String id, String password) {
         if (!id.isEmpty() && !password.isEmpty()) {
-            mState.postValue(new State(true, null, null, null));
+            mState.postValue(new State(true, null, null));
             if (id.equals("22000000") && password.equals("TestUser")) {
                 firebaseLogin(id, password);
             } else {
                 loginLMS(id, password, null, null);
             }
         } else {
-            mState.postValue(new State(false, null, new LoginFormState(id.isEmpty() ? "아이디 또는 학번을 입력하세요." : null, password.isEmpty() ? "패스워드를 입력하세요." : null), null));
+            mLoginFormState.postValue(new LoginFormState(id.isEmpty() ? "아이디 또는 학번을 입력하세요." : null, password.isEmpty() ? "패스워드를 입력하세요." : null));
         }
     }
 
@@ -67,11 +69,11 @@ public class LoginViewModel extends ViewModel {
             if (ssoToken != null) {
                 getUserInfo(id, password);
             } else {
-                mState.postValue(new State(false, null, null, "ssoToken is null"));
+                mState.postValue(new State(false, null, "ssoToken is null"));
             }
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
-            mState.postValue(new State(false, null, null, "로그인 실패"));
+            mState.postValue(new State(false, null, "로그인 실패"));
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
@@ -104,7 +106,7 @@ public class LoginViewModel extends ViewModel {
             mCookieManager.setCookie(EndPoint.LOGIN_LMS, cookie);
         }, error -> {
             VolleyLog.e(TAG, "로그인 에러 : " + error.getMessage());
-            mState.postValue(new State(false, null, null, error.getMessage()));
+            mState.postValue(new State(false, null, error.getMessage()));
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
@@ -159,11 +161,11 @@ public class LoginViewModel extends ViewModel {
                 createLog(user);
                 getUserUniqueId(user);
             } catch (Exception e) {
-                mState.postValue(new State(false, null, null, e.getMessage()));
+                mState.postValue(new State(false, null, e.getMessage()));
             }
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
-            mState.postValue(new State(false, null, null, error.getMessage()));
+            mState.postValue(new State(false, null, error.getMessage()));
         }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -209,10 +211,10 @@ public class LoginViewModel extends ViewModel {
             String uid = imageUrl.substring(imageUrl.indexOf("id=") + "id=".length(), imageUrl.lastIndexOf("&size"));
 
             user.setUid(uid);
-            mState.postValue(new State(false, user, null, null));
+            mState.postValue(new State(false, user, null));
         }, error -> {
             VolleyLog.e(error.getMessage());
-            mState.postValue(new State(false, null, null, error.getMessage()));
+            mState.postValue(new State(false, null, error.getMessage()));
         }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -241,9 +243,9 @@ public class LoginViewModel extends ViewModel {
                 user.setPhoneNumber("01000000000");
                 user.setEmail(email);
                 mCookieManager.setCookie(EndPoint.LOGIN_LMS, firebaseUser.getUid());
-                mState.postValue(new State(false, user, null, null));
+                mState.postValue(new State(false, user, null));
             }
-        }).addOnFailureListener(e -> mState.postValue(new State(false, null, null, "Firebase error" + e.getMessage())));
+        }).addOnFailureListener(e -> mState.postValue(new State(false, null, "Firebase error" + e.getMessage())));
     }
 
     private void firebaseRegister(String id, String password) {
@@ -264,9 +266,9 @@ public class LoginViewModel extends ViewModel {
                 user.setNumber("22000000");
                 user.setPhoneNumber("01000000000");
                 user.setEmail(email);
-                mState.postValue(new State(false, user, null, null));
+                mState.postValue(new State(false, user, null));
             }
-        }).addOnFailureListener(e -> mState.postValue(new State(false, null, null, "Firebase error" + e.getMessage())));
+        }).addOnFailureListener(e -> mState.postValue(new State(false, null, "Firebase error" + e.getMessage())));
     }
 
     public static final class State {
@@ -274,14 +276,11 @@ public class LoginViewModel extends ViewModel {
 
         public User user;
 
-        public LoginFormState loginFormState;
-
         public String message;
 
-        public State(boolean isLoading, User user, LoginFormState loginFormState, String message) {
+        public State(boolean isLoading, User user, String message) {
             this.isLoading = isLoading;
             this.user = user;
-            this.loginFormState = loginFormState;
             this.message = message;
         }
     }

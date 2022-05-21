@@ -31,6 +31,8 @@ import java.util.UUID;
 public class CreateGroupViewModel extends ViewModel {
     public final MutableLiveData<State> mState = new MutableLiveData<>();
 
+    public final MutableLiveData<CreateGroupFormState> mCreateGroupFormState = new MutableLiveData<>();
+
     public final MutableLiveData<Bitmap> mBitmap = new MutableLiveData<>();
 
     private final PreferenceManager mPreferenceManager = AppController.getInstance().getPreferenceManager();
@@ -49,7 +51,7 @@ public class CreateGroupViewModel extends ViewModel {
 
     public void createGroup(String title, String description) {
         if (!title.isEmpty() && !description.isEmpty()) {
-            mState.postValue(new State(true, null, null, null));
+            mState.postValue(new State(true, null, null));
             AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.POST, EndPoint.CREATE_GROUP, null, response -> {
                 try {
                     if (!response.getBoolean("isError")) {
@@ -64,9 +66,9 @@ public class CreateGroupViewModel extends ViewModel {
                         }
                     }
                 } catch (JSONException e) {
-                    mState.postValue(new State(false, null, null, e.getMessage()));
+                    mState.postValue(new State(false, null, e.getMessage()));
                 }
-            }, error -> mState.postValue(new State(false, null, null, error.getMessage()))) {
+            }, error -> mState.postValue(new State(false, null, error.getMessage()))) {
                 @Override
                 public Map<String, String> getHeaders() {
                     Map<String, String> headers = new HashMap<>();
@@ -110,12 +112,12 @@ public class CreateGroupViewModel extends ViewModel {
                 }
             });
         } else {
-            mState.postValue(new State(false, null, new CreateGroupFormState(title.isEmpty() ? "그룹명을 입력하세요." : null, description.isEmpty() ? "그룹설명을 입력하세요." : null), null));
+            mCreateGroupFormState.postValue(new CreateGroupFormState(title.isEmpty() ? "그룹명을 입력하세요." : null, description.isEmpty() ? "그룹설명을 입력하세요." : null));
         }
     }
 
     private void groupImageUpdate(final String clubGrpId, final String grpNm, final String txt, final Bitmap bitmap) {
-        AppController.getInstance().addToRequestQueue(new MultipartRequest(Request.Method.POST, EndPoint.GROUP_IMAGE_UPDATE, response -> insertGroupToFirebase(clubGrpId, grpNm, txt, bitmap), error -> mState.postValue(new State(false, null, null, error.getMessage()))) {
+        AppController.getInstance().addToRequestQueue(new MultipartRequest(Request.Method.POST, EndPoint.GROUP_IMAGE_UPDATE, response -> insertGroupToFirebase(clubGrpId, grpNm, txt, bitmap), error -> mState.postValue(new State(false, null, error.getMessage()))) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
@@ -172,7 +174,7 @@ public class CreateGroupViewModel extends ViewModel {
         childUpdates.put("Groups/" + key, groupItem);
         childUpdates.put("UserGroupList/" + mPreferenceManager.getUser().getUid() + "/" + key, true);
         databaseReference.updateChildren(childUpdates);
-        mState.postValue(new State(false, new AbstractMap.SimpleEntry<>(key, groupItem), null, null));
+        mState.postValue(new State(false, new AbstractMap.SimpleEntry<>(key, groupItem), null));
     }
 
     public static final class State {
@@ -180,14 +182,11 @@ public class CreateGroupViewModel extends ViewModel {
 
         public Map.Entry<String, GroupItem> groupItemEntry;
 
-        public CreateGroupFormState createGroupFormState;
-
         public String message;
 
-        public State(boolean isLoading, Map.Entry<String, GroupItem> groupItemEntry, CreateGroupFormState createGroupFormState, String message) {
+        public State(boolean isLoading, Map.Entry<String, GroupItem> groupItemEntry, String message) {
             this.isLoading = isLoading;
             this.groupItemEntry = groupItemEntry;
-            this.createGroupFormState = createGroupFormState;
             this.message = message;
         }
     }

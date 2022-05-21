@@ -16,6 +16,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -80,10 +81,11 @@ public class CreateGroupActivity extends AppCompatActivity {
             } else if (state.message != null && !state.message.isEmpty()) {
                 hideProgressLayout();
                 Snackbar.make(getCurrentFocus(), state.message, Snackbar.LENGTH_LONG).show();
-            } else if (state.createGroupFormState != null) {
-                mBinding.etTitle.setError(state.createGroupFormState.titleError);
-                mBinding.etDescription.setError(state.createGroupFormState.descriptionError);
             }
+        });
+        mViewModel.mCreateGroupFormState.observe(this, createGroupFormState -> {
+            mBinding.etTitle.setError(createGroupFormState.titleError);
+            mBinding.etDescription.setError(createGroupFormState.descriptionError);
         });
         mViewModel.mBitmap.observe(this, bitmap -> {
             if (bitmap != null) {

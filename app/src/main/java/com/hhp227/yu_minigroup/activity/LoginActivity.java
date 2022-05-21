@@ -50,13 +50,14 @@ public class LoginActivity extends AppCompatActivity {
                 hideProgressBar();
                 startActivity(intent);
                 finish();
-            } else if (!TextUtils.isEmpty(state.message)) {
+            } else if (state.message != null && !TextUtils.isEmpty(state.message)) {
                 hideProgressBar();
                 Snackbar.make(getCurrentFocus(), state.message, Snackbar.LENGTH_LONG).setAction("Action", null).show();
-            } else {
-                mBinding.etId.setError(state.loginFormState.emailError);
-                mBinding.etPassword.setError(state.loginFormState.passwordError);
             }
+        });
+        mViewModel.mLoginFormState.observe(this, loginFormState -> {
+            mBinding.etId.setError(loginFormState.emailError);
+            mBinding.etPassword.setError(loginFormState.passwordError);
         });
     }
 
