@@ -49,6 +49,8 @@ public class Tab1ViewModel extends ViewModel {
 
     private static final int LIMIT = 10;
 
+    private static final String STATE = "state";
+
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
     private final PreferenceManager mPreferenceManager = AppController.getInstance().getPreferenceManager();
@@ -67,12 +69,12 @@ public class Tab1ViewModel extends ViewModel {
         mGroupImage = savedStateHandle.get("grp_img");
         mKey = savedStateHandle.get("key");
 
-        mSavedStateHandle.set("state", new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, null));
+        mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, null));
         fetchNextPage();
     }
 
     public LiveData<State> getState() {
-        return mSavedStateHandle.getLiveData("state");
+        return mSavedStateHandle.getLiveData(STATE);
     }
 
     public User getUser() {
@@ -139,7 +141,7 @@ public class Tab1ViewModel extends ViewModel {
             }
         }, error -> {
             VolleyLog.e(error.getMessage());
-            mSavedStateHandle.set("state", new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, error.getMessage()));
+            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, error.getMessage()));
         }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -150,15 +152,15 @@ public class Tab1ViewModel extends ViewModel {
             }
         };
 
-        mSavedStateHandle.set("state", new State(true, Collections.emptyList(), Collections.emptyList(), offset, offset > 1, false, null));
+        mSavedStateHandle.set(STATE, new State(true, Collections.emptyList(), Collections.emptyList(), offset, offset > 1, false, null));
         AppController.getInstance().addToRequestQueue(stringRequest);
     }
 
     public void fetchNextPage() {
-        State state = mSavedStateHandle.get("state");
+        State state = mSavedStateHandle.get(STATE);
 
         if (state != null && !mStopRequestMore) {
-            mSavedStateHandle.set("state", new State(false, Collections.emptyList(), Collections.emptyList(), state.offset, true, false, null));
+            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), Collections.emptyList(), state.offset, true, false, null));
         }
     }
 
@@ -169,7 +171,7 @@ public class Tab1ViewModel extends ViewModel {
         mArticleItemValues.clear();
         mArticleItemKeys.add("");
         mArticleItemValues.add(null);
-        mSavedStateHandle.set("state", new State(false, Collections.emptyList(), Collections.emptyList(), 1, true, false, null));
+        mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), Collections.emptyList(), 1, true, false, null));
     }
 
     public void addAll(List<String> articleItemKeys, List<ArticleItem> articleItemValues) {
@@ -205,14 +207,14 @@ public class Tab1ViewModel extends ViewModel {
                         }
                     }
                 }
-                if (mSavedStateHandle.get("state") != null) {
-                    mSavedStateHandle.set("state", new State(false, articleItemKeys, articleItemValues, ((State) mSavedStateHandle.get("state")).offset + LIMIT, false, articleItemKeys.isEmpty() && articleItemValues.isEmpty(), null));
+                if (mSavedStateHandle.get(STATE) != null) {
+                    mSavedStateHandle.set(STATE, new State(false, articleItemKeys, articleItemValues, ((State) mSavedStateHandle.get(STATE)).offset + LIMIT, false, articleItemKeys.isEmpty() && articleItemValues.isEmpty(), null));
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                mSavedStateHandle.set("state", new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, databaseError.getMessage()));
+                mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, databaseError.getMessage()));
                 Log.e("파이어베이스", databaseError.getMessage());
             }
         });
