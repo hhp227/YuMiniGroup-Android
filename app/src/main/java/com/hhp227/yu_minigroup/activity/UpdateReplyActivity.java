@@ -62,7 +62,7 @@ public class UpdateReplyActivity extends AppCompatActivity {
                 return 1;
             }
         });
-        mViewModel.mState.observe(this, state -> {
+        mViewModel.getState().observe(this, state -> {
             if (state.isLoading) {
                 showProgressBar();
             } else if (state.text != null && !state.text.isEmpty()) {
@@ -80,13 +80,12 @@ public class UpdateReplyActivity extends AppCompatActivity {
                 intent.putExtra("update_reply", state.text);
                 setResult(RESULT_OK, intent);
                 finish();
-            } else if (state.replyFormState != null) {
-                Snackbar.make(getCurrentFocus(), state.replyFormState.replyError, Snackbar.LENGTH_LONG).show();
             } else if (state.message != null && !state.message.isEmpty()) {
                 hideProgressBar();
                 Snackbar.make(getCurrentFocus(), state.message, Snackbar.LENGTH_LONG).show();
             }
         });
+        mViewModel.getReplyFormState().observe(this, replyFormState -> Snackbar.make(getCurrentFocus(), replyFormState.replyError, Snackbar.LENGTH_LONG).show());
     }
 
     @Override

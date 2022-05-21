@@ -1,10 +1,12 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
@@ -24,15 +26,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UpdateReplyViewModel extends ViewModel {
-    public final MutableLiveData<State> mState = new MutableLiveData<>();
-
-    private static final String TAG = UpdateReplyViewModel.class.getSimpleName();
+    private static final String TAG = UpdateReplyViewModel.class.getSimpleName(), STATE = "state", REPLY_FORM_STATE = "replyFormState";
 
     private final String mGroupId, mArticleId, mReplyId, mArticleKey, mReplyKey;
+
+    private final SavedStateHandle mSavedStateHandle;
 
     private String mReply;
 
     public UpdateReplyViewModel(SavedStateHandle savedStateHandle) {
+        mSavedStateHandle = savedStateHandle;
         mGroupId = savedStateHandle.get("grp_id");
         mArticleId = savedStateHandle.get("artl_num");
         mReplyId = savedStateHandle.get("cmmt_num");
@@ -49,18 +52,26 @@ public class UpdateReplyViewModel extends ViewModel {
         return mReply;
     }
 
+    public LiveData<State> getState() {
+        return mSavedStateHandle.getLiveData(STATE);
+    }
+
+    public LiveData<ReplyFormState> getReplyFormState() {
+        return mSavedStateHandle.getLiveData(REPLY_FORM_STATE);
+    }
+
     public void actionSend(String text) {
         if (!TextUtils.isEmpty(text)) {
             String tag_string_req = "req_send";
             StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.MODIFY_REPLY, response -> {
                 try {
-                    mState.postValue(new State(false, response, null, null));
+                    mSavedStateHandle.set(STATE, new State(false, response, null));
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
                 } finally {
                     initFirebaseData(text);
                 }
-            }, error -> mState.postValue(new State(false, null, null, error.getMessage()))) {
+            }, error -> mSavedStateHandle.set(STATE, new State(false, null, error.getMessage()))) {
                 @Override
                 public Map<String, String> getHeaders() {
                     Map<String, String> headers = new HashMap<>();
@@ -81,10 +92,10 @@ public class UpdateReplyViewModel extends ViewModel {
                 }
             };
 
-            mState.postValue(new State(true, null, null, null));
+            mSavedStateHandle.set(STATE, new State(true, null, null));
             AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
         } else {
-            mState.postValue(new State(false, null, new ReplyFormState("내용을 입력하세요."), null));
+            mSavedStateHandle.set(REPLY_FORM_STATE, new ReplyFormState("내용을 입력하세요."));
         }
     }
 
@@ -110,33 +121,86 @@ public class UpdateReplyViewModel extends ViewModel {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                mState.postValue(new State(false, null, null, databaseError.getMessage()));
+                mSavedStateHandle.set(STATE, new State(false, null, databaseError.getMessage()));
             }
         });
     }
 
-    public static final class State {
+    public static final class State implements Parcelable {
         public boolean isLoading;
 
         public String text;
 
-        public ReplyFormState replyFormState;
-
         public String message;
 
-        public State(boolean isLoading, String text, ReplyFormState replyFormState, String message) {
+        public State(boolean isLoading, String text, String message) {
             this.isLoading = isLoading;
             this.text = text;
-            this.replyFormState = replyFormState;
             this.message = message;
+        }
+
+        protected State(Parcel in) {
+            isLoading = in.readByte() != 0;
+            text = in.readString();
+            message = in.readString();
+        }
+
+        public static final Creator<State> CREATOR = new Creator<State>() {
+            @Override
+            public State createFromParcel(Parcel in) {
+                return new State(in);
+            }
+
+            @Override
+            public State[] newArray(int size) {
+                return new State[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeByte((byte) (isLoading ? 1 : 0));
+            parcel.writeString(text);
+            parcel.writeString(message);
         }
     }
 
-    public static final class ReplyFormState {
+    public static final class ReplyFormState implements Parcelable {
         public String replyError;
 
         public ReplyFormState(String replyError) {
             this.replyError = replyError;
+        }
+
+        protected ReplyFormState(Parcel in) {
+            replyError = in.readString();
+        }
+
+        public static final Creator<ReplyFormState> CREATOR = new Creator<ReplyFormState>() {
+            @Override
+            public ReplyFormState createFromParcel(Parcel in) {
+                return new ReplyFormState(in);
+            }
+
+            @Override
+            public ReplyFormState[] newArray(int size) {
+                return new ReplyFormState[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeString(replyError);
         }
     }
 }
