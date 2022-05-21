@@ -25,6 +25,7 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
+import com.hhp227.yu_minigroup.helper.DateUtil;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 
 import net.htmlparser.jericho.Element;
@@ -115,7 +116,7 @@ public class Tab1ViewModel extends ViewModel {
                     articleItem.setId(id);
                     articleItem.setTitle(title.trim());
                     articleItem.setName(name.trim());
-                    articleItem.setDate(date);
+                    articleItem.setTimestamp(DateUtil.getTimeStamp(date));
                     articleItem.setContent(content.toString().trim());
                     articleItem.setImages(imageList);
                     articleItem.setReplyCount(replyCnt);
@@ -193,14 +194,14 @@ public class Tab1ViewModel extends ViewModel {
                     ArticleItem value = snapshot.getValue(ArticleItem.class);
 
                     if (value != null) {
-                        int index = mArticleItemKeys.indexOf(value.getId());
+                        int index = articleItemKeys.indexOf(value.getId());
 
                         if (index > -1) {
-                            ArticleItem articleItem = mArticleItemValues.get(index);
+                            ArticleItem articleItem = articleItemValues.get(index);
 
                             articleItem.setUid(value.getUid());
-                            mArticleItemValues.set(index, articleItem);
-                            mArticleItemKeys.set(index, key);
+                            articleItemKeys.set(index, key);
+                            articleItemValues.set(index, articleItem);
                         }
                     }
                 }

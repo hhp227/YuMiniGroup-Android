@@ -18,6 +18,7 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.ArticleItemBinding;
 import com.hhp227.yu_minigroup.databinding.LoadMoreBinding;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
+import com.hhp227.yu_minigroup.helper.DateUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -118,7 +119,7 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                             .diskCacheStrategy(DiskCacheStrategy.NONE))
                     .into(mBinding.ivProfileImage);
             mBinding.tvTitle.setText(articleItem.getName() != null ? articleItem.getTitle() + " - " + articleItem.getName() : articleItem.getTitle());
-            mBinding.tvTimestamp.setText(articleItem.getDate() != null ? articleItem.getDate() : new SimpleDateFormat("yyyy.MM.dd a h:mm:ss").format(articleItem.getTimestamp()));
+            mBinding.tvTimestamp.setText(DateUtil.getDateString(articleItem.getTimestamp()));
             if (!TextUtils.isEmpty(articleItem.getContent())) {
                 mBinding.tvContent.setText(articleItem.getContent());
                 mBinding.tvContent.setMaxLines(CONTENT_MAX_LINE);
