@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Html;
 import android.text.Spanned;
@@ -62,8 +64,6 @@ public class CreateArticleActivity extends AppCompatActivity {
 
     private List<String> mImageList;
 
-    private List<Object> mContents;
-
     private PreferenceManager mPreferenceManager;
 
     private ProgressDialog mProgressDialog;
@@ -87,8 +87,7 @@ public class CreateArticleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = ActivityCreateArticleBinding.inflate(getLayoutInflater());
         mViewModel = new ViewModelProvider(this).get(CreateArticleViewModel.class);
-        mContents = new ArrayList<>();
-        mAdapter = new WriteListAdapter(mContents);
+        mAdapter = new WriteListAdapter(mViewModel.mContents);
         mPreferenceManager = AppController.getInstance().getPreferenceManager();
         mCookie = AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS);
         mProgressDialog = new ProgressDialog(this);
@@ -104,41 +103,43 @@ public class CreateArticleActivity extends AppCompatActivity {
         mArtlKey = getIntent().getStringExtra("artl_key");
         mCameraPickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                Uri fileUri = result.getData().getData();
-                Bitmap bitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    Uri fileUri = result.getData().getData();
+                    Bitmap bitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
 
-                mContents.add(bitmap);
-                mAdapter.notifyItemInserted(mContents.size() - 1);
+                    mViewModel.setBitmap(bitmap);
+                });
             }
         });
         mCameraCaptureActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
-                try {
-                    Bitmap bitmap = new BitmapUtil(this).bitmapResize(mPhotoUri, 200);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    try {
+                        Bitmap bitmap = new BitmapUtil(this).bitmapResize(mPhotoUri, 200);
 
-                    if (bitmap != null) {
-                        ExifInterface ei = new ExifInterface(mCurrentPhotoPath);
-                        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-                        int angle = orientation == ExifInterface.ORIENTATION_ROTATE_90 ? 90
-                                : orientation == ExifInterface.ORIENTATION_ROTATE_180 ? 180
-                                : orientation == ExifInterface.ORIENTATION_ROTATE_270 ? 270
-                                : 0;
-                        Bitmap rotatedBitmap = new BitmapUtil(this).rotateImage(bitmap, angle);
+                        if (bitmap != null) {
+                            ExifInterface ei = new ExifInterface(mCurrentPhotoPath);
+                            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+                            int angle = orientation == ExifInterface.ORIENTATION_ROTATE_90 ? 90
+                                    : orientation == ExifInterface.ORIENTATION_ROTATE_180 ? 180
+                                    : orientation == ExifInterface.ORIENTATION_ROTATE_270 ? 270
+                                    : 0;
+                            Bitmap rotatedBitmap = new BitmapUtil(this).rotateImage(bitmap, angle);
 
-                        mContents.add(rotatedBitmap);
-                        mAdapter.notifyItemInserted(mContents.size() - 1);
+                            mViewModel.setBitmap(rotatedBitmap);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                });
             }
         });
         mYouTubeSearchActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                 mYouTubeItem = result.getData().getParcelableExtra("youtube");
 
-                mContents.add(mYouTubeItem);
-                mAdapter.notifyItemInserted(mContents.size() - 1);
+                mViewModel.mContents.add(mYouTubeItem);
+                mAdapter.notifyItemInserted(mViewModel.mContents.size() - 1);
             }
         });
         Map<String, Object> headerMap = new HashMap<>();
@@ -157,11 +158,15 @@ public class CreateArticleActivity extends AppCompatActivity {
         mBinding.llVideo.setOnClickListener(this::showContextMenu);
         mProgressDialog.setCancelable(false);
         if (mImageList != null && mImageList.size() > 0) {
-            mContents.addAll(mImageList);
+            mViewModel.mContents.addAll(mImageList);
             mAdapter.notifyDataSetChanged();
         }
         if (mYouTubeItem != null)
-            mContents.add(mYouTubeItem.position + 1, mYouTubeItem);
+            mViewModel.mContents.add(mYouTubeItem.position + 1, mYouTubeItem);
+        mViewModel.getBitmapState().observe(this, bitmap -> {
+            mViewModel.addItem(bitmap);
+            mAdapter.notifyItemChanged(mAdapter.getItemCount() - 1);
+        });
     }
 
     @Override
@@ -189,26 +194,26 @@ public class CreateArticleActivity extends AppCompatActivity {
                 String title = (String) mAdapter.getTextMap().get("title");
                 String content = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N ? Html.toHtml((Spanned) mAdapter.getTextMap().get("content"), Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL) : Html.toHtml((Spanned) mAdapter.getTextMap().get("content"));
 
-                if (!title.isEmpty() && !(TextUtils.isEmpty(content) && mContents.size() < 2)) {
+                if (!title.isEmpty() && !(TextUtils.isEmpty(content) && mViewModel.mContents.size() < 2)) {
                     mMakeHtmlContents = new StringBuilder();
                     mImageList = new ArrayList<>();
 
                     mProgressDialog.setMessage("전송중...");
-                    mProgressDialog.setProgressStyle(mContents.size() > 1 ? ProgressDialog.STYLE_HORIZONTAL : ProgressDialog.STYLE_SPINNER);
+                    mProgressDialog.setProgressStyle(mViewModel.mContents.size() > 1 ? ProgressDialog.STYLE_HORIZONTAL : ProgressDialog.STYLE_SPINNER);
                     showProgressDialog();
-                    if (mContents.size() > 1) {
+                    if (mViewModel.mContents.size() > 1) {
                         int position = 1;
 
-                        if (mContents.get(position) instanceof String) {
-                            String image = (String) mContents.get(position);
+                        if (mViewModel.mContents.get(position) instanceof String) {
+                            String image = (String) mViewModel.mContents.get(position);
 
                             uploadProcess(position, image, false);
-                        } else if (mContents.get(position) instanceof Bitmap) {////////////// 리팩토링 요망
-                            Bitmap bitmap = (Bitmap) mContents.get(position);// 수정
+                        } else if (mViewModel.mContents.get(position) instanceof Bitmap) {////////////// 리팩토링 요망
+                            Bitmap bitmap = (Bitmap) mViewModel.mContents.get(position);// 수정
 
                             uploadImage(position, bitmap); // 수정
-                        } else if (mContents.get(position) instanceof YouTubeItem) {
-                            YouTubeItem youTubeItem = (YouTubeItem) mContents.get(position);
+                        } else if (mViewModel.mContents.get(position) instanceof YouTubeItem) {
+                            YouTubeItem youTubeItem = (YouTubeItem) mViewModel.mContents.get(position);
 
                             uploadProcess(position, youTubeItem.videoId, true);
                         }
@@ -243,10 +248,10 @@ public class CreateArticleActivity extends AppCompatActivity {
 
         switch (item.getGroupId()) {
             case 0:
-                if (mContents.get(item.getItemId()) instanceof YouTubeItem) {
+                if (mViewModel.mContents.get(item.getItemId()) instanceof YouTubeItem) {
                     mYouTubeItem = null;
                 }
-                mContents.remove(item.getItemId());
+                mViewModel.mContents.remove(item.getItemId());
                 mAdapter.notifyItemRemoved(item.getItemId());
                 return true;
             case 1:
@@ -327,27 +332,27 @@ public class CreateArticleActivity extends AppCompatActivity {
     private void uploadProcess(int position, String imageUrl, boolean isYoutube) { // 추가
         if (!isYoutube)
             mImageList.add(imageUrl);
-        mProgressDialog.setProgress((int) ((double) (position) / (mContents.size() - 1) * 100));
+        mProgressDialog.setProgress((int) ((double) (position) / (mViewModel.mContents.size() - 1) * 100));
         try {
             String test = (isYoutube ? "<p><embed title=\"YouTube video player\" class=\"youtube-player\" autostart=\"true\" src=\"//www.youtube.com/embed/" + imageUrl + "?autoplay=1\"  width=\"488\" height=\"274\"></embed><p>" // 유튜브 태그
-                    : ("<p><img src=\"" + imageUrl + "\" width=\"488\"><p>")) + (position < mContents.size() - 1 ? "<br>": "");
+                    : ("<p><img src=\"" + imageUrl + "\" width=\"488\"><p>")) + (position < mViewModel.mContents.size() - 1 ? "<br>": "");
 
             mMakeHtmlContents.append(test);
-            if (position < mContents.size() - 1) {
+            if (position < mViewModel.mContents.size() - 1) {
                 position++;
                 Thread.sleep(isYoutube ? 0 : 700);
 
                 // 분기
-                if (mContents.get(position) instanceof Bitmap) {
-                    Bitmap bitmap = (Bitmap) mContents.get(position);
+                if (mViewModel.mContents.get(position) instanceof Bitmap) {
+                    Bitmap bitmap = (Bitmap) mViewModel.mContents.get(position);
 
                     uploadImage(position, bitmap);
-                } else if (mContents.get(position) instanceof String) {
-                    String imageSrc = (String) mContents.get(position);
+                } else if (mViewModel.mContents.get(position) instanceof String) {
+                    String imageSrc = (String) mViewModel.mContents.get(position);
 
                     uploadProcess(position, imageSrc, false);
-                } else if (mContents.get(position) instanceof YouTubeItem) {
-                    YouTubeItem youTubeItem = (YouTubeItem) mContents.get(position);
+                } else if (mViewModel.mContents.get(position) instanceof YouTubeItem) {
+                    YouTubeItem youTubeItem = (YouTubeItem) mViewModel.mContents.get(position);
 
                     uploadProcess(position, youTubeItem.videoId, true);
                 }
