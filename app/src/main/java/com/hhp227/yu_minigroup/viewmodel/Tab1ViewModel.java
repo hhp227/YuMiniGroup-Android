@@ -69,8 +69,10 @@ public class Tab1ViewModel extends ViewModel {
         mGroupImage = savedStateHandle.get("grp_img");
         mKey = savedStateHandle.get("key");
 
-        mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, null));
-        fetchNextPage();
+        if (!mSavedStateHandle.contains(STATE)) {
+            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, null));
+            fetchNextPage();
+        }
     }
 
     public LiveData<State> getState() {
