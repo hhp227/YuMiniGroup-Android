@@ -36,7 +36,6 @@ public class TabHostLayoutFragment extends Fragment {
     private static final String GROUP_ID = "grp_id";
     private static final String GROUP_NAME = "grp_nm";
     private static final String GROUP_IMAGE = "grp_img";
-    private static final String POSITION = "pos";
     private static final String KEY = "key";
     private static final String[] TAB_NAMES = {"소식", "일정", "맴버", "설정"};
 
@@ -53,7 +52,7 @@ public class TabHostLayoutFragment extends Fragment {
     public TabHostLayoutFragment() {
     }
 
-    public static TabHostLayoutFragment newInstance(boolean isAdmin, String groupId, String groupName, String groupImage, int position, String key) {
+    public static TabHostLayoutFragment newInstance(boolean isAdmin, String groupId, String groupName, String groupImage, String key) {
         TabHostLayoutFragment fragment = new TabHostLayoutFragment();
         Bundle args = new Bundle();
 
@@ -61,7 +60,6 @@ public class TabHostLayoutFragment extends Fragment {
         args.putString(GROUP_ID, groupId);
         args.putString(GROUP_NAME, groupName);
         args.putString(GROUP_IMAGE, groupImage);
-        args.putInt(POSITION, position);
         args.putString(KEY, key);
         fragment.setArguments(args);
         return fragment;
@@ -75,7 +73,6 @@ public class TabHostLayoutFragment extends Fragment {
             mGroupId = getArguments().getString(GROUP_ID);
             mGroupName = getArguments().getString(GROUP_NAME);
             mGroupImage = getArguments().getString(GROUP_IMAGE);
-            mPosition = getArguments().getInt(POSITION);
             mKey = getArguments().getString(KEY);
         }
     }
@@ -96,7 +93,7 @@ public class TabHostLayoutFragment extends Fragment {
                 .add(tab1Fragment)
                 .add(new Tab2Fragment())
                 .add(Tab3Fragment.newInstance(mGroupId))
-                .add(Tab4Fragment.newInstance(mIsAdmin, mGroupId, mGroupImage, mPosition, mKey))
+                .add(Tab4Fragment.newInstance(mIsAdmin, mGroupId, mGroupImage, mKey))
                 .build()
                 .collect(Collectors.toList());
         FragmentPagerAdapter adapter = new FragmentPagerAdapter(getChildFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {

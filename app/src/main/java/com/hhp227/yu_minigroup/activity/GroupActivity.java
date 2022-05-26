@@ -27,7 +27,7 @@ public class GroupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = ActivityGroupBinding.inflate(getLayoutInflater());
         mViewModel = new ViewModelProvider(this).get(GroupViewModel.class);
-        mFragMain = TabHostLayoutFragment.newInstance(mViewModel.isAdmin, mViewModel.mGroupId, mViewModel.mGroupName, mViewModel.mGroupImage, mViewModel.mPosition, mViewModel.mKey);
+        mFragMain = TabHostLayoutFragment.newInstance(mViewModel.isAdmin, mViewModel.mGroupId, mViewModel.mGroupName, mViewModel.mGroupImage, mViewModel.mKey);
 
         setContentView(mBinding.getRoot());
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, mFragMain).commit();
