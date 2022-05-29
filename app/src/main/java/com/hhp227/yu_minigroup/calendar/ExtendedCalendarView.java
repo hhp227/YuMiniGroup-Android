@@ -206,6 +206,11 @@ public class ExtendedCalendarView extends RelativeLayout implements OnItemClickL
         rebuildCalendar();
     }
 
+    public void setCalendar(Calendar calendar) {
+        cal.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE));
+        rebuildCalendar();
+    }
+
     private void rebuildCalendar() {
         if (month != null) {
             month.setText(cal.get(Calendar.YEAR) + " " + cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()));
