@@ -43,14 +43,9 @@ public class TabHostLayoutFragment extends Fragment {
 
     private boolean mIsAdmin;
 
-    private int mPosition;
-
     private String mGroupId, mGroupName, mGroupImage, mKey;
 
     private FragmentTabHostLayoutBinding mBinding;
-
-    public TabHostLayoutFragment() {
-    }
 
     public static TabHostLayoutFragment newInstance(boolean isAdmin, String groupId, String groupName, String groupImage, String key) {
         TabHostLayoutFragment fragment = new TabHostLayoutFragment();
