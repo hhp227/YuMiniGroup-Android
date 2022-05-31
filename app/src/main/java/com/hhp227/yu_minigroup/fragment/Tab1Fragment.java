@@ -69,7 +69,7 @@ public class Tab1Fragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(Tab1ViewModel.class);
-        mAdapter = new ArticleListAdapter(mViewModel.mArticleItemKeys, mViewModel.mArticleItemValues, mKey);
+        mAdapter = new ArticleListAdapter(mViewModel.mArticleItemKeys, mViewModel.mArticleItemValues);
         mArticleActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == Activity.RESULT_OK) {
                 if (result.getData() != null) {

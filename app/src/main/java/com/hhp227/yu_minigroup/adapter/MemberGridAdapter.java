@@ -16,17 +16,14 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.MemberItemBinding;
 import com.hhp227.yu_minigroup.dto.MemberItem;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
 public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.MemberGridHolder> {
-    private final List<MemberItem> mMemberItemList;
+    private final List<MemberItem> mCurrentList = new ArrayList<>();
 
     private BiConsumer<View, Integer> mOnItemClickListener;
-
-    public MemberGridAdapter(List<MemberItem> memberItemList) {
-        this.mMemberItemList = memberItemList;
-    }
 
     @NonNull
     @Override
@@ -36,12 +33,12 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
 
     @Override
     public void onBindViewHolder(MemberGridHolder holder, int position) {
-        holder.bind(mMemberItemList.get(position));
+        holder.bind(mCurrentList.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return mMemberItemList.size();
+        return mCurrentList.size();
     }
 
     @Override
@@ -51,6 +48,16 @@ public class MemberGridAdapter extends RecyclerView.Adapter<MemberGridAdapter.Me
 
     public void setOnItemClickListener(BiConsumer<View, Integer> onItemClickListener) {
         this.mOnItemClickListener = onItemClickListener;
+    }
+
+    public List<MemberItem> getCurrentList() {
+        return mCurrentList;
+    }
+
+    public void submitList(List<MemberItem> memberItemList) {
+        mCurrentList.clear();
+        mCurrentList.addAll(memberItemList);
+        notifyDataSetChanged();
     }
 
     public class MemberGridHolder extends RecyclerView.ViewHolder {

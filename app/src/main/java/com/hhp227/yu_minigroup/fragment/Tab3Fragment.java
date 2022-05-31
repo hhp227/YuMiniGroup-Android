@@ -47,11 +47,11 @@ public class Tab3Fragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(Tab3ViewModel.class);
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
-        mAdapter = new MemberGridAdapter(mViewModel.mMemberItems);
+        mAdapter = new MemberGridAdapter();
 
         mAdapter.setHasStableIds(true);
         mAdapter.setOnItemClickListener((v, position) -> {
-            MemberItem memberItem = mViewModel.mMemberItems.get(position);
+            MemberItem memberItem = mAdapter.getCurrentList().get(position);
             String uid = memberItem.uid;
             String name = memberItem.name;
             String value = memberItem.value;
@@ -88,8 +88,7 @@ public class Tab3Fragment extends Fragment {
                 mViewModel.fetchMemberList(state.offset);
             } else if (!state.memberItems.isEmpty()) {
                 hideProgressBar();
-                mViewModel.addAll(state.memberItems);
-                mAdapter.notifyDataSetChanged();
+                mAdapter.submitList(state.memberItems);
             } else if (state.message != null && !state.message.isEmpty()) {
                 hideProgressBar();
                 Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show();

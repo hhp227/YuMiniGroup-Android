@@ -37,14 +37,11 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private int mProgressBarVisibility;
 
-    private String mGroupKey;
-
     private BiConsumer<View, Integer> mOnItemClickListener;
 
-    public ArticleListAdapter(List<String> articleItemKeys, List<ArticleItem> articleItemValues, String groupKey) {
+    public ArticleListAdapter(List<String> articleItemKeys, List<ArticleItem> articleItemValues) {
         this.mArticleItemKeys = articleItemKeys;
         this.mArticleItemValues = articleItemValues;
-        this.mGroupKey = groupKey;
     }
 
     @NonNull

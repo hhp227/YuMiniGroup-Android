@@ -18,6 +18,7 @@ import net.htmlparser.jericho.Source;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class UnivNoticeViewModel extends ViewModel {
@@ -49,9 +50,7 @@ public class UnivNoticeViewModel extends ViewModel {
         String tag_string_req = "req_yu_news";
         StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.URL_YU_NOTICE.replace("{MODE}", "list") + "&articleLimit={LIMIT}&article.offset={OFFSET}".replace("{LIMIT}", String.valueOf(ITEM_COUNT)).replace("{OFFSET}", String.valueOf(offset)), this::onResponse, this::onErrorResponse);
 
-        if (mState.getValue() != null) {
-            mState.postValue(new State(true, mState.getValue().bbsItems, offset, offset > 0, null));
-        }
+        mState.postValue(new State(true, Objects.requireNonNull(mState.getValue()).bbsItems, offset, offset > 0, null));
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
 

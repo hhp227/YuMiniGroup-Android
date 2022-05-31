@@ -23,8 +23,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class Tab3ViewModel extends ViewModel {
-    public final List<MemberItem> mMemberItems = new ArrayList<>();
-
     private static final int LIMIT = 40;
 
     private static final String TAG = Tab3ViewModel.class.getSimpleName(), STATE = "state";
@@ -50,6 +48,7 @@ public class Tab3ViewModel extends ViewModel {
     public void fetchMemberList(int offset) {
         String params = "?CLUB_GRP_ID=" + mGroupId + "&startM=" + offset + "&displayM=" + LIMIT;
 
+        mSavedStateHandle.set(STATE, new State(true, requireState().memberItems, offset, offset > 1, false, null));
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.GET, EndPoint.MEMBER_LIST + params, response -> {
             List<MemberItem> memberItemList = new ArrayList<>();
 
@@ -71,32 +70,42 @@ public class Tab3ViewModel extends ViewModel {
 
                     memberItemList.add(new MemberItem(uid, name, value));
                 }
-                mSavedStateHandle.set(STATE, new State(false, memberItemList, ((State) mSavedStateHandle.get(STATE)).offset + LIMIT, false, memberItemList.isEmpty(), null));
+                mSavedStateHandle.set(STATE, new State(false, mergedList(requireState().memberItems, memberItemList), requireState().offset + LIMIT, false, memberItemList.isEmpty(), null));
             } catch (NullPointerException e) {
                 e.printStackTrace();
-                mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), ((State) mSavedStateHandle.get(STATE)).offset, false, false, null));
+                mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), requireState().offset, false, false, null));
             }
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
-            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), ((State) mSavedStateHandle.get(STATE)).offset, false, false, error.getMessage()));
+            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), requireState().offset, false, false, error.getMessage()));
         }));
     }
 
     public void fetchNextPage() {
-        State state = mSavedStateHandle.get(STATE);
-
-        if (state != null) {
-            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), state.offset, true, false, null));
-        }
+        mSavedStateHandle.set(STATE, new State(false, requireState().memberItems, requireState().offset, true, false, null));
     }
 
     public void refresh() {
-        mMemberItems.clear();
         mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), 1, true, false, null));
     }
 
-    public void addAll(List<MemberItem> memberItemList) {
-        mMemberItems.addAll(memberItemList);
+    private List<MemberItem> mergedList(List<MemberItem> existingList, List<MemberItem> newList) {
+        List<MemberItem> result = new ArrayList<>();
+
+        result.addAll(existingList);
+        result.addAll(newList);
+        return result;
+    }
+
+    private State requireState() {
+        if (mSavedStateHandle.contains(STATE)) {
+            State state = mSavedStateHandle.get(STATE);
+
+            if (state != null) {
+                return state;
+            }
+        }
+        return new State(false, Collections.emptyList(), 0, false, false, null);
     }
 
     public static final class State implements Parcelable {
