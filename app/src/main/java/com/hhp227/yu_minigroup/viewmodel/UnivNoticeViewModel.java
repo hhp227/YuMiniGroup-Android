@@ -1,5 +1,6 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -20,9 +21,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 public class UnivNoticeViewModel extends ViewModel {
-    public final ArrayList<BbsItem> mBbsItemArrayList = new ArrayList<>();
-
-    public final MutableLiveData<State> mState = new MutableLiveData<>(new State(false, Collections.emptyList(), 0, false, null));
+    private final MutableLiveData<State> mState = new MutableLiveData<>(new State(false, Collections.emptyList(), 0, false, null));
 
     private static final int MAX_PAGE = 100;
 
@@ -32,29 +31,28 @@ public class UnivNoticeViewModel extends ViewModel {
         fetchNextPage();
     }
 
+    public LiveData<State> getState() {
+        return mState;
+    }
+
     public void fetchNextPage() {
         if (mState.getValue() != null && mState.getValue().offset < MAX_PAGE) {
-            mState.postValue(new State(false, Collections.emptyList(), mState.getValue().offset, true, null));
+            mState.postValue(new State(false, mState.getValue().bbsItems, mState.getValue().offset, true, null));
         }
     }
 
     public void refresh() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            mBbsItemArrayList.clear();
-            mState.postValue(new State(false, Collections.emptyList(), 0, true, null));
-        });
+        Executors.newSingleThreadExecutor().execute(() -> mState.postValue(new State(false, Collections.emptyList(), 0, true, null)));
     }
 
     public void fetchDataList(int offset) {
         String tag_string_req = "req_yu_news";
         StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.URL_YU_NOTICE.replace("{MODE}", "list") + "&articleLimit={LIMIT}&article.offset={OFFSET}".replace("{LIMIT}", String.valueOf(ITEM_COUNT)).replace("{OFFSET}", String.valueOf(offset)), this::onResponse, this::onErrorResponse);
 
-        mState.postValue(new State(true, Collections.emptyList(), offset, offset > 0, null));
+        if (mState.getValue() != null) {
+            mState.postValue(new State(true, mState.getValue().bbsItems, offset, offset > 0, null));
+        }
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
-    }
-
-    public void addAll(List<BbsItem> bbsItems) {
-        mBbsItemArrayList.addAll(bbsItems);
     }
 
     private void onResponse(String response) {
@@ -79,7 +77,7 @@ public class UnivNoticeViewModel extends ViewModel {
                 itemList.add(bbsItem);
             }
             if (mState.getValue() != null) {
-                mState.postValue(new State(false, itemList, mState.getValue().offset + ITEM_COUNT, false, null));
+                mState.postValue(new State(false, mergedList(mState.getValue().bbsItems, itemList), mState.getValue().offset + ITEM_COUNT, false, null));
             }
         } catch (Exception e) {
             mState.postValue(new State(false, Collections.emptyList(), 0, false, e.getMessage()));
@@ -88,6 +86,14 @@ public class UnivNoticeViewModel extends ViewModel {
 
     private void onErrorResponse(VolleyError error) {
         mState.postValue(new State(false, Collections.emptyList(), 0, false, error.getMessage()));
+    }
+
+    private List<BbsItem> mergedList(List<BbsItem> existingList, List<BbsItem> newList) {
+        List<BbsItem> result = new ArrayList<>();
+
+        result.addAll(existingList);
+        result.addAll(newList);
+        return result;
     }
 
     public static final class State {
