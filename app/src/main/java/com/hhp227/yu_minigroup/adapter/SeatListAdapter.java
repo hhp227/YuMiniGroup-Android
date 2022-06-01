@@ -11,14 +11,11 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.SeatItemBinding;
 import com.hhp227.yu_minigroup.dto.SeatItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SeatListAdapter extends RecyclerView.Adapter<SeatListAdapter.SeatListHolder> {
-    private final List<SeatItem> mSearItemList;
-
-    public SeatListAdapter(List<SeatItem> mSearItemList) {
-        this.mSearItemList = mSearItemList;
-    }
+    private final List<SeatItem> mSearItemList = new ArrayList<>();
 
     @NonNull
     @Override
@@ -34,6 +31,12 @@ public class SeatListAdapter extends RecyclerView.Adapter<SeatListAdapter.SeatLi
     @Override
     public int getItemCount() {
         return mSearItemList.size();
+    }
+
+    public void submitList(List<SeatItem> seatItemList) {
+        mSearItemList.clear();
+        mSearItemList.addAll(seatItemList);
+        notifyDataSetChanged();
     }
 
     public class SeatListHolder extends RecyclerView.ViewHolder {

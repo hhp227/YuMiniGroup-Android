@@ -14,26 +14,25 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SeatViewModel extends ViewModel {
     public final MutableLiveData<State> mState = new MutableLiveData<>();
-
-    public List<SeatItem> mSeatItemList = new ArrayList<>();
 
     public SeatViewModel() {
         fetchDataTask(false);
     }
 
     public void refresh() {
-        mSeatItemList.clear();
         fetchDataTask(true);
     }
 
     private void fetchDataTask(boolean isRefresh) {
-        mState.postValue(new State(!isRefresh, false, null));
+        mState.postValue(new State(!isRefresh, Collections.emptyList(), null));
         AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.GET, EndPoint.URL_YU_LIBRARY_SEAT_ROOMS, null, response -> {
             try {
+                List<SeatItem> seatItemList = new ArrayList<>();
                 JSONArray jsonArray = response.getJSONArray("_Model_lg_clicker_reading_room_brief_list");
 
                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -46,26 +45,26 @@ public class SeatViewModel extends ViewModel {
                     String openMode = jsonObject.getString("l_open_mode");
                     SeatItem seatItem = new SeatItem(id, roomName, count, occupied, percentage, openMode);
 
-                    mSeatItemList.add(seatItem);
+                    seatItemList.add(seatItem);
                 }
-                mState.postValue(new State(false, true, null));
+                mState.postValue(new State(false, seatItemList, null));
             } catch (JSONException e) {
                 e.printStackTrace();
-                mState.postValue(new State(false, false, e.getMessage()));
+                mState.postValue(new State(false, Collections.emptyList(), e.getMessage()));
             }
-        }, error -> mState.postValue(new State(false, false, error.getMessage()))));
+        }, error -> mState.postValue(new State(false, Collections.emptyList(), error.getMessage()))));
     }
 
     public static final class State {
         public boolean isLoading;
 
-        public boolean isSuccess;
+        public List<SeatItem> seatItemList;
 
         public String message;
 
-        public State(boolean isLoading, boolean isSuccess, String message) {
+        public State(boolean isLoading, List<SeatItem> seatItemList, String message) {
             this.isLoading = isLoading;
-            this.isSuccess = isSuccess;
+            this.seatItemList = seatItemList;
             this.message = message;
         }
     }

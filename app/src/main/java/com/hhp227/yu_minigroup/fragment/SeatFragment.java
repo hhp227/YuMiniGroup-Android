@@ -35,7 +35,7 @@ public class SeatFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(SeatViewModel.class);
-        mAdapter = new SeatListAdapter(mViewModel.mSeatItemList);
+        mAdapter = new SeatListAdapter();
 
         ((MainActivity) requireActivity()).setAppBar(mBinding.toolbar, getString(R.string.library_seat));
         mBinding.collapsingToolbar.setTitleEnabled(false);
@@ -45,9 +45,9 @@ public class SeatFragment extends Fragment {
         mViewModel.mState.observe(getViewLifecycleOwner(), state -> {
             if (state.isLoading) {
                 showProgressBar();
-            } else if (state.isSuccess) {
+            } else if (!state.seatItemList.isEmpty()) {
                 hideProgressBar();
-                mAdapter.notifyDataSetChanged();
+                mAdapter.submitList(state.seatItemList);
             } else if (state.message != null && !state.message.isEmpty()) {
                 hideProgressBar();
                 Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG).show();
