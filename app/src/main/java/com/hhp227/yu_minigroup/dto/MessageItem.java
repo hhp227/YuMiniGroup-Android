@@ -1,11 +1,20 @@
 package com.hhp227.yu_minigroup.dto;
 
-public class MessageItem {
+import com.google.firebase.database.PropertyName;
+
+import java.io.Serializable;
+
+public class MessageItem implements Serializable {
     private String from;
+
     private String name;
+
     private String message;
+
     private String type;
+
     private boolean seen;
+
     private long timestamp;
 
     public MessageItem() {
@@ -20,51 +29,63 @@ public class MessageItem {
         this.timestamp = timestamp;
     }
 
+    @PropertyName("from")
     public String getFrom() {
         return from;
     }
 
+    @PropertyName("from")
     public void setFrom(String from) {
         this.from = from;
     }
 
+    @PropertyName("name")
     public String getName() {
         return name;
     }
 
+    @PropertyName("name")
     public void setName(String name) {
         this.name = name;
     }
 
+    @PropertyName("message")
     public String getMessage() {
         return message;
     }
 
+    @PropertyName("message")
     public void setMessage(String message) {
         this.message = message;
     }
 
+    @PropertyName("type")
     public String getType() {
         return type;
     }
 
+    @PropertyName("type")
     public void setType(String type) {
         this.type = type;
     }
 
+    @PropertyName("seen")
     public boolean isSeen() {
         return seen;
     }
 
+    @PropertyName("seen")
     public void setSeen(boolean seen) {
         this.seen = seen;
     }
 
-    public long getTimeStamp() {
+    @PropertyName("timestamp")
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimeStamp(long timestamp) {
+    @PropertyName("timestamp")
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 }
