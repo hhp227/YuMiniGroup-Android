@@ -57,14 +57,14 @@ public class ProfileActivity extends AppCompatActivity {
             unregisterForContextMenu(v);
         });
         mBinding.bSync.setOnClickListener(v -> mViewModel.sync());
-        mViewModel.mBitmap.observe(this, bitmap -> {
+        mViewModel.getBitmap().observe(this, bitmap -> {
             Glide.with(getApplicationContext())
                     .load(bitmap)
                     .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle).circleCrop())
                     .into(mBinding.ivProfileImage);
             invalidateOptionsMenu();
         });
-        mViewModel.mState.observe(this, state -> {
+        mViewModel.getState().observe(this, state -> {
             if (state.isLoading) {
                 showProgressBar();
             } else if (state.user != null) {
@@ -138,7 +138,7 @@ public class ProfileActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem menuItem = menu.findItem(R.id.action_send);
 
-        menuItem.setVisible(mViewModel.mBitmap.getValue() != null);
+        menuItem.setVisible(mViewModel.getBitmap().getValue() != null);
         return super.onPrepareOptionsMenu(menu);
     }
 

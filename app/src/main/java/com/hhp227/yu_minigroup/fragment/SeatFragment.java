@@ -42,7 +42,7 @@ public class SeatFragment extends Fragment {
         mBinding.rvSeat.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvSeat.setAdapter(mAdapter);
         mBinding.srlSeat.setOnRefreshListener(() -> new Handler().postDelayed(this::refresh, 1000));
-        mViewModel.mState.observe(getViewLifecycleOwner(), state -> {
+        mViewModel.getState().observe(getViewLifecycleOwner(), state -> {
             if (state.isLoading) {
                 showProgressBar();
             } else if (!state.seatItemList.isEmpty()) {

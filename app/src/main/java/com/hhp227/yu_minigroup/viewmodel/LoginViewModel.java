@@ -2,6 +2,7 @@ package com.hhp227.yu_minigroup.viewmodel;
 
 import android.webkit.CookieManager;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -32,15 +33,23 @@ import java.util.List;
 import java.util.Map;
 
 public class LoginViewModel extends ViewModel {
-    public final MutableLiveData<State> mState = new MutableLiveData<>();
-
-    public final MutableLiveData<LoginFormState> mLoginFormState = new MutableLiveData<>();
-
     private static final String TAG = "로그인화면";
+
+    private final MutableLiveData<State> mState = new MutableLiveData<>();
+
+    private final MutableLiveData<LoginFormState> mLoginFormState = new MutableLiveData<>();
 
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
     private final PreferenceManager mPreferenceManager = AppController.getInstance().getPreferenceManager();
+
+    public LiveData<State> getState() {
+        return mState;
+    }
+
+    public LiveData<LoginFormState> getLoginFormState() {
+        return mLoginFormState;
+    }
 
     public void login(String id, String password) {
         if (!id.isEmpty() && !password.isEmpty()) {

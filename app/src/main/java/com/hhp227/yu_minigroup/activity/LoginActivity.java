@@ -38,7 +38,7 @@ public class LoginActivity extends AppCompatActivity {
 
             mViewModel.login(id, password);
         });
-        mViewModel.mState.observe(this, state -> {
+        mViewModel.getState().observe(this, state -> {
             if (state.isLoading) {
                 showProgressBar();
             } else if (state.user != null) {
@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
                 Snackbar.make(getCurrentFocus(), state.message, Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
-        mViewModel.mLoginFormState.observe(this, loginFormState -> {
+        mViewModel.getLoginFormState().observe(this, loginFormState -> {
             mBinding.etId.setError(loginFormState.emailError);
             mBinding.etPassword.setError(loginFormState.passwordError);
         });

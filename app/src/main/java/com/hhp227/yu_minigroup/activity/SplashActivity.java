@@ -36,7 +36,7 @@ public class SplashActivity extends AppCompatActivity {
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         window.setStatusBarColor(Color.TRANSPARENT);
         handler.postDelayed(() -> mViewModel.loginLMS(null, null), SPLASH_TIME_OUT);
-        mViewModel.mState.observe(this, state -> {
+        mViewModel.getState().observe(this, state -> {
             if (state.isSuccess) {
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
                 finish();

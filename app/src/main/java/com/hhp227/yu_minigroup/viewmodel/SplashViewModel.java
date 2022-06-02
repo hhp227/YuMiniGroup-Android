@@ -2,6 +2,7 @@ package com.hhp227.yu_minigroup.viewmodel;
 
 import android.webkit.CookieManager;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -20,11 +21,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SplashViewModel extends ViewModel {
-    public MutableLiveData<State> mState = new MutableLiveData<>(new State());
+    private final MutableLiveData<State> mState = new MutableLiveData<>();
 
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
     private final PreferenceManager mPreferenceManager = AppController.getInstance().getPreferenceManager();
+
+    public LiveData<State> getState() {
+        return mState;
+    }
 
     public void loginLMS(String ssoToken, String lmsToken) {
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.LOGIN_LMS, response -> {

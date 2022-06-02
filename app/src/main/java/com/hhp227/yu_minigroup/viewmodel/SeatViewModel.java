@@ -1,5 +1,6 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -18,10 +19,14 @@ import java.util.Collections;
 import java.util.List;
 
 public class SeatViewModel extends ViewModel {
-    public final MutableLiveData<State> mState = new MutableLiveData<>();
+    private final MutableLiveData<State> mState = new MutableLiveData<>();
 
     public SeatViewModel() {
         fetchDataTask(false);
+    }
+
+    public LiveData<State> getState() {
+        return mState;
     }
 
     public void refresh() {
