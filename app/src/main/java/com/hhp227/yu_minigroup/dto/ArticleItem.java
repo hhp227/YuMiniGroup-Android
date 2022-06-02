@@ -5,14 +5,14 @@ import java.util.List;
 public class ArticleItem {
     private boolean auth;
     private long timestamp;
-    private String id, uid, name, title, content, date, replyCount;
+    private String id, uid, name, title, content, replyCount;
     private List<String> images;
     private YouTubeItem youtube;
 
     public ArticleItem() {
     }
 
-    public ArticleItem(String id, String uid, String name, String title, String content, List<String> images, YouTubeItem youTube, String date, String replyCount, boolean auth, long timestamp) {
+    public ArticleItem(String id, String uid, String name, String title, String content, List<String> images, YouTubeItem youTube, String replyCount, boolean auth, long timestamp) {
         super();
         this.id = id;
         this.uid = uid;
@@ -21,7 +21,6 @@ public class ArticleItem {
         this.content = content;
         this.images = images;
         this.youtube = youTube;
-        this.date = date;
         this.replyCount = replyCount;
         this.auth = auth;
         this.timestamp = timestamp;
@@ -81,14 +80,6 @@ public class ArticleItem {
 
     public void setYoutube(YouTubeItem youtube) {
         this.youtube = youtube;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
     }
 
     public String getReplyCount() {

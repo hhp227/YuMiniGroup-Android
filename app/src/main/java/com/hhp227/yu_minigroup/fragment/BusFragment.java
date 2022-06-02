@@ -17,9 +17,6 @@ import com.hhp227.yu_minigroup.databinding.FragmentBusBinding;
 public class BusFragment extends Fragment {
     private FragmentBusBinding mBinding;
 
-    public BusFragment() {
-    }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mBinding = FragmentBusBinding.inflate(inflater, container, false);

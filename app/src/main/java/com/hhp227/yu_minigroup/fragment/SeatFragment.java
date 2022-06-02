@@ -8,37 +8,22 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.android.volley.Request;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.material.snackbar.Snackbar;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.activity.MainActivity;
 import com.hhp227.yu_minigroup.adapter.SeatListAdapter;
-import com.hhp227.yu_minigroup.app.AppController;
-import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.FragmentSeatBinding;
-import com.hhp227.yu_minigroup.dto.SeatItem;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.hhp227.yu_minigroup.viewmodel.SeatViewModel;
 
 public class SeatFragment extends Fragment {
-    public static final String TAG = "도서관 좌석";
-
-    private List<SeatItem> mSeatItemList;
-
     private SeatListAdapter mAdapter;
 
     private FragmentSeatBinding mBinding;
 
-    public SeatFragment() {
-    }
+    private SeatViewModel mViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,16 +34,25 @@ public class SeatFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mSeatItemList = new ArrayList<>();
-        mAdapter = new SeatListAdapter(mSeatItemList);
+        mViewModel = new ViewModelProvider(this).get(SeatViewModel.class);
+        mAdapter = new SeatListAdapter();
 
         ((MainActivity) requireActivity()).setAppBar(mBinding.toolbar, getString(R.string.library_seat));
         mBinding.collapsingToolbar.setTitleEnabled(false);
         mBinding.rvSeat.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvSeat.setAdapter(mAdapter);
         mBinding.srlSeat.setOnRefreshListener(() -> new Handler().postDelayed(this::refresh, 1000));
-        showProgressBar();
-        fetchDataTask();
+        mViewModel.mState.observe(getViewLifecycleOwner(), state -> {
+            if (state.isLoading) {
+                showProgressBar();
+            } else if (!state.seatItemList.isEmpty()) {
+                hideProgressBar();
+                mAdapter.submitList(state.seatItemList);
+            } else if (state.message != null && !state.message.isEmpty()) {
+                hideProgressBar();
+                Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
@@ -67,37 +61,8 @@ public class SeatFragment extends Fragment {
         mBinding = null;
     }
 
-    private void fetchDataTask() {
-        AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.GET, EndPoint.URL_YU_LIBRARY_SEAT_ROOMS, null, response -> {
-            hideProgressBar();
-            try {
-                JSONArray jsonArray = response.getJSONArray("_Model_lg_clicker_reading_room_brief_list");
-
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    String id = jsonObject.getString("l_id");
-                    String roomName = jsonObject.getString("l_room_name");
-                    String count = jsonObject.getString("l_count");
-                    String occupied = jsonObject.getString("l_occupied");
-                    String percentage = jsonObject.getString("l_percentage_integer");
-                    String openMode = jsonObject.getString("l_open_mode");
-                    SeatItem seatItem = new SeatItem(id, roomName, count, occupied, percentage, openMode);
-
-                    mSeatItemList.add(seatItem);
-                    mAdapter.notifyItemChanged(mSeatItemList.size() - 1);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }, error -> {
-            if (error.getMessage() != null)
-                VolleyLog.e(error.getMessage());
-        }));
-    }
-
     private void refresh() {
-        mSeatItemList.clear();
-        fetchDataTask();
+        mViewModel.refresh();
         mBinding.srlSeat.setRefreshing(false);
     }
 

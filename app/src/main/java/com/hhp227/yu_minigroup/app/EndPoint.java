@@ -27,6 +27,7 @@ public interface EndPoint {
     String TIMETABLE = BASE_URL + "/ilos/st/main/pop_academic_timetable_form.acl";
     String MY_INFO = BASE_URL + "/ilos/mp/myinfo_form.acl";
     String SEND_MESSAGE = BASE_URL + "/ilos/co/club_send_msg_insert.acl";
+    String GROUP_IMAGE = BASE_URL + "/ilosfiles/club/photo/{FILE}";
     String SYNC_PROFILE = BASE_URL + "/ilos/mp/myinfo_sync.acl";
     String PROFILE_IMAGE_PREVIEW = BASE_URL + "/ilos/mp/myinfo_file_update.acl";
     String PROFILE_IMAGE_UPDATE = BASE_URL + "/ilos/mp/myinfo_insert.acl";

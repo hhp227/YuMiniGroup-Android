@@ -65,11 +65,12 @@ public class WriteListAdapter extends RecyclerView.Adapter {
     public void addHeaderView(Map<String, Object> textMap) {
         this.mTextMap = textMap;
 
-        mWriteItemList.add(textMap);
+        mWriteItemList.add(0, textMap);
+        notifyItemChanged(0);
     }
 
     public Map<String, Object> getTextMap() {
-        mTextMap.put("title", mHeaderHolder.mBinding.etTitle.getText().toString());
+        mTextMap.put("title", mHeaderHolder.mBinding.etTitle.getText());
         mTextMap.put("content", mHeaderHolder.mBinding.etContent.getText());
         return mTextMap;
     }
