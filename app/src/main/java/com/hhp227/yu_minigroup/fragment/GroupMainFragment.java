@@ -99,7 +99,7 @@ public class GroupMainFragment extends Fragment {
                 }
             }
         };
-        mAdapter = new GroupGridAdapter(mViewModel.mGroupItemKeys, mViewModel.mGroupItemValues);
+        mAdapter = new GroupGridAdapter(mViewModel.mGroupItemList);
         mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == Activity.RESULT_OK) {
                 mViewModel.refresh();
@@ -110,8 +110,8 @@ public class GroupMainFragment extends Fragment {
         ((MainActivity) requireActivity()).setAppBar(mBinding.toolbar, getString(R.string.main));
         mAdapter.setHasStableIds(true);
         mAdapter.setOnItemClickListener((v, position) -> {
-            if (mViewModel.mGroupItemValues.get(position) instanceof GroupItem) {
-                GroupItem groupItem = (GroupItem) mViewModel.mGroupItemValues.get(position);
+            if (mViewModel.mGroupItemList.get(position).getValue() instanceof GroupItem) {
+                GroupItem groupItem = (GroupItem) mViewModel.mGroupItemList.get(position).getValue();
                 Intent intent = new Intent(getContext(), GroupActivity.class);
 
                 intent.putExtra("admin", groupItem.isAdmin());

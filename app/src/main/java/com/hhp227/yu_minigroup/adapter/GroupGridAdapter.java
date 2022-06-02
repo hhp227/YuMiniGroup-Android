@@ -51,9 +51,7 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
 
     private static final String TAG = "어뎁터";
 
-    private final List<String> mGroupItemKeys;
-
-    private final List<Object> mGroupItemValues;
+    private final List<Map.Entry<String, Object>> mGroupItemList;
 
     private BiConsumer<View, Integer> mOnItemClickListener;
 
@@ -63,9 +61,8 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
 
     private View.OnClickListener mOnClickListener;
 
-    public GroupGridAdapter(List<String> groupItemKeys, List<Object> groupItemValues) {
-        this.mGroupItemKeys = groupItemKeys;
-        this.mGroupItemValues = groupItemValues;
+    public GroupGridAdapter(List<Map.Entry<String, Object>> groupItemList) {
+        mGroupItemList = groupItemList;
     }
 
     @NonNull
@@ -89,9 +86,9 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof HeaderHolder) {
-            ((HeaderHolder) holder).bind((Map<String, String>) mGroupItemValues.get(position));
+            ((HeaderHolder) holder).bind((Map<String, String>) mGroupItemList.get(position).getValue());
         } else if (holder instanceof ItemHolder) {
-            ((ItemHolder) holder).bind((GroupItem) mGroupItemValues.get(position));
+            ((ItemHolder) holder).bind((GroupItem) mGroupItemList.get(position).getValue());
         } else if (holder instanceof AdHolder) {
             ((AdHolder) holder).bind();
         } else if (holder instanceof BannerHolder) {
@@ -108,16 +105,16 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        return mGroupItemValues.size();
+        return mGroupItemList.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return mGroupItemValues.get(position) instanceof Map ? TYPE_TEXT
-                : mGroupItemValues.get(position) instanceof GroupItem ? TYPE_GROUP
-                : mGroupItemValues.get(position) instanceof String && mGroupItemValues.get(position).equals("광고") ? TYPE_AD
-                : mGroupItemValues.get(position) instanceof String && mGroupItemValues.get(position).equals("없음") ? TYPE_BANNER
-                : mGroupItemValues.get(position) instanceof String && mGroupItemValues.get(position).equals("뷰페이져") ? TYPE_VIEW_PAGER
+        return mGroupItemList.get(position).getValue() instanceof Map ? TYPE_TEXT
+                : mGroupItemList.get(position).getValue() instanceof GroupItem ? TYPE_GROUP
+                : mGroupItemList.get(position).getValue() instanceof String && mGroupItemList.get(position).getValue().equals("광고") ? TYPE_AD
+                : mGroupItemList.get(position).getValue() instanceof String && mGroupItemList.get(position).getValue().equals("없음") ? TYPE_BANNER
+                : mGroupItemList.get(position).getValue() instanceof String && mGroupItemList.get(position).getValue().equals("뷰페이져") ? TYPE_VIEW_PAGER
                 : -1;
     }
 
@@ -138,24 +135,6 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
         return adText;
     }
 
-    public void addHeaderView(String text) {
-        Map<String, String> headerMap = new HashMap<>();
-
-        headerMap.put("text", text);
-        mGroupItemKeys.add(text);
-        mGroupItemValues.add(headerMap);
-        notifyItemInserted(mGroupItemValues.size() - 1);
-    }
-
-    public void addHeaderView(String text, int position) {
-        Map<String, String> headerMap = new HashMap<>();
-
-        headerMap.put("text", text);
-        mGroupItemKeys.add(position, text);
-        mGroupItemValues.add(position, headerMap);
-        notifyItemInserted(position);
-    }
-
     public void setOnItemClickListener(BiConsumer<View, Integer> onItemClickListener) {
         this.mOnItemClickListener = onItemClickListener;
     }
@@ -165,7 +144,7 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
     }
 
     public String getKey(int position) {
-        return mGroupItemKeys.get(position);
+        return mGroupItemList.get(position).getKey();
     }
 
     public void moveSliderPager() {

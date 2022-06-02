@@ -13,28 +13,29 @@ import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.ReplyItemBinding;
+import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.dto.ReplyItem;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ReplyListAdapter extends BaseAdapter {
-    private final List<String> mReplyItemKeys;
+    public final List<Map.Entry<String, ReplyItem>> mReplyItemList;
 
-    private final List<ReplyItem> mReplyItemValues;
-
-    public ReplyListAdapter(List<String> replyItemKeys, List<ReplyItem> replyItemValues) {
-        this.mReplyItemKeys = replyItemKeys;
-        this.mReplyItemValues = replyItemValues;
+    public ReplyListAdapter(List<Map.Entry<String, ReplyItem>> replyItemList) {
+        this.mReplyItemList = replyItemList;
     }
 
     @Override
     public int getCount() {
-        return mReplyItemValues.size();
+        return mReplyItemList.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return mReplyItemValues.get(position);
+        return mReplyItemList.get(position);
     }
 
     @Override
@@ -54,12 +55,14 @@ public class ReplyListAdapter extends BaseAdapter {
             convertView.setTag(viewHolder);
         } else
             viewHolder = (ViewHolder) convertView.getTag();
-        viewHolder.bind(mReplyItemValues.get(position));
+        viewHolder.bind(mReplyItemList.get(position).getValue());
         return convertView;
     }
 
-    public String getKey(int position) {
-        return mReplyItemKeys.get(position);
+    public void submitList(List<Map.Entry<String, ReplyItem>> replyItemList) {
+        mReplyItemList.clear();
+        mReplyItemList.addAll(replyItemList);
+        notifyDataSetChanged();
     }
 
     private static class ViewHolder {

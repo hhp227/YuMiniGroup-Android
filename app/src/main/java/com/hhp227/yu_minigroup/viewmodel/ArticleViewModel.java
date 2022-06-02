@@ -36,20 +36,20 @@ import net.htmlparser.jericho.Source;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ArticleViewModel extends ViewModel {
-    public final List<String> mReplyItemKeys = new ArrayList<>();
+    public final List<Map.Entry<String, ReplyItem>> mReplyItemList = new ArrayList<>();
 
-    public final List<ReplyItem> mReplyItemValues = new ArrayList<>();
+    public final Boolean mIsAuthorized;
 
-    public final boolean mIsAuthorized;
-
-    public final int mPosition;
+    public final Integer mPosition;
 
     public final String mGroupId, mArticleId, mGroupName, mGroupImage, mGroupKey, mArticleKey;
 
@@ -122,7 +122,7 @@ public class ArticleViewModel extends ViewModel {
                 }
             }, error -> {
                 VolleyLog.e(TAG, error.getMessage());
-                mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), Collections.emptyList(), false, error.getMessage()));
+                mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), false, error.getMessage()));
             }) {
                 @Override
                 public Map<String, String> getHeaders() {
@@ -143,7 +143,7 @@ public class ArticleViewModel extends ViewModel {
                 }
             };
 
-            mSavedStateHandle.set(STATE, new State(true, ((State) requireNonNull(mSavedStateHandle.get(STATE))).articleItem, Collections.emptyList(), Collections.emptyList(), false, null));
+            mSavedStateHandle.set(STATE, new State(true, ((State) requireNonNull(mSavedStateHandle.get(STATE))).articleItem, Collections.emptyList(), false, null));
             AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
         } else {
             mSavedStateHandle.set(REPLY_FORM_STATE, new ReplyFormState("댓글을 입력하세요."));
@@ -158,16 +158,16 @@ public class ArticleViewModel extends ViewModel {
                 boolean error = jsonObject.getBoolean("isError");
 
                 if (!error) {
-                    mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), Collections.emptyList(), true, "삭제완료"));
+                    mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), true, "삭제완료"));
                 } else {
-                    mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), Collections.emptyList(), false, "삭제할수 없습니다."));
+                    mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), false, "삭제할수 없습니다."));
                 }
             } catch (JSONException e) {
                 Log.e(TAG, "json 파싱 에러 : " + e.getMessage());
             } finally {
                 deleteArticleFromFirebase();
             }
-        }, error -> mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), Collections.emptyList(), false, error.getMessage()))) {
+        }, error -> mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), false, error.getMessage()))) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
@@ -186,7 +186,7 @@ public class ArticleViewModel extends ViewModel {
             }
         };
 
-        mSavedStateHandle.set(STATE, new State(true, null, Collections.emptyList(), Collections.emptyList(), false, null));
+        mSavedStateHandle.set(STATE, new State(true, null, Collections.emptyList(), false, null));
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
 
@@ -202,14 +202,14 @@ public class ArticleViewModel extends ViewModel {
                     refreshReply(commentList);
                 }
             } catch (Exception e) {
-                mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), Collections.emptyList(), false, e.getMessage()));
+                mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), false, e.getMessage()));
                 Log.e(TAG, e.getMessage());
             } finally {
                 deleteReplyFromFirebase(replyKey);
             }
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
-            mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), Collections.emptyList(), false, error.getMessage()));
+            mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), false, error.getMessage()));
         }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -230,7 +230,7 @@ public class ArticleViewModel extends ViewModel {
             }
         };
 
-        mSavedStateHandle.set(STATE, new State(true, ((State) requireNonNull(mSavedStateHandle.get(STATE))).articleItem, Collections.emptyList(), Collections.emptyList(), false, null));
+        mSavedStateHandle.set(STATE, new State(true, ((State) requireNonNull(mSavedStateHandle.get(STATE))).articleItem, Collections.emptyList(), false, null));
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
 
@@ -239,16 +239,12 @@ public class ArticleViewModel extends ViewModel {
     }
 
     public void refreshReply(List<Element> commentList) {
-        mReplyItemKeys.clear();
-        mReplyItemValues.clear();
+        mReplyItemList.clear();
         fetchReplyData(commentList);
     }
 
-    public void addAll(List<String> replyItemKeys, List<ReplyItem> replyItemValues) {
-        if (replyItemKeys.size() == replyItemValues.size()) {
-            mReplyItemKeys.addAll(replyItemKeys);
-            mReplyItemValues.addAll(replyItemValues);
-        }
+    public void addAll(List<Map.Entry<String, ReplyItem>> replyItemList) {
+        mReplyItemList.addAll(replyItemList);
     }
 
     private void fetchArticleData(String articleId) {
@@ -283,11 +279,11 @@ public class ArticleViewModel extends ViewModel {
                 refreshReply(commentList);
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
-                mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), Collections.emptyList(), false, "값이 없습니다."));
+                mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), false, "값이 없습니다."));
             } finally {
                 fetchArticleDataFromFirebase(articleItem);
             }
-        }, error -> mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), Collections.emptyList(), false, error.getMessage()))) {
+        }, error -> mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), false, error.getMessage()))) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
@@ -297,13 +293,12 @@ public class ArticleViewModel extends ViewModel {
             }
         };
 
-        mSavedStateHandle.set(STATE, new State(true, null, Collections.emptyList(), Collections.emptyList(), false, null));
+        mSavedStateHandle.set(STATE, new State(true, null, Collections.emptyList(), false, null));
         AppController.getInstance().addToRequestQueue(stringRequest);
     }
 
     private void fetchReplyData(List<Element> commentList) {
-        List<String> replyItemKeys = new ArrayList<>();
-        List<ReplyItem> replyItemValues = new ArrayList<>();
+        List<Map.Entry<String, ReplyItem>> replyItemList = new ArrayList<>();
 
         try {
             for (Element comment : commentList) {
@@ -321,14 +316,13 @@ public class ArticleViewModel extends ViewModel {
                 replyItem.setReply(Html.fromHtml(replyContent).toString());
                 replyItem.setDate(timeStamp.replaceAll("[(]|[)]", ""));
                 replyItem.setAuth(authorization);
-                replyItemKeys.add(replyId);
-                replyItemValues.add(replyItem);
+                replyItemList.add(new AbstractMap.SimpleEntry<>(replyId, replyItem));
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
-            mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), Collections.emptyList(), false, e.getMessage()));
+            mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), false, e.getMessage()));
         } finally {
-            fetchReplyListFromFirebase(replyItemKeys, replyItemValues);
+            fetchReplyListFromFirebase(replyItemList);
         }
     }
 
@@ -343,12 +337,12 @@ public class ArticleViewModel extends ViewModel {
                 if (value != null) {
                     articleItem.setUid(value.getUid());
                 }
-                mSavedStateHandle.set(STATE, new State(false, articleItem, Collections.emptyList(), Collections.emptyList(), false, null));
+                mSavedStateHandle.set(STATE, new State(false, articleItem, Collections.emptyList(), false, null));
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), Collections.emptyList(), false, databaseError.getMessage()));
+                mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), false, databaseError.getMessage()));
             }
         });
     }
@@ -361,7 +355,7 @@ public class ArticleViewModel extends ViewModel {
         replysReference.child(mArticleKey).removeValue();
     }
 
-    private void fetchReplyListFromFirebase(List<String> replyItemKeys, List<ReplyItem> replyItemValues) {
+    private void fetchReplyListFromFirebase(List<Map.Entry<String, ReplyItem>> replyItemList) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Replys");
 
         databaseReference.child(mArticleKey).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -372,24 +366,24 @@ public class ArticleViewModel extends ViewModel {
                     ReplyItem value = snapshot.getValue(ReplyItem.class);
 
                     if (value != null) {
-                        int index = replyItemKeys.indexOf(value.getId());
+                        int index = replyItemList.stream().map(Map.Entry::getKey).collect(Collectors.toList()).indexOf(value.getId());
 
                         if (index > -1) {
-                            ReplyItem replyItem = replyItemValues.get(index);
+                            Map.Entry<String, ReplyItem> entry = replyItemList.get(index);
+                            ReplyItem replyItem = entry.getValue();
 
                             replyItem.setUid(value.getUid());
-                            replyItemKeys.set(index, key);
-                            replyItemValues.set(index, replyItem);
+                            replyItemList.set(index, new AbstractMap.SimpleEntry<>(key, replyItem));
                         }
                     }
                 }
-                mSavedStateHandle.set(STATE, new State(false, ((State) requireNonNull(mSavedStateHandle.get(STATE))).articleItem, replyItemKeys, replyItemValues, false, null));
+                mSavedStateHandle.set(STATE, new State(false, ((State) requireNonNull(mSavedStateHandle.get(STATE))).articleItem, replyItemList, false, null));
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
-                mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), Collections.emptyList(), false, databaseError.getMessage()));
+                mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), false, databaseError.getMessage()));
             }
         });
     }
@@ -467,28 +461,36 @@ public class ArticleViewModel extends ViewModel {
 
         public ArticleItem articleItem;
 
-        public List<String> replyItemKeys;
-
-        public List<ReplyItem> replyItemValues;
+        public List<Map.Entry<String, ReplyItem>> replyItemList;
 
         public boolean isSetResultOK;
 
         public String message;
 
-        public State(boolean isLoading, ArticleItem articleItem, List<String> replyItemKeys, List<ReplyItem> replyItemValues, boolean isSetResultOK, String message) {
+        public State(boolean isLoading, ArticleItem articleItem, List<Map.Entry<String, ReplyItem>> replyItemList, boolean isSetResultOK, String message) {
             this.isLoading = isLoading;
             this.articleItem = articleItem;
-            this.replyItemKeys = replyItemKeys;
-            this.replyItemValues = replyItemValues;
+            this.replyItemList = replyItemList;
             this.isSetResultOK = isSetResultOK;
             this.message = message;
         }
 
         protected State(Parcel in) {
             isLoading = in.readByte() != 0;
-            replyItemKeys = in.createStringArrayList();
             isSetResultOK = in.readByte() != 0;
             message = in.readString();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeByte((byte) (isLoading ? 1 : 0));
+            dest.writeByte((byte) (isSetResultOK ? 1 : 0));
+            dest.writeString(message);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
         }
 
         public static final Creator<State> CREATOR = new Creator<State>() {
@@ -502,19 +504,6 @@ public class ArticleViewModel extends ViewModel {
                 return new State[size];
             }
         };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeByte((byte) (isLoading ? 1 : 0));
-            parcel.writeStringList(replyItemKeys);
-            parcel.writeByte((byte) (isSetResultOK ? 1 : 0));
-            parcel.writeString(message);
-        }
     }
 
     public static final class ReplyFormState implements Parcelable {
