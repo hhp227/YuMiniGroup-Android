@@ -2,12 +2,13 @@ package com.hhp227.yu_minigroup.adapter;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.hhp227.yu_minigroup.R;
@@ -17,6 +18,7 @@ import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.fragment.GroupInfoFragment;
 
 import java.util.List;
+import java.util.Map;
 
 public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_GROUP = 0;
@@ -27,16 +29,13 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     private final Activity mActivity;
 
-    private final List<String> mGroupItemKeys;
-
-    private final List<GroupItem> mGroupItemValues;
+    private final List<Map.Entry<String, GroupItem>> mGroupItemList;
 
     private int mProgressBarVisibility, mButtonType;
 
-    public GroupListAdapter(Activity activity, List<String> groupItemKeys, List<GroupItem> groupItemValues) {
+    public GroupListAdapter(Activity activity, List<Map.Entry<String, GroupItem>> groupItemList) {
         this.mActivity = activity;
-        this.mGroupItemKeys = groupItemKeys;
-        this.mGroupItemValues = groupItemValues;
+        this.mGroupItemList = groupItemList;
     }
 
     @NonNull
@@ -54,7 +53,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ItemHolder) {
-            ((ItemHolder) holder).bind(mGroupItemValues.get(position));
+            ((ItemHolder) holder).bind(mGroupItemList.get(position).getValue());
         } else if (holder instanceof FooterHolder) {
             ((FooterHolder) holder).bind(mProgressBarVisibility);
         }
@@ -62,12 +61,12 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public int getItemCount() {
-        return mGroupItemValues.size();
+        return mGroupItemList.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return mGroupItemValues.get(position) != null ? TYPE_GROUP : TYPE_LOADER;
+        return mGroupItemList.get(position) != null ? TYPE_GROUP : TYPE_LOADER;
     }
 
     public void setFooterProgressBarVisibility(int visibility) {
@@ -81,7 +80,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     public String getKey(int position) {
-        return mGroupItemKeys.get(position);
+        return mGroupItemList.get(position).getKey();
     }
 
     public class ItemHolder extends RecyclerView.ViewHolder {
@@ -109,7 +108,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 args.putString("desc", groupItem.getDescription());
                 args.putString("type", groupItem.getJoinType());
                 args.putInt("btn_type", mButtonType);
-                args.putString("key", mGroupItemKeys.get(getAdapterPosition()));
+                args.putString("key", mGroupItemList.get(getAdapterPosition()).getKey());
 
                 GroupInfoFragment newFragment = GroupInfoFragment.newInstance();
                 newFragment.setArguments(args);

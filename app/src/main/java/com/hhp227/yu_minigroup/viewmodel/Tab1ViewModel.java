@@ -3,7 +3,6 @@ package com.hhp227.yu_minigroup.viewmodel;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-import android.view.View;
 import android.webkit.CookieManager;
 
 import androidx.annotation.NonNull;
@@ -32,20 +31,20 @@ import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Tab1ViewModel extends ViewModel {
-    public static boolean mIsAdmin;
+    public static Boolean mIsAdmin;
 
     public static String mGroupId, mGroupName, mGroupImage, mKey;
 
-    public final List<String> mArticleItemKeys = new ArrayList<>(Collections.singletonList(""));
-
-    public final List<ArticleItem> mArticleItemValues = new ArrayList<>(Collections.singletonList(null));
+    public final List<Map.Entry<String, ArticleItem>> mArticleItemList = new ArrayList<>(Collections.singletonList(null));
 
     private static final int LIMIT = 10;
 
@@ -70,7 +69,7 @@ public class Tab1ViewModel extends ViewModel {
         mKey = savedStateHandle.get("key");
 
         if (!mSavedStateHandle.contains(STATE)) {
-            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, null));
+            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), 1, false, false, null));
             fetchNextPage();
         }
     }
@@ -87,8 +86,7 @@ public class Tab1ViewModel extends ViewModel {
         String params = "?CLUB_GRP_ID=" + mGroupId + "&startL=" + offset + "&displayL=" + LIMIT;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, EndPoint.GROUP_ARTICLE_LIST + params, response -> {
             Source source = new Source(response);
-            List<String> articleItemKeys = new ArrayList<>();
-            List<ArticleItem> articleItemValues = new ArrayList<>();
+            List<Map.Entry<String, ArticleItem>> articleItemList = new ArrayList<>();
 
             try {
                 List<Element> list = source.getAllElementsByClass("listbox2");
@@ -133,17 +131,16 @@ public class Tab1ViewModel extends ViewModel {
 
                         articleItem.setYoutube(youTubeItem);
                     }
-                    articleItemKeys.add(id);
-                    articleItemValues.add(articleItem);
+                    articleItemList.add(new AbstractMap.SimpleEntry<>(id, articleItem));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                initFirebaseData(articleItemKeys, articleItemValues);
+                initFirebaseData(articleItemList);
             }
         }, error -> {
             VolleyLog.e(error.getMessage());
-            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, error.getMessage()));
+            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), 1, false, false, error.getMessage()));
         }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -154,7 +151,7 @@ public class Tab1ViewModel extends ViewModel {
             }
         };
 
-        mSavedStateHandle.set(STATE, new State(true, Collections.emptyList(), Collections.emptyList(), offset, offset > 1, false, null));
+        mSavedStateHandle.set(STATE, new State(true, Collections.emptyList(), offset, offset > 1, false, null));
         AppController.getInstance().addToRequestQueue(stringRequest);
     }
 
@@ -162,34 +159,29 @@ public class Tab1ViewModel extends ViewModel {
         State state = mSavedStateHandle.get(STATE);
 
         if (state != null && !mStopRequestMore) {
-            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), Collections.emptyList(), state.offset, true, false, null));
+            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), state.offset, true, false, null));
         }
     }
 
     public void refresh() {
         mMinId = 0;
 
-        mArticleItemKeys.clear();
-        mArticleItemValues.clear();
-        mArticleItemKeys.add("");
-        mArticleItemValues.add(null);
-        mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), Collections.emptyList(), 1, true, false, null));
+        mArticleItemList.clear();
+        mArticleItemList.add(null);
+        mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), 1, true, false, null));
     }
 
-    public void addAll(List<String> articleItemKeys, List<ArticleItem> articleItemValues) {
-        if (articleItemKeys.size() == articleItemValues.size()) {
-            mArticleItemKeys.addAll(mArticleItemKeys.size() - 1, articleItemKeys);
-            mArticleItemValues.addAll(mArticleItemValues.size() - 1, articleItemValues);
-        }
+    public void addAll(List<Map.Entry<String, ArticleItem>> articleItemList) {
+        mArticleItemList.addAll(mArticleItemList.size() - 1, articleItemList);
     }
 
-    private void initFirebaseData(List<String> articleItemKeys, List<ArticleItem> articleItemValues) {
+    private void initFirebaseData(List<Map.Entry<String, ArticleItem>> articleItemList) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Articles");
 
-        fetchArticleListFromFirebase(databaseReference.child(mKey), articleItemKeys, articleItemValues);
+        fetchArticleListFromFirebase(databaseReference.child(mKey), articleItemList);
     }
 
-    private void fetchArticleListFromFirebase(Query query, List<String> articleItemKeys, List<ArticleItem> articleItemValues) {
+    private void fetchArticleListFromFirebase(Query query, List<Map.Entry<String, ArticleItem>> articleItemList) {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -198,25 +190,24 @@ public class Tab1ViewModel extends ViewModel {
                     ArticleItem value = snapshot.getValue(ArticleItem.class);
 
                     if (value != null) {
-                        int index = articleItemKeys.indexOf(value.getId());
+                        int index = articleItemList.stream().map(Map.Entry::getKey).collect(Collectors.toList()).indexOf(value.getId());
 
                         if (index > -1) {
-                            ArticleItem articleItem = articleItemValues.get(index);
+                            ArticleItem articleItem = articleItemList.get(index).getValue();
 
                             articleItem.setUid(value.getUid());
-                            articleItemKeys.set(index, key);
-                            articleItemValues.set(index, articleItem);
+                            articleItemList.set(index, new AbstractMap.SimpleEntry<>(key, articleItem));
                         }
                     }
                 }
                 if (mSavedStateHandle.get(STATE) != null) {
-                    mSavedStateHandle.set(STATE, new State(false, articleItemKeys, articleItemValues, ((State) mSavedStateHandle.get(STATE)).offset + LIMIT, false, articleItemKeys.isEmpty() && articleItemValues.isEmpty(), null));
+                    mSavedStateHandle.set(STATE, new State(false, articleItemList, ((State) mSavedStateHandle.get(STATE)).offset + LIMIT, false, articleItemList.isEmpty(), null));
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), Collections.emptyList(), 1, false, false, databaseError.getMessage()));
+                mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), 1, false, false, databaseError.getMessage()));
                 Log.e("파이어베이스", databaseError.getMessage());
             }
         });
@@ -225,9 +216,7 @@ public class Tab1ViewModel extends ViewModel {
     public static final class State implements Parcelable {
         public boolean isLoading;
 
-        public List<String> articleItemKeys;
-
-        public List<ArticleItem> articleItemValues;
+        public List<Map.Entry<String, ArticleItem>> articleItemList;
 
         public int offset;
 
@@ -237,10 +226,9 @@ public class Tab1ViewModel extends ViewModel {
 
         public String message;
 
-        public State(boolean isLoading, List<String> articleItemKeys, List<ArticleItem> articleItemValues, int offset, boolean hasRequestedMore, boolean isEndReached, String message) {
+        public State(boolean isLoading, List<Map.Entry<String, ArticleItem>> articleItemList, int offset, boolean hasRequestedMore, boolean isEndReached, String message) {
             this.isLoading = isLoading;
-            this.articleItemKeys = articleItemKeys;
-            this.articleItemValues = articleItemValues;
+            this.articleItemList = articleItemList;
             this.offset = offset;
             this.hasRequestedMore = hasRequestedMore;
             this.isEndReached = isEndReached;
@@ -249,11 +237,24 @@ public class Tab1ViewModel extends ViewModel {
 
         protected State(Parcel in) {
             isLoading = in.readByte() != 0;
-            articleItemKeys = in.createStringArrayList();
             offset = in.readInt();
             hasRequestedMore = in.readByte() != 0;
             isEndReached = in.readByte() != 0;
             message = in.readString();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeByte((byte) (isLoading ? 1 : 0));
+            dest.writeInt(offset);
+            dest.writeByte((byte) (hasRequestedMore ? 1 : 0));
+            dest.writeByte((byte) (isEndReached ? 1 : 0));
+            dest.writeString(message);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
         }
 
         public static final Creator<State> CREATOR = new Creator<State>() {
@@ -267,20 +268,5 @@ public class Tab1ViewModel extends ViewModel {
                 return new State[size];
             }
         };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeByte((byte) (isLoading ? 1 : 0));
-            parcel.writeStringList(articleItemKeys);
-            parcel.writeInt(offset);
-            parcel.writeByte((byte) (hasRequestedMore ? 1 : 0));
-            parcel.writeByte((byte) (isEndReached ? 1 : 0));
-            parcel.writeString(message);
-        }
     }
 }

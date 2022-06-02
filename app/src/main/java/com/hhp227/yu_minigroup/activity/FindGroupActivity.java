@@ -31,7 +31,7 @@ public class FindGroupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = ActivityListBinding.inflate(getLayoutInflater());
         mViewModel = new ViewModelProvider(this).get(FindGroupViewModel.class);
-        mAdapter = new GroupListAdapter(this, mViewModel.mGroupItemKeys, mViewModel.mGroupItemValues);
+        mAdapter = new GroupListAdapter(this, mViewModel.mGroupItemList);
         mOnScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -68,9 +68,9 @@ public class FindGroupActivity extends AppCompatActivity {
                 }
             } else if (state.hasRequestedMore) {
                 mViewModel.fetchGroupList(state.offset);
-            } else if (!state.groupItemKeys.isEmpty() && !state.groupItemValues.isEmpty()) {
+            } else if (!state.groupItemList.isEmpty()) {
                 hideProgressBar();
-                mViewModel.addAll(state.groupItemKeys, state.groupItemValues);
+                mViewModel.addAll(state.groupItemList);
                 mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
             } else if (state.isEndReached) {
                 hideProgressBar();

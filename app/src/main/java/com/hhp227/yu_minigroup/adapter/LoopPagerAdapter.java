@@ -26,7 +26,7 @@ public class LoopPagerAdapter extends PagerAdapter {
 
     @NonNull
     @Override
-    public Object instantiateItem(ViewGroup view, int position) {
+    public Object instantiateItem(@NonNull ViewGroup view, int position) {
         FragmentMainPagerBinding binding = FragmentMainPagerBinding.inflate(LayoutInflater.from(view.getContext()), view, false);
         switch (mPagerItemList.get(position)) {
             case "메인":
