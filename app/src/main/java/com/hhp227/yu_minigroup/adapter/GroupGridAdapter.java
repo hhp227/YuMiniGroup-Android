@@ -6,7 +6,7 @@ import android.view.*;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
+
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
@@ -15,15 +15,13 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.formats.MediaView;
-import com.google.android.gms.ads.formats.UnifiedNativeAdView;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.*;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.ui.loopviewpager.LoopViewPager;
-import com.hhp227.yu_minigroup.helper.ui.pageindicator.LoopingCirclePageIndicator;
+
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
@@ -51,7 +49,7 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
 
     private static final String TAG = "어뎁터";
 
-    private final List<Map.Entry<String, Object>> mGroupItemList;
+    private final List<Map.Entry<String, Object>> mCurrentList = new ArrayList<>();
 
     private BiConsumer<View, Integer> mOnItemClickListener;
 
@@ -60,10 +58,6 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
     private LoopPagerAdapter mLoopPagerAdapter;
 
     private View.OnClickListener mOnClickListener;
-
-    public GroupGridAdapter(List<Map.Entry<String, Object>> groupItemList) {
-        mGroupItemList = groupItemList;
-    }
 
     @NonNull
     @Override
@@ -86,9 +80,9 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof HeaderHolder) {
-            ((HeaderHolder) holder).bind((Map<String, String>) mGroupItemList.get(position).getValue());
+            ((HeaderHolder) holder).bind((Map<String, String>) mCurrentList.get(position).getValue());
         } else if (holder instanceof ItemHolder) {
-            ((ItemHolder) holder).bind((GroupItem) mGroupItemList.get(position).getValue());
+            ((ItemHolder) holder).bind((GroupItem) mCurrentList.get(position).getValue());
         } else if (holder instanceof AdHolder) {
             ((AdHolder) holder).bind();
         } else if (holder instanceof BannerHolder) {
@@ -105,22 +99,32 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        return mGroupItemList.size();
+        return mCurrentList.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return mGroupItemList.get(position).getValue() instanceof Map ? TYPE_TEXT
-                : mGroupItemList.get(position).getValue() instanceof GroupItem ? TYPE_GROUP
-                : mGroupItemList.get(position).getValue() instanceof String && mGroupItemList.get(position).getValue().equals("광고") ? TYPE_AD
-                : mGroupItemList.get(position).getValue() instanceof String && mGroupItemList.get(position).getValue().equals("없음") ? TYPE_BANNER
-                : mGroupItemList.get(position).getValue() instanceof String && mGroupItemList.get(position).getValue().equals("뷰페이져") ? TYPE_VIEW_PAGER
+        return mCurrentList.get(position).getValue() instanceof Map ? TYPE_TEXT
+                : mCurrentList.get(position).getValue() instanceof GroupItem ? TYPE_GROUP
+                : mCurrentList.get(position).getValue() instanceof String && mCurrentList.get(position).getValue().equals("광고") ? TYPE_AD
+                : mCurrentList.get(position).getValue() instanceof String && mCurrentList.get(position).getValue().equals("없음") ? TYPE_BANNER
+                : mCurrentList.get(position).getValue() instanceof String && mCurrentList.get(position).getValue().equals("뷰페이져") ? TYPE_VIEW_PAGER
                 : -1;
     }
 
     @Override
     public long getItemId(int position) {
         return position;
+    }
+
+    public List<Map.Entry<String, Object>> getCurrentList() {
+        return mCurrentList;
+    }
+
+    public void submitList(List<Map.Entry<String, Object>> groupItemList) {
+        mCurrentList.clear();
+        mCurrentList.addAll(groupItemList);
+        notifyDataSetChanged();
     }
 
     private TextView getAdText(Context context) {
@@ -144,7 +148,7 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
     }
 
     public String getKey(int position) {
-        return mGroupItemList.get(position).getKey();
+        return mCurrentList.get(position).getKey();
     }
 
     public void moveSliderPager() {

@@ -99,7 +99,7 @@ public class GroupMainFragment extends Fragment {
                 }
             }
         };
-        mAdapter = new GroupGridAdapter(mViewModel.mGroupItemList);
+        mAdapter = new GroupGridAdapter();
         mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == Activity.RESULT_OK) {
                 mViewModel.refresh();
@@ -110,8 +110,8 @@ public class GroupMainFragment extends Fragment {
         ((MainActivity) requireActivity()).setAppBar(mBinding.toolbar, getString(R.string.main));
         mAdapter.setHasStableIds(true);
         mAdapter.setOnItemClickListener((v, position) -> {
-            if (mViewModel.mGroupItemList.get(position).getValue() instanceof GroupItem) {
-                GroupItem groupItem = (GroupItem) mViewModel.mGroupItemList.get(position).getValue();
+            if (mAdapter.getCurrentList().get(position).getValue() instanceof GroupItem) {
+                GroupItem groupItem = (GroupItem) mAdapter.getCurrentList().get(position).getValue();
                 Intent intent = new Intent(getContext(), GroupActivity.class);
 
                 intent.putExtra("admin", groupItem.isAdmin());
@@ -159,13 +159,13 @@ public class GroupMainFragment extends Fragment {
         if (mViewModel.getUser() == null) {
             ((MainActivity) requireActivity()).logout();
         }
-        mViewModel.mState.observe(getViewLifecycleOwner(), state -> {
+        mViewModel.getState().observe(getViewLifecycleOwner(), state -> {
             if (state.isLoading) {
                 requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                 showProgressBar();
-            } else if (state.isSuccess) {
+            } else if (!state.groupItemList.isEmpty()) {
                 hideProgressBar();
-                mAdapter.notifyDataSetChanged();
+                mAdapter.submitList(state.groupItemList);
                 if (getActivity() != null) {
                     getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                 }
@@ -177,7 +177,7 @@ public class GroupMainFragment extends Fragment {
                 }
             }
         });
-        mViewModel.mTick.observe(getViewLifecycleOwner(), aLong -> mAdapter.moveSliderPager());
+        mViewModel.getTick().observe(getViewLifecycleOwner(), aLong -> mAdapter.moveSliderPager());
     }
 
     @Override

@@ -18,10 +18,12 @@ import com.hhp227.yu_minigroup.databinding.HeaderCalendarBinding;
 import com.hhp227.yu_minigroup.databinding.ScheduleItemBinding;
 import com.hhp227.yu_minigroup.viewmodel.Tab2ViewModel;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class Tab2Fragment extends Fragment {
-    private RecyclerView.Adapter mAdapter;
+    private CalendarAdapter mAdapter;
 
     private FragmentTab2Binding mBinding;
 
@@ -37,39 +39,7 @@ public class Tab2Fragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(Tab2ViewModel.class);
-        mAdapter = new RecyclerView.Adapter() {
-            private static final int TYPE_CALENDAR = 0;
-
-            private static final int TYPE_ITEM = 1;
-
-            @NonNull
-            @Override
-            public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                if (viewType == TYPE_CALENDAR) {
-                    return new HeaderHolder(HeaderCalendarBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
-                } else if (viewType == TYPE_ITEM) {
-                    return new ItemHolder(ScheduleItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
-                }
-                throw new RuntimeException();
-            }
-
-            @Override
-            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-                if (holder instanceof ItemHolder) {
-                    ((ItemHolder) holder).bind(mViewModel.mList.get(position));
-                }
-            }
-
-            @Override
-            public int getItemCount() {
-                return mViewModel.mList.size();
-            }
-
-            @Override
-            public int getItemViewType(int position) {
-                return position == 0 ? TYPE_CALENDAR : TYPE_ITEM;
-            }
-        };
+        mAdapter = new CalendarAdapter();
 
         mBinding.rvCal.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvCal.setAdapter(mAdapter);
@@ -83,8 +53,7 @@ public class Tab2Fragment extends Fragment {
             if (state.isLoading) {
                 Log.e("TEST", "isLoading");
             } else if (!state.list.isEmpty()) {
-                mViewModel.addAll(state.list);
-                mBinding.rvCal.getAdapter().notifyDataSetChanged();
+                mAdapter.submitList(state.list);
             } else if (state.message != null && !state.message.isEmpty()) {
                 Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show();
             }
@@ -120,6 +89,48 @@ public class Tab2Fragment extends Fragment {
         public void bind(Map<String, String> map) {
             mBinding.date.setText(map.get("날짜"));
             mBinding.content.setText(map.get("내용"));
+        }
+    }
+
+    private class CalendarAdapter extends RecyclerView.Adapter {
+        private static final int TYPE_CALENDAR = 0;
+
+        private static final int TYPE_ITEM = 1;
+
+        private final List<Map<String, String>> mCurrentList = new ArrayList<>();
+
+        @NonNull
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            if (viewType == TYPE_CALENDAR) {
+                return new HeaderHolder(HeaderCalendarBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            } else if (viewType == TYPE_ITEM) {
+                return new ItemHolder(ScheduleItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            }
+            throw new RuntimeException();
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            if (holder instanceof ItemHolder) {
+                ((ItemHolder) holder).bind(mCurrentList.get(position));
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return mCurrentList.size();
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return position == 0 ? TYPE_CALENDAR : TYPE_ITEM;
+        }
+
+        public void submitList(List<Map<String, String>> list) {
+            mCurrentList.clear();
+            mCurrentList.addAll(list);
+            notifyDataSetChanged();
         }
     }
 }
