@@ -123,7 +123,7 @@ public class Tab1Fragment extends Fragment {
             intent.putExtra("grp_img", mGroupImage);
             intent.putExtra("artl_num", articleItem.getId());
             intent.putExtra("position", position + 1);
-            intent.putExtra("auth", articleItem.isAuth() || AppController.getInstance().getPreferenceManager().getUser().getUid().equals(articleItem.getUid()));
+            intent.putExtra("auth", articleItem.isAuth() || mViewModel.getUser().getUid().equals(articleItem.getUid()));
             intent.putExtra("isbottom", v.getId() == R.id.ll_reply);
             intent.putExtra("grp_key", mKey);
             intent.putExtra("artl_key", mAdapter.getKey(position));
