@@ -104,9 +104,12 @@ public class Tab1Fragment extends Fragment {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                Handler handler = new Handler(Looper.getMainLooper());
 
                 if (dy > 0 && layoutManager != null && layoutManager.findLastCompletelyVisibleItemPosition() >= layoutManager.getItemCount() - 1) {
+                    recyclerView.removeOnScrollListener(this);
                     mViewModel.fetchNextPage();
+                    handler.postDelayed(() -> recyclerView.addOnScrollListener(this), 1000);
                 }
             }
         });
