@@ -72,12 +72,12 @@ public class Tab1Fragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(Tab1ViewModel.class);
-        mAdapter = new ArticleListAdapter(mViewModel.mArticleItemList);
+        mAdapter = new ArticleListAdapter();
         mArticleActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == Activity.RESULT_OK) {
                 if (result.getData() != null) {
                     int position = result.getData().getIntExtra("position", 0) - 1;
-                    Map.Entry<String, ArticleItem> entry = mViewModel.mArticleItemList.get(position);
+                    Map.Entry<String, ArticleItem> entry = mAdapter.getCurrentList().get(position);
                     String key = entry.getKey();
                     ArticleItem articleItem = entry.getValue();
 
@@ -86,8 +86,7 @@ public class Tab1Fragment extends Fragment {
                     articleItem.setImages(result.getData().getStringArrayListExtra("img")); // firebase data
                     articleItem.setReplyCount(result.getData().getStringExtra("cmmt_cnt"));
                     articleItem.setYoutube(result.getData().getParcelableExtra("youtube"));
-                    mViewModel.mArticleItemList.set(position, new AbstractMap.SimpleEntry<>(key, articleItem));
-                    mAdapter.notifyItemChanged(position);
+                    mViewModel.updateArticleItem(position, new AbstractMap.SimpleEntry<>(key, articleItem));
                 } else {
                     mViewModel.refresh();
                     mBinding.rvArticle.scrollToPosition(0);
@@ -114,7 +113,7 @@ public class Tab1Fragment extends Fragment {
             }
         });
         mAdapter.setOnItemClickListener((v, position) -> {
-            ArticleItem articleItem = mViewModel.mArticleItemList.get(position).getValue();
+            ArticleItem articleItem = mAdapter.getCurrentList().get(position).getValue();
             Intent intent = new Intent(getContext(), ArticleActivity.class);
 
             intent.putExtra("admin", mIsAdmin);
@@ -156,14 +155,10 @@ public class Tab1Fragment extends Fragment {
                 }
             } else if (state.hasRequestedMore) {
                 mViewModel.fetchArticleList(state.offset);
-            } else if (!state.articleItemList.isEmpty()) {
+            } else if (!state.articleItemList.isEmpty() || state.isEndReached) {
                 hideProgressBar();
-                mViewModel.addAll(state.articleItemList);
-                mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
-                mBinding.rlWrite.setVisibility(mAdapter.getItemCount() > 1 ? View.GONE : View.VISIBLE);
-            } else if (state.isEndReached) {
-                hideProgressBar();
-                mAdapter.setFooterProgressBarVisibility(View.GONE);
+                mAdapter.submitList(state.articleItemList);
+                mAdapter.setFooterProgressBarVisibility(state.isEndReached ? View.GONE : View.INVISIBLE);
                 mBinding.rlWrite.setVisibility(mAdapter.getItemCount() > 1 ? View.GONE : View.VISIBLE);
             } else if (state.message != null && !state.message.isEmpty()) {
                 hideProgressBar();
