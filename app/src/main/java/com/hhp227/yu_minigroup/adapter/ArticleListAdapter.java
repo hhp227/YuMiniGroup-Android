@@ -86,6 +86,14 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         return mArticleItemList.get(position).getKey();
     }
 
+    // TODO
+    public void submitList(List<Map.Entry<String, ArticleItem>> articleItemList) {
+        mArticleItemList.clear();
+        mArticleItemList.add(null);
+        mArticleItemList.addAll(mArticleItemList.size() - 1, articleItemList);
+        notifyDataSetChanged();
+    }
+
     public class ItemHolder extends RecyclerView.ViewHolder {
         private final ArticleItemBinding mBinding;
 
