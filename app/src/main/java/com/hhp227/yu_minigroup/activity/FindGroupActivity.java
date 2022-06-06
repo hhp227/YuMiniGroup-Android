@@ -31,7 +31,7 @@ public class FindGroupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = ActivityListBinding.inflate(getLayoutInflater());
         mViewModel = new ViewModelProvider(this).get(FindGroupViewModel.class);
-        mAdapter = new GroupListAdapter(this, mViewModel.mGroupItemList);
+        mAdapter = new GroupListAdapter(this);
         mOnScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -39,7 +39,9 @@ public class FindGroupActivity extends AppCompatActivity {
                 LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
 
                 if (dy > 0 && manager != null && manager.findLastCompletelyVisibleItemPosition() >= manager.getItemCount() - 1) {
+                    recyclerView.removeOnScrollListener(this);
                     mViewModel.fetchNextPage();
+                    recyclerView.postDelayed(() -> recyclerView.addOnScrollListener(this), 500);
                 }
             }
         };
@@ -59,7 +61,7 @@ public class FindGroupActivity extends AppCompatActivity {
             mBinding.srlList.setRefreshing(false);
             mViewModel.refresh();
         }, 1000));
-        mViewModel.mState.observe(this, state -> {
+        mViewModel.getState().observe(this, state -> {
             if (state.isLoading) {
                 if (!state.hasRequestedMore) {
                     showProgressBar();
@@ -68,13 +70,10 @@ public class FindGroupActivity extends AppCompatActivity {
                 }
             } else if (state.hasRequestedMore) {
                 mViewModel.fetchGroupList(state.offset);
-            } else if (!state.groupItemList.isEmpty()) {
+            } else if (!state.groupItemList.isEmpty() || state.isEndReached) {
                 hideProgressBar();
-                mViewModel.addAll(state.groupItemList);
-                mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
-            } else if (state.isEndReached) {
-                hideProgressBar();
-                mAdapter.setFooterProgressBarVisibility(View.GONE);
+                mAdapter.submitList(state.groupItemList);
+                mAdapter.setFooterProgressBarVisibility(state.isEndReached ? View.GONE : View.INVISIBLE);
                 mBinding.text.setText("가입신청중인 그룹이 없습니다.");
                 mBinding.rlGroup.setVisibility(mAdapter.getItemCount() > 1 ? View.GONE : View.VISIBLE);
             } else if (state.message != null && !state.message.isEmpty()) {
