@@ -22,11 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ReplyListAdapter extends BaseAdapter {
-    public final List<Map.Entry<String, ReplyItem>> mReplyItemList;
-
-    public ReplyListAdapter(List<Map.Entry<String, ReplyItem>> replyItemList) {
-        this.mReplyItemList = replyItemList;
-    }
+    private final List<Map.Entry<String, ReplyItem>> mReplyItemList = new ArrayList<>();
 
     @Override
     public int getCount() {
@@ -57,6 +53,10 @@ public class ReplyListAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         viewHolder.bind(mReplyItemList.get(position).getValue());
         return convertView;
+    }
+
+    public List<Map.Entry<String, ReplyItem>> getCurrentList() {
+        return mReplyItemList;
     }
 
     public void submitList(List<Map.Entry<String, ReplyItem>> replyItemList) {

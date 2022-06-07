@@ -72,7 +72,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
         mActivityArticleBinding = ActivityArticleBinding.inflate(getLayoutInflater());
         mArticleDetailBinding = ArticleDetailBinding.inflate(getLayoutInflater());
         mViewModel = new ViewModelProvider(this).get(ArticleViewModel.class);
-        mAdapter = new ReplyListAdapter(mViewModel.mReplyItemList);
+        mAdapter = new ReplyListAdapter();
         mTextWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -119,28 +119,26 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
         mViewModel.getState().observe(this, state -> {
             if (state.isLoading) {
                 showProgressBar();
-            } else if (!state.replyItemList.isEmpty()) {
-                mViewModel.addAll(state.replyItemList);
-                mAdapter.notifyDataSetChanged();
-                if (state.articleItem != null) {
-                    hideProgressBar();
-                }
-            } else if (state.articleItem != null) {
-                hideProgressBar();
-                bindArticle(state.articleItem);
-                if (mViewModel.getUpdateArticleState().getValue() != null) {
-                    deliveryUpdate(state.articleItem);
-                }
             } else if (state.isSetResultOK) {
                 setResult(RESULT_OK);
                 finish();
                 Toast.makeText(getApplicationContext(), state.message, Toast.LENGTH_LONG).show();
+            } else if (state.articleItem != null || state.replyItemList != null) {
+                mAdapter.submitList(state.replyItemList);
+                hideProgressBar();
+                if (state.articleItem != null) {
+                    mViewModel.setArticleState(state.articleItem);
+                    if (mViewModel.getUpdateArticleState().getValue() != null) {
+                        deliveryUpdate(state.articleItem);
+                    }
+                }
             } else if (state.message != null && !state.message.isEmpty()) {
                 hideProgressBar();
                 Snackbar.make(mActivityArticleBinding.lvArticle, state.message, Snackbar.LENGTH_LONG).show();
             }
         });
         mViewModel.getReplyFormState().observe(this, replyFormState -> Toast.makeText(ArticleActivity.this, replyFormState.replyError, Toast.LENGTH_SHORT).show());
+        mViewModel.getArticleState().observe(this, this::bindArticle);
         mViewModel.getUpdateArticleState().observe(this, isUpdateArticle -> mViewModel.refresh());
         mViewModel.getScrollToLastState().observe(this, isScrollToLast -> {
             if (isScrollToLast) {
@@ -180,23 +178,19 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
                 return true;
             case 1:
                 Intent modifyIntent = new Intent(this, CreateArticleActivity.class);
-                ArticleViewModel.State state = mViewModel.getState().getValue();
+                ArticleItem articleItem = mViewModel.getArticleState().getValue();
 
-                if (state != null) {
-                    ArticleItem articleItem = state.articleItem;
-
-                    if (articleItem != null) {
-                        modifyIntent.putExtra("grp_id", mViewModel.mGroupId);
-                        modifyIntent.putExtra("artl_num", articleItem.getId());
-                        modifyIntent.putExtra("sbjt", articleItem.getTitle());
-                        modifyIntent.putExtra("txt", articleItem.getContent());
-                        modifyIntent.putStringArrayListExtra("img", (ArrayList<String>) articleItem.getImages());
-                        modifyIntent.putExtra("vid", articleItem.getYoutube());
-                        modifyIntent.putExtra("grp_key", mViewModel.mGroupKey);
-                        modifyIntent.putExtra("artl_key", mViewModel.mArticleKey);
-                        modifyIntent.putExtra("type", 1);
-                        startActivityForResult(modifyIntent, UPDATE_ARTICLE);
-                    }
+                if (articleItem != null) {
+                    modifyIntent.putExtra("grp_id", mViewModel.mGroupId);
+                    modifyIntent.putExtra("artl_num", articleItem.getId());
+                    modifyIntent.putExtra("sbjt", articleItem.getTitle());
+                    modifyIntent.putExtra("txt", articleItem.getContent());
+                    modifyIntent.putStringArrayListExtra("img", (ArrayList<String>) articleItem.getImages());
+                    modifyIntent.putExtra("vid", articleItem.getYoutube());
+                    modifyIntent.putExtra("grp_key", mViewModel.mGroupKey);
+                    modifyIntent.putExtra("artl_key", mViewModel.mArticleKey);
+                    modifyIntent.putExtra("type", 1);
+                    startActivityForResult(modifyIntent, UPDATE_ARTICLE);
                 }
                 return true;
             case 2:
@@ -226,7 +220,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         int position = ((AdapterView.AdapterContextMenuInfo) menuInfo).position;
-        boolean auth = !mViewModel.mReplyItemList.isEmpty() && position != 0 && mViewModel.mReplyItemList.get((position - 1)).getValue().isAuth();
+        boolean auth = !mAdapter.getCurrentList().isEmpty() && position != 0 && mAdapter.getCurrentList().get((position - 1)).getValue().isAuth();
 
         menu.setHeaderTitle("작업선택");
         menu.add(Menu.NONE, 1, Menu.NONE, "내용 복사");
@@ -239,8 +233,8 @@ public class ArticleActivity extends MyYouTubeBaseActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        String replyKey = mViewModel.mReplyItemList.isEmpty() || info.position == 0 ? null : mViewModel.mReplyItemList.get(info.position - 1).getKey();
-        ReplyItem replyItem = mViewModel.mReplyItemList.isEmpty() || info.position == 0 ? null : mViewModel.mReplyItemList.get(info.position - 1).getValue(); // 헤더가 있기때문에 포지션에서 -1을 해준다.
+        String replyKey = mAdapter.getCurrentList().isEmpty() || info.position == 0 ? null : mAdapter.getCurrentList().get(info.position - 1).getKey();
+        ReplyItem replyItem = mAdapter.getCurrentList().isEmpty() || info.position == 0 ? null : mAdapter.getCurrentList().get(info.position - 1).getValue(); // 헤더가 있기때문에 포지션에서 -1을 해준다.
 
         if (replyItem != null) {
             String replyId = replyItem.getId();
