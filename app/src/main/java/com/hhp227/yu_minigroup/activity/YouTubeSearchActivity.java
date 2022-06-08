@@ -32,12 +32,12 @@ public class YouTubeSearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = ActivityListBinding.inflate(getLayoutInflater());
         mViewModel = new ViewModelProvider(this).get(YoutubeSearchViewModel.class);
-        mAdapter = new YouTubeListAdapter(mViewModel.mYouTubeItemList);
+        mAdapter = new YouTubeListAdapter();
 
         setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
         mAdapter.setOnItemClickListener((v, position) -> {
-            YouTubeItem youTubeItem = mViewModel.mYouTubeItemList.get(position);
+            YouTubeItem youTubeItem = mAdapter.getCurrentList().get(position);
             youTubeItem.position = -1;
             Intent intent = new Intent(this, CreateArticleActivity.class);
 
@@ -52,19 +52,18 @@ public class YouTubeSearchActivity extends AppCompatActivity {
         }, 1000));
         mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         mBinding.recyclerView.setAdapter(mAdapter);
-        mViewModel.mState.observe(this, state -> {
+        mViewModel.getState().observe(this, state -> {
             if (state.isLoading) {
                 showProgressBar();
             } else if (!state.youTubeItems.isEmpty()) {
                 hideProgressBar();
-                mViewModel.addAll(state.youTubeItems);
-                mAdapter.notifyItemRangeChanged(0, mAdapter.getItemCount());
+                mAdapter.submitList(state.youTubeItems);
             } else if (state.message != null && !state.message.isEmpty()) {
                 hideProgressBar();
                 Snackbar.make(findViewById(android.R.id.content), state.message, Snackbar.LENGTH_LONG).show();
             }
         });
-        mViewModel.mQuery.observe(this, mViewModel::requestData);
+        mViewModel.getQuery().observe(this, mViewModel::requestData);
     }
 
     @Override
