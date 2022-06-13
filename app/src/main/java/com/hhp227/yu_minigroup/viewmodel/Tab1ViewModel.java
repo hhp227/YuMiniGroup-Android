@@ -67,12 +67,12 @@ public class Tab1ViewModel extends ViewModel {
     }
 
     public void fetchArticleList(int offset) {
-        State state = mSavedStateHandle.get(STATE);
         String params = "?CLUB_GRP_ID=" + mGroupId + "&startL=" + offset + "&displayL=" + LIMIT;
 
         articleRepository.getArticleList(mCookieManager.getCookie(EndPoint.LOGIN_LMS), params, new Callback() {
             @Override
             public <T> void onSuccess(T data) {
+                State state = mSavedStateHandle.get(STATE);
                 List<Map.Entry<String, ArticleItem>> articleItemList = (List<Map.Entry<String, ArticleItem>>) data;
 
                 if (state != null) {
@@ -87,6 +87,8 @@ public class Tab1ViewModel extends ViewModel {
 
             @Override
             public void onLoading() {
+                State state = mSavedStateHandle.get(STATE);
+
                 if (state != null) {
                     setState(new State(true, state.articleItemList, offset, offset > 1, false, null));
                 }
