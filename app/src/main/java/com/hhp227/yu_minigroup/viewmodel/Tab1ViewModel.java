@@ -37,7 +37,7 @@ public class Tab1ViewModel extends ViewModel {
 
     private final SavedStateHandle mSavedStateHandle;
 
-    private final ArticleRepository repository;
+    private final ArticleRepository articleRepository;
 
     public Tab1ViewModel(SavedStateHandle savedStateHandle) {
         mSavedStateHandle = savedStateHandle;
@@ -46,7 +46,7 @@ public class Tab1ViewModel extends ViewModel {
         mGroupName = savedStateHandle.get("grp_nm");
         mGroupImage = savedStateHandle.get("grp_img");
         mKey = savedStateHandle.get("key");
-        repository = new ArticleRepository(mKey);
+        articleRepository = new ArticleRepository(mGroupId, mKey);
 
         if (!mSavedStateHandle.contains(STATE)) {
             setState(new State(false, Collections.emptyList(), 1, false, false, null));
@@ -70,7 +70,7 @@ public class Tab1ViewModel extends ViewModel {
         State state = mSavedStateHandle.get(STATE);
         String params = "?CLUB_GRP_ID=" + mGroupId + "&startL=" + offset + "&displayL=" + LIMIT;
 
-        repository.getArticleList(mCookieManager.getCookie(EndPoint.LOGIN_LMS), params, new Callback() {
+        articleRepository.getArticleList(mCookieManager.getCookie(EndPoint.LOGIN_LMS), params, new Callback() {
             @Override
             public <T> void onSuccess(T data) {
                 List<Map.Entry<String, ArticleItem>> articleItemList = (List<Map.Entry<String, ArticleItem>>) data;
@@ -97,13 +97,13 @@ public class Tab1ViewModel extends ViewModel {
     public void fetchNextPage() {
         State state = mSavedStateHandle.get(STATE);
 
-        if (state != null && !repository.isStopRequestMore()) {
+        if (state != null && !articleRepository.isStopRequestMore()) {
             setState(new State(false, state.articleItemList, state.offset, true, false, null));
         }
     }
 
     public void refresh() {
-        repository.setMinId(0);
+        articleRepository.setMinId(0);
         setState(new State(false, Collections.emptyList(), 1, true, false, null));
     }
 
