@@ -294,7 +294,6 @@ public class ArticleRepository {
     public void addArticleImage(String cookie, Bitmap bitmap, Callback callback) {
         MultipartRequest multipartRequest = new MultipartRequest(Request.Method.POST, EndPoint.IMAGE_UPLOAD, response -> {
             String imageSrc = new String(response.data);
-            Log.e("TEST", "imageSrc: " + imageSrc);
             imageSrc = EndPoint.BASE_URL + imageSrc.substring(imageSrc.lastIndexOf("/ilosfiles/"), imageSrc.lastIndexOf("\""));
 
             callback.onSuccess(imageSrc);
