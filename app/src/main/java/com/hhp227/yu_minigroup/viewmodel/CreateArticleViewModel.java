@@ -165,7 +165,7 @@ public class CreateArticleViewModel extends ViewModel {
     }
 
     private void uploadImage(final Spannable title, final Spannable content, final int position, final Bitmap bitmap) {
-        articleRepository.addArticleImage("", bitmap, new Callback() {
+        articleRepository.addArticleImage(mCookieManager.getCookie(EndPoint.LOGIN_LMS), bitmap, new Callback() {
             @Override
             public <T> void onSuccess(T data) {
                 uploadProcess(title, content, position, (String) data, false);
