@@ -16,7 +16,6 @@ import androidx.lifecycle.ViewModel;
 
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.StringRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,15 +24,12 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.data.ArticleRepository;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
+import com.hhp227.yu_minigroup.helper.Callback;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import com.hhp227.yu_minigroup.volley.util.MultipartRequest;
-
-import net.htmlparser.jericho.Source;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -45,7 +41,7 @@ import java.util.Map;
 public class CreateArticleViewModel extends ViewModel {
     public final List<Object> mContents = new ArrayList<>();
 
-    private static final String TAG = CreateArticleViewModel.class.getSimpleName(), STATE = "state", BITMAP = "bitmap";
+    private static final String STATE = "state", BITMAP = "bitmap";
 
     private List<String> mImageList;
 
@@ -59,6 +55,8 @@ public class CreateArticleViewModel extends ViewModel {
 
     private final SavedStateHandle mSavedStateHandle;
 
+    private final ArticleRepository articleRepository;
+
     public CreateArticleViewModel(SavedStateHandle savedStateHandle) {
         mSavedStateHandle = savedStateHandle;
         mGrpId = savedStateHandle.get("grp_id");
@@ -66,6 +64,7 @@ public class CreateArticleViewModel extends ViewModel {
         mArtlNum = savedStateHandle.get("artl_num");
         mArtlKey = savedStateHandle.get("artl_key");
         mImageList = savedStateHandle.get("img");
+        articleRepository = new ArticleRepository(mGrpId, mGrpKey);
 
         if (mImageList != null && mImageList.size() > 0) {
             mContents.addAll(mImageList);
@@ -138,97 +137,45 @@ public class CreateArticleViewModel extends ViewModel {
     }
 
     private void actionCreate(final String title, final String content) {
-        String tagStringReq = "req_send";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.WRITE_ARTICLE, response -> {
-            try {
-                JSONObject jsonObject = new JSONObject(response);
-                boolean error = jsonObject.getBoolean("isError");
-
-                if (!error) {
-                    getArticleId(title, Html.fromHtml(content).toString().trim());
-                }
-            } catch (JSONException e) {
-                Log.e(TAG, "에러 : " + e.getMessage());
-            }
-        }, error -> {
-            VolleyLog.e(error.getMessage());
-            mSavedStateHandle.set(STATE, new State(-1, null, Collections.emptyList(), error.getMessage()));
-        }) {
+        articleRepository.addArticle(mCookieManager.getCookie(EndPoint.LOGIN_LMS), mPreferenceManager.getUser(), title, content, mImageList, getYoutubeState().getValue(), new Callback() {
             @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-
-                headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
-                return headers;
+            public <T> void onSuccess(T data) {
+                mSavedStateHandle.set(STATE, new State(-1, (String) data, Collections.emptyList(), "전송완료"));
             }
 
             @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-
-                params.put("SBJT", title);
-                params.put("CLUB_GRP_ID", mGrpId);
-                params.put("TXT", content);
-                return params;
+            public void onFailure(Throwable throwable) {
+                mSavedStateHandle.set(STATE, new State(-1, null, Collections.emptyList(), throwable.getMessage()));
             }
-        };
 
-        AppController.getInstance().addToRequestQueue(stringRequest, tagStringReq);
+            @Override
+            public void onLoading() {
+                mSavedStateHandle.set(STATE, new State(0, null, Collections.emptyList(), null));
+            }
+        });
     }
 
     private void actionUpdate(final String title, final String content) {
-        String tagStringReq = "req_send";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.MODIFY_ARTICLE, response -> {
-            try {
-                initFirebaseData(title, Html.fromHtml(content).toString().trim());
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
-                mSavedStateHandle.set(STATE, new State(-1, null, Collections.emptyList(), e.getMessage()));
-            }
-        }, error -> {
-            VolleyLog.e(error.getMessage());
-            mSavedStateHandle.set(STATE, new State(-1, null, Collections.emptyList(), error.getMessage()));
-        }) {
+        articleRepository.setArticle(mCookieManager.getCookie(EndPoint.LOGIN_LMS), mArtlNum, mArtlKey, title, content, mImageList, getYoutubeState().getValue(), new Callback() {
             @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
+            public <T> void onSuccess(T data) {
+                if (data != null) {
+                    ArticleItem articleItem = (ArticleItem) data;
 
-                headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
-                return headers;
+                    mSavedStateHandle.set(STATE, new State(-1, articleItem.getId(), Collections.emptyList(), "수정완료"));
+                } else {
+                    mSavedStateHandle.set(STATE, new State(-1, "dummy", Collections.emptyList(), "수정완료"));
+                }
             }
 
             @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-
-                params.put("CLUB_GRP_ID", mGrpId);
-                params.put("ARTL_NUM", mArtlNum);
-                params.put("SBJT", title);
-                params.put("TXT", content);
-                return params;
+            public void onFailure(Throwable throwable) {
+                mSavedStateHandle.set(STATE, new State(-1, null, Collections.emptyList(), throwable.getMessage()));
             }
-        };
-        AppController.getInstance().addToRequestQueue(stringRequest, tagStringReq);
-    }
 
-    private void getArticleId(String title, String content) {
-        String params = "?CLUB_GRP_ID=" + mGrpId + "&displayL=1";
-
-        AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.GET, EndPoint.GROUP_ARTICLE_LIST + params, response -> {
-            Source source = new Source(response);
-            String artlNum = source.getFirstElementByClass("comment_wrap").getAttributeValue("num");
-
-            insertArticleToFirebase(artlNum, title, content);
-        }, error -> {
-            VolleyLog.e(error.getMessage());
-            mSavedStateHandle.set(STATE, new State(-1, null, Collections.emptyList(), error.getMessage()));
-        }) {
             @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-
-                headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
-                return headers;
+            public void onLoading() {
+                mSavedStateHandle.set(STATE, new State(0, null, Collections.emptyList(), null));
             }
         });
     }
@@ -313,54 +260,6 @@ public class CreateArticleViewModel extends ViewModel {
         }
     }
 
-    private void insertArticleToFirebase(String artlNum, String title, String content) {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Articles");
-        Map<String, Object> map = new HashMap<>();
-
-        map.put("id", artlNum);
-        map.put("uid", mPreferenceManager.getUser().getUid());
-        map.put("name", mPreferenceManager.getUser().getName());
-        map.put("title", title);
-        map.put("timestamp", System.currentTimeMillis());
-        map.put("content", TextUtils.isEmpty(content) ? null : content);
-        map.put("images", mImageList);
-        map.put("youtube", getYoutubeState().getValue());
-        databaseReference.child(mGrpKey).push().setValue(map);
-        mSavedStateHandle.set(STATE, new State(-1, artlNum, Collections.emptyList(), "전송완료"));
-    }
-
-    private void initFirebaseData(String title, String content) {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Articles");
-
-        updateArticleDataToFirebase(databaseReference.child(mGrpKey).child(mArtlKey), title, content);
-    }
-
-    private void updateArticleDataToFirebase(final Query query, final String title, final String content) {
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArticleItem articleItem = dataSnapshot.getValue(ArticleItem.class);
-
-                if (articleItem != null) {
-                    articleItem.setTitle(title);
-                    articleItem.setContent(TextUtils.isEmpty(content) ? null : content);
-                    articleItem.setImages(mImageList.isEmpty() ? null : mImageList);
-                    articleItem.setYoutube(getYoutubeState().getValue());
-                    query.getRef().setValue(articleItem);
-                    mSavedStateHandle.set(STATE, new State(-1, articleItem.getId(), Collections.emptyList(), "수정완료"));
-                } else {
-                    mSavedStateHandle.set(STATE, new State(-1, "dummy", Collections.emptyList(), "수정완료"));
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, databaseError.getMessage());
-                mSavedStateHandle.set(STATE, new State(-1, null, Collections.emptyList(), databaseError.getMessage()));
-            }
-        });
-    }
-
     public static final class State implements Parcelable {
         public int progress;
 
@@ -377,7 +276,7 @@ public class CreateArticleViewModel extends ViewModel {
             this.message = message;
         }
 
-        protected State(Parcel in) {
+        private State(Parcel in) {
             progress = in.readInt();
             articleId = in.readString();
             message = in.readString();
@@ -415,7 +314,7 @@ public class CreateArticleViewModel extends ViewModel {
             this.message = message;
         }
 
-        protected ArticleFormState(Parcel in) {
+        private ArticleFormState(Parcel in) {
             message = in.readString();
         }
 
