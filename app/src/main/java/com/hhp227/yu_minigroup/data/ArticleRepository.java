@@ -1,5 +1,6 @@
 package com.hhp227.yu_minigroup.data;
 
+import android.graphics.Bitmap;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
@@ -22,6 +23,7 @@ import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import com.hhp227.yu_minigroup.helper.Callback;
 import com.hhp227.yu_minigroup.helper.DateUtil;
+import com.hhp227.yu_minigroup.volley.util.MultipartRequest;
 
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
@@ -30,6 +32,7 @@ import net.htmlparser.jericho.Source;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -286,6 +289,43 @@ public class ArticleRepository {
 
         callback.onLoading();
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
+    }
+
+    public void addArticleImage(String cookie, Bitmap bitmap, Callback callback) {
+        MultipartRequest multipartRequest = new MultipartRequest(Request.Method.POST, EndPoint.IMAGE_UPLOAD, response -> {
+            String imageSrc = new String(response.data);
+            imageSrc = EndPoint.BASE_URL + imageSrc.substring(imageSrc.lastIndexOf("/ilosfiles/"), imageSrc.lastIndexOf("\""));
+
+            callback.onSuccess(imageSrc);
+        }, error -> {
+            VolleyLog.e(error.getMessage());
+            callback.onFailure(error);
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+
+                headers.put("Cookie", cookie);
+                return headers;
+            }
+
+            @Override
+            protected Map<String, DataPart> getByteData() {
+                Map<String, DataPart> params = new HashMap<>();
+
+                params.put("file", new DataPart(System.currentTimeMillis() + ".jpg", getFileDataFromDrawable(bitmap)));
+                return params;
+            }
+
+            private byte[] getFileDataFromDrawable(Bitmap bitmap) {
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+                bitmap.compress(Bitmap.CompressFormat.PNG, 80, byteArrayOutputStream);
+                return byteArrayOutputStream.toByteArray();
+            }
+        };
+
+        AppController.getInstance().addToRequestQueue(multipartRequest);
     }
 
     private void getArticleId(String cookie, User user, String title, String content, List<String> imageList, YouTubeItem youTubeItem, Callback callback) {

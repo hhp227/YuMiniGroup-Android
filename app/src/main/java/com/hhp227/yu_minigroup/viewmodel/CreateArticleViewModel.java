@@ -12,8 +12,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
-import com.android.volley.Request;
-import com.android.volley.VolleyLog;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.data.ArticleRepository;
@@ -21,14 +19,10 @@ import com.hhp227.yu_minigroup.dto.ArticleItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import com.hhp227.yu_minigroup.helper.Callback;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
-import com.hhp227.yu_minigroup.volley.util.MultipartRequest;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class CreateArticleViewModel extends ViewModel {
     public final List<Object> mContents = new ArrayList<>();
@@ -43,7 +37,7 @@ public class CreateArticleViewModel extends ViewModel {
 
     private StringBuilder mMakeHtmlContents;
 
-    private final String mGrpId, mGrpKey, mArtlNum, mArtlKey;
+    private final String mArtlNum, mArtlKey;
 
     private final SavedStateHandle mSavedStateHandle;
 
@@ -51,12 +45,10 @@ public class CreateArticleViewModel extends ViewModel {
 
     public CreateArticleViewModel(SavedStateHandle savedStateHandle) {
         mSavedStateHandle = savedStateHandle;
-        mGrpId = savedStateHandle.get("grp_id");
-        mGrpKey = savedStateHandle.get("grp_key");
         mArtlNum = savedStateHandle.get("artl_num");
         mArtlKey = savedStateHandle.get("artl_key");
         mImageList = savedStateHandle.get("img");
-        articleRepository = new ArticleRepository(mGrpId, mGrpKey);
+        articleRepository = new ArticleRepository(savedStateHandle.get("grp_id"), savedStateHandle.get("grp_key"));
 
         if (mImageList != null && mImageList.size() > 0) {
             mContents.addAll(mImageList);
@@ -173,40 +165,22 @@ public class CreateArticleViewModel extends ViewModel {
     }
 
     private void uploadImage(final Spannable title, final Spannable content, final int position, final Bitmap bitmap) {
-        MultipartRequest multipartRequest = new MultipartRequest(Request.Method.POST, EndPoint.IMAGE_UPLOAD, response -> {
-            String imageSrc = new String(response.data);
-            imageSrc = EndPoint.BASE_URL + imageSrc.substring(imageSrc.lastIndexOf("/ilosfiles/"), imageSrc.lastIndexOf("\""));
-
-            uploadProcess(title, content, position, imageSrc, false);
-        }, error -> {
-            VolleyLog.e(error.getMessage());
-            mSavedStateHandle.set(STATE, new State(-1, null, Collections.emptyList(), error.getMessage()));
-        }) {
+        articleRepository.addArticleImage("", bitmap, new Callback() {
             @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-
-                headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
-                return headers;
+            public <T> void onSuccess(T data) {
+                uploadProcess(title, content, position, (String) data, false);
             }
 
             @Override
-            protected Map<String, DataPart> getByteData() {
-                Map<String, DataPart> params = new HashMap<>();
-
-                params.put("file", new DataPart(System.currentTimeMillis() + position + ".jpg", getFileDataFromDrawable(bitmap)));
-                return params;
+            public void onFailure(Throwable throwable) {
+                mSavedStateHandle.set(STATE, new State(-1, null, Collections.emptyList(), throwable.getMessage()));
             }
 
-            private byte[] getFileDataFromDrawable(Bitmap bitmap) {
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-                bitmap.compress(Bitmap.CompressFormat.PNG, 80, byteArrayOutputStream);
-                return byteArrayOutputStream.toByteArray();
+            @Override
+            public void onLoading() {
+                mSavedStateHandle.set(STATE, new State(0, null, Collections.emptyList(), null));
             }
-        };
-
-        AppController.getInstance().addToRequestQueue(multipartRequest);
+        });
     }
 
     private void uploadProcess(Spannable spannableTitle, Spannable spannableContent, int position, String imageUrl, boolean isYoutube) {
