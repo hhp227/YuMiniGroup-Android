@@ -22,7 +22,6 @@ import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import com.hhp227.yu_minigroup.helper.Callback;
 import com.hhp227.yu_minigroup.helper.DateUtil;
-import com.hhp227.yu_minigroup.viewmodel.CreateArticleViewModel;
 
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
@@ -33,7 +32,6 @@ import org.json.JSONObject;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

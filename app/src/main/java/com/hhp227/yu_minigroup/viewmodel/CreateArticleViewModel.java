@@ -6,22 +6,14 @@ import android.os.Parcelable;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.webkit.CookieManager;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
 import com.android.volley.Request;
 import com.android.volley.VolleyLog;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.data.ArticleRepository;
