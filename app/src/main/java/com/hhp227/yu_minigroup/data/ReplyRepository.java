@@ -104,6 +104,10 @@ public class ReplyRepository {
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
 
+    public void setReply(String cookie) {
+        // TODO
+    }
+
     public void removeReply(String cookie, String replyId, String replyKey, Callback callback) {
         String tag_string_req = "req_delete";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.DELETE_REPLY, response -> {
