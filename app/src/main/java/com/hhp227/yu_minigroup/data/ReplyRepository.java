@@ -11,6 +11,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
@@ -104,8 +105,40 @@ public class ReplyRepository {
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
 
-    public void setReply(String cookie) {
-        // TODO
+    public void setReply(String cookie, String replyId, String replyKey, String text, Callback callback) {
+        String tag_string_req = "req_send";
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.MODIFY_REPLY, response -> {
+            try {
+                initFirebaseData(text, response, replyKey, callback);
+            } catch (Exception e) {
+                callback.onFailure(e);
+            }
+        }, error -> {
+            VolleyLog.e(error.getMessage());
+            callback.onFailure(error);
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+
+                headers.put("Cookie", cookie);
+                return headers;
+            }
+
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+
+                params.put("CLUB_GRP_ID", mGroupId);
+                params.put("ARTL_NUM", mArticleId);
+                params.put("CMMT_NUM", replyId);
+                params.put("CMT", text);
+                return params;
+            }
+        };
+
+        callback.onLoading();
+        AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
 
     public void removeReply(String cookie, String replyId, String replyKey, Callback callback) {
@@ -148,7 +181,12 @@ public class ReplyRepository {
 
         callback.onLoading();
         AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
+    }
 
+    private void initFirebaseData(String text, String response, String replyKey, Callback callback) {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Replys");
+
+        updateReplyDataToFirebase(databaseReference.child(mArticleKey).child(replyKey), text, response, callback);
     }
 
     private void fetchReplyListFromFirebase(List<Map.Entry<String, ReplyItem>> replyItemList, Callback callback) {
@@ -195,6 +233,28 @@ public class ReplyRepository {
         replyItem.setReply(text);
         databaseReference.child(mArticleKey).push().setValue(replyItem);
         callback.onSuccess(commentList);
+    }
+
+    private void updateReplyDataToFirebase(final Query query, String text, String response, Callback callback) {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    ReplyItem replyItem = dataSnapshot.getValue(ReplyItem.class);
+
+                    if (replyItem != null) {
+                        replyItem.setReply(text + "\n");
+                    }
+                    query.getRef().setValue(replyItem);
+                }
+                callback.onSuccess(response);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                callback.onFailure(databaseError.toException());
+            }
+        });
     }
 
     private void deleteReplyFromFirebase(String replyKey, List<Element> commentList, Callback callback) {

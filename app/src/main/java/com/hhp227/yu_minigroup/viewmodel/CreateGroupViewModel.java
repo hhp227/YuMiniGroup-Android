@@ -14,6 +14,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
+import com.hhp227.yu_minigroup.data.GroupRepository;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import com.hhp227.yu_minigroup.volley.util.MultipartRequest;
@@ -38,6 +39,8 @@ public class CreateGroupViewModel extends ViewModel {
     private final PreferenceManager mPreferenceManager = AppController.getInstance().getPreferenceManager();
 
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
+
+    private final GroupRepository mGroupRepository = new GroupRepository();
 
     private String mType;
 
