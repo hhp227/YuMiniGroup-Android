@@ -8,8 +8,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
@@ -24,11 +22,7 @@ import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.Callback;
-import com.hhp227.yu_minigroup.viewmodel.CreateGroupViewModel;
 import com.hhp227.yu_minigroup.viewmodel.FindGroupViewModel;
-import com.hhp227.yu_minigroup.viewmodel.GroupMainViewModel;
-import com.hhp227.yu_minigroup.viewmodel.RequestViewModel;
-import com.hhp227.yu_minigroup.viewmodel.Tab4ViewModel;
 import com.hhp227.yu_minigroup.volley.util.MultipartRequest;
 
 import net.htmlparser.jericho.Element;
@@ -39,14 +33,11 @@ import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
