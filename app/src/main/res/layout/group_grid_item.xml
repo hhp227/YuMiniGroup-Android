@@ -1,58 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<layout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/card_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:elevation="3dp"
-        app:cardCornerRadius="4dp">
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <RelativeLayout
-            android:id="@+id/rl_group"
+    <androidx.cardview.widget.CardView
+            android:id="@+id/card_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground">
-
-        <ImageView
-                android:id="@+id/iv_group_image"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:src="@drawable/ic_launcher_background"
-                android:scaleType="fitXY"/>
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:elevation="3dp"
+            app:cardCornerRadius="4dp">
 
         <RelativeLayout
-                android:layout_below="@id/iv_group_image"
+                android:id="@+id/rl_group"
                 android:layout_width="match_parent"
-                android:layout_height="65dp"
-                android:layout_marginBottom="0dp">
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
 
-            <TextView
-                    android:id="@+id/tv_title"
-                    android:textSize="15dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:paddingTop="10dp"
-                    android:textColor="#4c4c4c"
-                    android:text="제목"/>
+            <ImageView
+                    android:id="@+id/iv_group_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:src="@drawable/ic_launcher_background"
+                    android:scaleType="fitXY" />
+
+            <RelativeLayout
+                    android:layout_below="@id/iv_group_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="65dp"
+                    android:layout_marginBottom="0dp">
+
+                <TextView
+                        android:id="@+id/tv_title"
+                        android:textSize="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingTop="10dp"
+                        android:textColor="#4c4c4c"
+                        android:text="제목" />
+
+            </RelativeLayout>
+
+            <ImageView
+                    android:id="@+id/iv_more"
+                    android:layout_width="16dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@id/iv_group_image"
+                    android:layout_marginTop="10dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_more_vert_gray_24dp" />
 
         </RelativeLayout>
 
-        <ImageView
-                android:id="@+id/iv_more"
-                android:layout_width="16dp"
-                android:layout_height="24dp"
-                android:layout_alignParentRight="true"
-                android:layout_below="@id/iv_group_image"
-                android:layout_marginTop="10dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_more_vert_gray_24dp"/>
+    </androidx.cardview.widget.CardView>
 
-    </RelativeLayout>
-
-</androidx.cardview.widget.CardView>
+</layout>

@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+<layout
+        xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <EditText
-            android:padding="10dp"
-            android:id="@+id/et_reply"
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="top"
-            android:background="@null"
-            android:hint="내용을 입력하세요."
-            android:divider="@null">
-        <requestFocus/>
+            android:layout_height="match_parent">
 
-    </EditText>
+        <EditText
+                android:padding="10dp"
+                android:id="@+id/et_reply"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="top"
+                android:background="@null"
+                android:hint="내용을 입력하세요."
+                android:divider="@null">
+            <requestFocus/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        </EditText>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -1,101 +1,105 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="vertical">
+<layout
+        xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <RelativeLayout
-            android:id="@+id/rl_type_main"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
 
-        <ImageView
-                android:layout_width="186dp"
-                android:layout_height="110dp"
-                android:src="@drawable/yu_minigroup"
-                android:layout_above="@id/tv_nogroups"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="20dp"/>
-
-        <TextView
-                android:text="가입한 그룹이 없습니다."
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_above="@id/tv_nogroups"/>
-
-        <TextView
-                android:id="@+id/tv_nogroups"
-                android:text="그룹찾기를 통해 가입하거나"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_marginTop="15dp"/>
-
-        <TextView
-                android:id="@+id/tv_notice"
-                android:text="새로운 모임을 생성하세요."
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_marginTop="3dp"
-                android:layout_below="@id/tv_nogroups"/>
-
-        <Button
-                android:id="@+id/b_find"
-                android:layout_below="@id/tv_notice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="그룹 찾기"/>
-
-        <Button
-                android:id="@+id/b_create"
-                android:layout_below="@id/b_find"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="그룹 생성"/>
-
-    </RelativeLayout>
-
-    <RelativeLayout
-            android:id="@+id/rl_type_image"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="visible">
-
-        <ImageView
-                android:id="@+id/iv_banner"
+        <RelativeLayout
+                android:id="@+id/rl_type_main"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/yu_minigroup"
-                android:scaleType="centerCrop"/>
+                android:visibility="gone">
 
-        <TextView
-                android:id="@+id/tv_type1"
-                android:text="같은 취향을 가진 사람들과 \n취미생활을 공유하세요."
-                android:textSize="16dp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:layout_marginEnd="25dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentEnd="true"/>
+            <ImageView
+                    android:layout_width="186dp"
+                    android:layout_height="110dp"
+                    android:src="@drawable/yu_minigroup"
+                    android:layout_above="@id/tv_nogroups"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="20dp" />
 
-        <TextView
-                android:id="@+id/tv_type2"
-                android:text="동아리, 조별과제 모임을 만들어보세요"
-                android:textSize="16dp"
-                android:textStyle="bold"
-                android:textColor="#f1d51a"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginStart="25dp"/>
+            <TextView
+                    android:text="가입한 그룹이 없습니다."
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_above="@id/tv_nogroups" />
 
-    </RelativeLayout>
+            <TextView
+                    android:id="@+id/tv_nogroups"
+                    android:text="그룹찾기를 통해 가입하거나"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginTop="15dp" />
 
-</LinearLayout>
+            <TextView
+                    android:id="@+id/tv_notice"
+                    android:text="새로운 모임을 생성하세요."
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginTop="3dp"
+                    android:layout_below="@id/tv_nogroups" />
+
+            <Button
+                    android:id="@+id/b_find"
+                    android:layout_below="@id/tv_notice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="그룹 찾기" />
+
+            <Button
+                    android:id="@+id/b_create"
+                    android:layout_below="@id/b_find"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="그룹 생성" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+                android:id="@+id/rl_type_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible">
+
+            <ImageView
+                    android:id="@+id/iv_banner"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/yu_minigroup"
+                    android:scaleType="centerCrop" />
+
+            <TextView
+                    android:id="@+id/tv_type1"
+                    android:text="같은 취향을 가진 사람들과 \n취미생활을 공유하세요."
+                    android:textSize="16dp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginEnd="25dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true" />
+
+            <TextView
+                    android:id="@+id/tv_type2"
+                    android:text="동아리, 조별과제 모임을 만들어보세요"
+                    android:textSize="16dp"
+                    android:textStyle="bold"
+                    android:textColor="#f1d51a"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginStart="25dp" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</layout>
