@@ -18,6 +18,7 @@ import com.hhp227.yu_minigroup.adapter.SeatListAdapter;
 import com.hhp227.yu_minigroup.databinding.FragmentSeatBinding;
 import com.hhp227.yu_minigroup.viewmodel.SeatViewModel;
 
+// TODO
 public class SeatFragment extends Fragment {
     private SeatListAdapter mAdapter;
 

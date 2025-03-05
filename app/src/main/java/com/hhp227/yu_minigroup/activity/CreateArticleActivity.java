@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+// TODO
 public class CreateArticleActivity extends AppCompatActivity {
     private String mCurrentPhotoPath;
 

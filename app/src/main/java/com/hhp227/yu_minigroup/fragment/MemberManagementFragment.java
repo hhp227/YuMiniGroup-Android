@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 
 import com.hhp227.yu_minigroup.databinding.FragmentMemberBinding;
 
+// TODO
 public class MemberManagementFragment extends Fragment {
     private static String mGroupId;
 

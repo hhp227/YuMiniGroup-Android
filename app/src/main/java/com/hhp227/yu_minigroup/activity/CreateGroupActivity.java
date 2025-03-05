@@ -27,6 +27,7 @@ import com.hhp227.yu_minigroup.viewmodel.CreateGroupViewModel;
 
 import java.util.Map;
 
+// TODO
 public class CreateGroupActivity extends AppCompatActivity {
     private ActivityCreateGroupBinding mBinding;
 

@@ -10,6 +10,7 @@ import com.hhp227.yu_minigroup.databinding.ActivityPictureBinding;
 
 import java.util.List;
 
+// TODO
 public class PictureActivity extends AppCompatActivity {
     private List<String> mImages;
 

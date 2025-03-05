@@ -2,7 +2,6 @@ package com.hhp227.yu_minigroup.viewmodel;
 
 import android.webkit.CookieManager;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -21,24 +20,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SplashViewModel extends ViewModel {
-    private final MutableLiveData<State> mState = new MutableLiveData<>();
-
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
     private final PreferenceManager mPreferenceManager = AppController.getInstance().getPreferenceManager();
 
-    public LiveData<State> getState() {
-        return mState;
+    private final MutableLiveData<Boolean> mSuccess = new MutableLiveData<>(false);
+
+    private final MutableLiveData<String> mMessage = new MutableLiveData<>();
+
+    public MutableLiveData<Boolean> isSuccess() {
+        return mSuccess;
+    }
+
+    public MutableLiveData<String> getMessage() {
+        return mMessage;
     }
 
     public void loginLMS(String ssoToken, String lmsToken) {
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.LOGIN_LMS, response -> {
             if (ssoToken != null) {
-                mState.postValue(new State(true, null));
+                mSuccess.postValue(true);
             }
         }, error -> {
             VolleyLog.e(SplashViewModel.class.getSimpleName(), error.getMessage());
-            mState.postValue(new State(false, error.getMessage()));
+            mSuccess.postValue(false);
+            mMessage.postValue(error.getMessage());
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
@@ -68,7 +74,8 @@ public class SplashViewModel extends ViewModel {
             mCookieManager.setCookie(EndPoint.LOGIN_LMS, cookie);
         }, error -> {
             VolleyLog.e(SplashViewModel.class.getSimpleName(), "로그인 에러 : " + error.getMessage());
-            mState.postValue(new State(false, error.getMessage()));
+            mSuccess.postValue(false);
+            mMessage.postValue(error.getMessage());
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
@@ -108,23 +115,4 @@ public class SplashViewModel extends ViewModel {
         new SSLConnect().postHttps(EndPoint.YU_PORTAL_LOGIN_URL, 1000, 1000);
         AppController.getInstance().addToRequestQueue(stringRequest, tagStringReq);
     }
-
-    public void clearUser() {
-
-    }
-
-    public static final class State {
-        public boolean isSuccess;
-
-        public String message;
-
-        public State() {
-        }
-
-        public State(boolean isSuccess, String message) {
-            this.isSuccess = isSuccess;
-            this.message = message;
-        }
-    }
 }
-

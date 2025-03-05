@@ -43,6 +43,7 @@ import com.hhp227.yu_minigroup.databinding.FragmentTab4Binding;
 import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.viewmodel.Tab4ViewModel;
 
+// TODO
 public class Tab4Fragment extends Fragment {
     private FragmentTab4Binding mBinding;
 

@@ -20,6 +20,7 @@ import com.hhp227.yu_minigroup.databinding.FragmentTab3Binding;
 import com.hhp227.yu_minigroup.dto.MemberItem;
 import com.hhp227.yu_minigroup.viewmodel.Tab3ViewModel;
 
+// TODO
 public class Tab3Fragment extends Fragment {
     private MemberGridAdapter mAdapter;
 

@@ -51,6 +51,7 @@ import net.htmlparser.jericho.Source;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO
 public class ArticleActivity extends MyYouTubeBaseActivity {
     private static final int UPDATE_ARTICLE = 10;
 

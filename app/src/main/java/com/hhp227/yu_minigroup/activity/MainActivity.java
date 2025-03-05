@@ -30,6 +30,7 @@ import com.hhp227.yu_minigroup.fragment.TimetableFragment;
 import com.hhp227.yu_minigroup.fragment.UnivNoticeFragment;
 import com.hhp227.yu_minigroup.viewmodel.MainViewModel;
 
+// TODO
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding mBinding;
 

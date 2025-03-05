@@ -20,6 +20,7 @@ import com.hhp227.yu_minigroup.databinding.ActivityListBinding;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import com.hhp227.yu_minigroup.viewmodel.YoutubeSearchViewModel;
 
+// TODO
 public class YouTubeSearchActivity extends AppCompatActivity {
     private YouTubeListAdapter mAdapter;
 

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.hhp227.yu_minigroup.databinding.ActivityWebViewBinding;
 
+// TODO
 public class WebViewActivity extends AppCompatActivity {
 
     @Override

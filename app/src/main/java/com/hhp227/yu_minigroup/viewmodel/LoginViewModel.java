@@ -35,41 +35,60 @@ import java.util.Map;
 public class LoginViewModel extends ViewModel {
     private static final String TAG = "로그인화면";
 
-    private final MutableLiveData<State> mState = new MutableLiveData<>();
-
-    private final MutableLiveData<LoginFormState> mLoginFormState = new MutableLiveData<>();
-
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
     private final PreferenceManager mPreferenceManager = AppController.getInstance().getPreferenceManager();
 
-    public LiveData<State> getState() {
-        return mState;
+    private final MutableLiveData<Boolean> mLoading = new MutableLiveData<>(false);
+
+    private final MutableLiveData<User> mUser = new MutableLiveData<>(mPreferenceManager.getUser());
+
+    private final MutableLiveData<String> mMessage = new MutableLiveData<>();
+
+    private final MutableLiveData<String> mEmailError = new MutableLiveData<>();
+
+    private final MutableLiveData<String> mPasswordError = new MutableLiveData<>();
+
+    public MutableLiveData<String> id = new MutableLiveData<>("");
+
+    public MutableLiveData<String> password = new MutableLiveData<>("");
+
+    public LiveData<Boolean> isLoading() {
+        return mLoading;
     }
 
-    public LiveData<LoginFormState> getLoginFormState() {
-        return mLoginFormState;
+    public LiveData<User> getUser() {
+        return mUser;
+    }
+
+    public LiveData<String> getMessage() {
+        return mMessage;
+    }
+
+    public LiveData<String> getEmailError() {
+        return mEmailError;
+    }
+
+    public LiveData<String> getPasswordError() {
+        return mPasswordError;
     }
 
     public void login(String id, String password) {
         if (!id.isEmpty() && !password.isEmpty()) {
-            mState.postValue(new State(true, null, null));
+            mLoading.postValue(true);
             if (id.equals("22000000") && password.equals("TestUser")) {
                 firebaseLogin(id, password);
             } else {
                 loginLMS(id, password, null, null);
             }
         } else {
-            mLoginFormState.postValue(new LoginFormState(id.isEmpty() ? "아이디 또는 학번을 입력하세요." : null, password.isEmpty() ? "패스워드를 입력하세요." : null));
+            mEmailError.postValue(id.isEmpty() ? "아이디 또는 학번을 입력하세요." : null);
+            mPasswordError.postValue(password.isEmpty() ? "패스워드를 입력하세요." : null);
         }
     }
 
     public void storeUser(User user) {
         mPreferenceManager.storeUser(user);
-    }
-
-    public User getUser() {
-        return mPreferenceManager.getUser();
     }
 
     private void loginLMS(String id, String password, String ssoToken, String lmsToken) {
@@ -78,11 +97,13 @@ public class LoginViewModel extends ViewModel {
             if (ssoToken != null) {
                 getUserInfo(id, password);
             } else {
-                mState.postValue(new State(false, null, "ssoToken is null"));
+                mLoading.postValue(false);
+                mMessage.postValue("ssoToken is null");
             }
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
-            mState.postValue(new State(false, null, "로그인 실패"));
+            mLoading.postValue(false);
+            mMessage.postValue("로그인 실패");
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
@@ -115,7 +136,8 @@ public class LoginViewModel extends ViewModel {
             mCookieManager.setCookie(EndPoint.LOGIN_LMS, cookie);
         }, error -> {
             VolleyLog.e(TAG, "로그인 에러 : " + error.getMessage());
-            mState.postValue(new State(false, null, error.getMessage()));
+            mLoading.postValue(false);
+            mMessage.postValue(error.getMessage());
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
@@ -170,11 +192,13 @@ public class LoginViewModel extends ViewModel {
                 createLog(user);
                 getUserUniqueId(user);
             } catch (Exception e) {
-                mState.postValue(new State(false, null, e.getMessage()));
+                mLoading.postValue(false);
+                mMessage.postValue(e.getMessage());
             }
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
-            mState.postValue(new State(false, null, error.getMessage()));
+            mLoading.postValue(false);
+            mMessage.postValue(error.getMessage());
         }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -220,10 +244,12 @@ public class LoginViewModel extends ViewModel {
             String uid = imageUrl.substring(imageUrl.indexOf("id=") + "id=".length(), imageUrl.lastIndexOf("&size"));
 
             user.setUid(uid);
-            mState.postValue(new State(false, user, null));
+            mLoading.postValue(false);
+            mUser.postValue(user);
         }, error -> {
             VolleyLog.e(error.getMessage());
-            mState.postValue(new State(false, null, error.getMessage()));
+            mLoading.postValue(false);
+            mMessage.postValue(error.getMessage());
         }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -239,22 +265,28 @@ public class LoginViewModel extends ViewModel {
         String email = "TestUser@yu.ac.kr";
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
-        firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                FirebaseUser firebaseUser = task.getResult().getUser();
-                User user = new User();
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser firebaseUser = task.getResult().getUser();
+                        User user = new User();
 
-                user.setUid(firebaseUser.getUid());
-                user.setUserId(id);
-                user.setPassword(password);
-                user.setName("TestUser");
-                user.setNumber("22000000");
-                user.setPhoneNumber("01000000000");
-                user.setEmail(email);
-                mCookieManager.setCookie(EndPoint.LOGIN_LMS, firebaseUser.getUid());
-                mState.postValue(new State(false, user, null));
-            }
-        }).addOnFailureListener(e -> mState.postValue(new State(false, null, "Firebase error" + e.getMessage())));
+                        user.setUid(firebaseUser.getUid());
+                        user.setUserId(id);
+                        user.setPassword(password);
+                        user.setName("TestUser");
+                        user.setNumber("22000000");
+                        user.setPhoneNumber("01000000000");
+                        user.setEmail(email);
+                        mCookieManager.setCookie(EndPoint.LOGIN_LMS, firebaseUser.getUid());
+                        mLoading.postValue(false);
+                        mUser.postValue(user);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    mLoading.postValue(false);
+                    mMessage.postValue("Firebase error" + e.getMessage());
+                });
     }
 
     private void firebaseRegister(String id, String password) {
@@ -262,46 +294,27 @@ public class LoginViewModel extends ViewModel {
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users");
 
-        firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                FirebaseUser firebaseUser = task.getResult().getUser();
-                User user = new User();
-                databaseReference.child(firebaseUser.getUid()).setValue(firebaseUser);
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser firebaseUser = task.getResult().getUser();
+                        User user = new User();
+                        databaseReference.child(firebaseUser.getUid()).setValue(firebaseUser);
 
-                user.setUid(firebaseUser.getUid());
-                user.setUserId(id);
-                user.setPassword(password);
-                user.setName("TestUser");
-                user.setNumber("22000000");
-                user.setPhoneNumber("01000000000");
-                user.setEmail(email);
-                mState.postValue(new State(false, user, null));
-            }
-        }).addOnFailureListener(e -> mState.postValue(new State(false, null, "Firebase error" + e.getMessage())));
-    }
-
-    public static final class State {
-        public boolean isLoading;
-
-        public User user;
-
-        public String message;
-
-        public State(boolean isLoading, User user, String message) {
-            this.isLoading = isLoading;
-            this.user = user;
-            this.message = message;
-        }
-    }
-
-    public static final class LoginFormState {
-        public String emailError;
-
-        public String passwordError;
-
-        public LoginFormState(String emailError, String passwordError) {
-            this.emailError = emailError;
-            this.passwordError = passwordError;
-        }
+                        user.setUid(firebaseUser.getUid());
+                        user.setUserId(id);
+                        user.setPassword(password);
+                        user.setName("TestUser");
+                        user.setNumber("22000000");
+                        user.setPhoneNumber("01000000000");
+                        user.setEmail(email);
+                        mLoading.postValue(false);
+                        mUser.postValue(user);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    mLoading.postValue(false);
+                    mMessage.postValue("Firebase error" + e.getMessage());
+                });
     }
 }

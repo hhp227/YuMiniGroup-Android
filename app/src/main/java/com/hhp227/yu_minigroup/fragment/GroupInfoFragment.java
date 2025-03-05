@@ -25,6 +25,7 @@ import com.hhp227.yu_minigroup.activity.RequestActivity;
 import com.hhp227.yu_minigroup.databinding.FragmentGroupInfoBinding;
 import com.hhp227.yu_minigroup.viewmodel.GroupInfoViewModel;
 
+// TODO
 public class GroupInfoFragment extends DialogFragment {
     public static final int TYPE_REQUEST = 0;
 

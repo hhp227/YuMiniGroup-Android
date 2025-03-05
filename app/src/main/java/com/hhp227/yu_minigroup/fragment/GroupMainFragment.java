@@ -36,6 +36,7 @@ import com.hhp227.yu_minigroup.viewmodel.GroupMainViewModel;
 import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_AD;
 import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_GROUP;
 
+// TODO
 public class GroupMainFragment extends Fragment {
     private static final int PORTAIT_SPAN_COUNT = 2;
 

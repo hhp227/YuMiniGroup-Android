@@ -3,6 +3,8 @@ package com.hhp227.yu_minigroup.activity;
 import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import androidx.databinding.DataBindingUtil;
+import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.databinding.ActivityNoticeBinding;
 
 public class NoticeActivity extends AppCompatActivity {
@@ -11,9 +13,8 @@ public class NoticeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = ActivityNoticeBinding.inflate(getLayoutInflater());
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_notice);
 
-        setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);

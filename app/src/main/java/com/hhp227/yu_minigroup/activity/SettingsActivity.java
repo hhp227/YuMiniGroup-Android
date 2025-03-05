@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+// TODO
 public class SettingsActivity extends AppCompatActivity {
     private static final String[] TAB_NAMES = {"회원관리", "모임정보"};
 

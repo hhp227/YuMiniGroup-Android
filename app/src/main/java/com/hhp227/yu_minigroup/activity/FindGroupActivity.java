@@ -17,6 +17,7 @@ import com.hhp227.yu_minigroup.databinding.ActivityListBinding;
 import com.hhp227.yu_minigroup.fragment.GroupInfoFragment;
 import com.hhp227.yu_minigroup.viewmodel.FindGroupViewModel;
 
+// TODO
 public class FindGroupActivity extends AppCompatActivity {
     private GroupListAdapter mAdapter;
 

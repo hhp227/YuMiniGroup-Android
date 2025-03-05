@@ -56,6 +56,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
+// TODO
 public class DefaultSettingFragment extends Fragment {
     private static String mGroupId, mGroupImage, mGroupKey;
 

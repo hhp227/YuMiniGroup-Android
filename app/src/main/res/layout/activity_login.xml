@@ -5,6 +5,14 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         tools:context=".activity.LoginActivity">
 
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+                name="viewModel"
+                type="com.hhp227.yu_minigroup.viewmodel.LoginViewModel" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -34,7 +42,8 @@
                     android:layout_marginBottom="10dp"
                     android:hint="ID"
                     android:inputType="number"
-                    android:singleLine="true">
+                    android:singleLine="true"
+                    android:text="@={viewModel.id}">
                 <requestFocus/>
 
             </EditText>
@@ -51,7 +60,8 @@
                     android:layout_marginBottom="10dp"
                     android:hint="Password"
                     android:inputType="textPassword"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:text="@={viewModel.password}" />
 
         </LinearLayout>
 
@@ -73,7 +83,8 @@
                 android:text="로그인"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/linear_layout" />
+                app:layout_constraintTop_toBottomOf="@id/linear_layout"
+                android:onClick="@{() -> viewModel.login(viewModel.id, viewModel.password)}" />
 
         <TextView
                 android:id="@+id/register"
@@ -112,7 +123,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="30dp"
-                android:visibility="gone"
+                android:visibility="@{viewModel.isLoading() ? View.VISIBLE : View.GONE}"
                 app:layout_constraintBottom_toTopOf="@id/text_view"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
