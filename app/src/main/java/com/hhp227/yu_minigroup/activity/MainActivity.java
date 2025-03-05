@@ -9,6 +9,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -28,10 +29,10 @@ import com.hhp227.yu_minigroup.fragment.GroupMainFragment;
 import com.hhp227.yu_minigroup.fragment.SeatFragment;
 import com.hhp227.yu_minigroup.fragment.TimetableFragment;
 import com.hhp227.yu_minigroup.fragment.UnivNoticeFragment;
+import com.hhp227.yu_minigroup.handler.OnActivityMainEventListener;
 import com.hhp227.yu_minigroup.viewmodel.MainViewModel;
 
-// TODO
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnActivityMainEventListener {
     private ActivityMainBinding mBinding;
 
     private MainViewModel mViewModel;
@@ -43,15 +44,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = ActivityMainBinding.inflate(getLayoutInflater());
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         mViewModel = new ViewModelProvider(this).get(MainViewModel.class);
         mProfileActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
                 updateProfileImage();
             }
         });
-
-        setContentView(mBinding.getRoot());
 
         // Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713
         MobileAds.initialize(this, initializationStatus -> getString(R.string.admob_app_id));
@@ -107,6 +106,11 @@ public class MainActivity extends AppCompatActivity {
             super.onBackPressed();
     }
 
+    @Override
+    public void onProfileImageClick() {
+        mProfileActivityResultLauncher.launch(new Intent(getApplicationContext(), ProfileActivity.class));
+    }
+
     public void setAppBar(Toolbar toolbar, String title) {
         setTitle(title);
         setSupportActionBar(toolbar);
@@ -138,16 +142,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void subscribeUi(NavHeaderMainBinding navHeaderMainBinding) {
-        Glide.with(this)
-                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mViewModel.getUser().getUid()), new LazyHeaders.Builder()
-                        .addHeader("Cookie", mViewModel.getCookie())
-                        .build()))
-                .apply(new RequestOptions().circleCrop()
-                        .error(R.drawable.user_image_view_circle)
-                        .skipMemoryCache(true)
-                        .diskCacheStrategy(DiskCacheStrategy.NONE))
-                .into(navHeaderMainBinding.ivProfileImage);
-        navHeaderMainBinding.ivProfileImage.setOnClickListener(v -> mProfileActivityResultLauncher.launch(new Intent(getApplicationContext(), ProfileActivity.class)));
-        navHeaderMainBinding.tvName.setText(mViewModel.getUser().getName());
+        navHeaderMainBinding.setViewModel(mViewModel);
+        navHeaderMainBinding.setLifecycleOwner(this);
+        navHeaderMainBinding.setUid("{UID}");
+        navHeaderMainBinding.setHandler(this);
     }
 }
