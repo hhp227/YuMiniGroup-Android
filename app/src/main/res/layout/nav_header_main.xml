@@ -13,10 +13,6 @@
         <variable
                 name="handler"
                 type="com.hhp227.yu_minigroup.handler.OnActivityMainEventListener" />
-
-        <variable
-                name="uid"
-                type="String" />
     </data>
 
     <LinearLayout
@@ -39,7 +35,7 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/user_image_view_circle"
                 android:onClick="@{() -> handler.onProfileImageClick()}"
-                app:userImageUrl="@{EndPoint.USER_IMAGE.replace(uid, viewModel.user.uid)}"
+                app:userImageUrl="@{EndPoint.USER_IMAGE.replace(`{UID}`, viewModel.user.uid)}"
                 app:cookie="@{viewModel.cookie}" />
 
         <TextView

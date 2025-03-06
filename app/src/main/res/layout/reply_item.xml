@@ -1,7 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.hhp227.yu_minigroup.app.EndPoint" />
+
+        <variable
+                name="replyItem"
+                type="com.hhp227.yu_minigroup.dto.ReplyItem" />
+
+        <variable
+                name="cookie"
+                type="String" />
+    </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -24,7 +37,9 @@
                     android:layout_height="45dp"
                     android:src="@drawable/user_image_view_circle"
                     android:scaleType="fitCenter"
-                    android:contentDescription="TODO" />
+                    android:contentDescription="TODO"
+                    app:userImageUrl="@{EndPoint.USER_IMAGE.replace(`{UID}`, replyItem.uid != null ? replyItem.uid : `{Null}`)}"
+                    app:cookie="@{cookie}" />
 
             <LinearLayout
                     android:layout_width="fill_parent"
@@ -36,15 +51,17 @@
                         android:id="@+id/tv_name"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:text="이름"
+                        android:text="@{replyItem.name}"
                         android:textSize="15dp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        tools:text="이름" />
 
                 <TextView
                         android:id="@+id/tv_reply"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:text="댓글 내용" />
+                        android:text="@{replyItem.reply}"
+                        tools:text="댓글 내용" />
 
             </LinearLayout>
 
@@ -54,11 +71,12 @@
                 android:id="@+id/tv_timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="날짜"
                 android:textColor="#888888"
                 android:textSize="12dp"
+                android:text="@{replyItem.date}"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ll_reply" />
+                app:layout_constraintTop_toBottomOf="@id/ll_reply"
+                tools:text="날짜" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

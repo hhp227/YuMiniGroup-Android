@@ -8,7 +8,6 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.app.EndPoint;
 
 public class BindingAdapters {
     @BindingAdapter("imageUrl")

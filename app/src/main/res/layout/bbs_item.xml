@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+                name="bbsItem"
+                type="com.hhp227.yu_minigroup.dto.BbsItem" />
+    </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -46,9 +53,10 @@
                         android:layout_alignParentStart="true"
                         android:layout_alignParentTop="true"
                         android:singleLine="true"
-                        android:text="Title"
+                        android:text="@{bbsItem.title}"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:textSize="17dp" />
+                        android:textSize="17dp"
+                        tools:text="Title" />
 
                 <TextView
                         android:id="@+id/item_date"
@@ -57,8 +65,9 @@
                         android:layout_alignLeft="@+id/item_title"
                         android:layout_alignStart="@+id/item_title"
                         android:layout_below="@+id/item_title"
-                        android:text="Date"
-                        android:textSize="15dp" />
+                        android:text="@{bbsItem.date}"
+                        android:textSize="15dp"
+                        tools:text="Date"/>
 
                 <TextView
                         android:id="@+id/item_writer"
@@ -67,8 +76,9 @@
                         android:layout_alignEnd="@+id/item_title"
                         android:layout_alignRight="@+id/item_title"
                         android:layout_alignTop="@+id/item_date"
-                        android:text="Writer"
-                        android:textSize="10dp" />
+                        android:text="@{bbsItem.writer}"
+                        android:textSize="10dp"
+                        tools:text="Writer" />
 
             </RelativeLayout>
 

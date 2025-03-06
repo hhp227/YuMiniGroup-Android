@@ -1,5 +1,6 @@
 package com.hhp227.yu_minigroup.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,19 +74,9 @@ public class ReplyListAdapter extends BaseAdapter {
         }
 
         public void bind(ReplyItem replyItem) {
-            Glide.with(mBinding.getRoot().getContext())
-                    .load(replyItem.getUid() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", replyItem.getUid()), new LazyHeaders.Builder()
-                            .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
-                            .build()) : null)
-                    .apply(RequestOptions
-                            .errorOf(R.drawable.user_image_view_circle)
-                            .circleCrop()
-                            .skipMemoryCache(true)
-                            .diskCacheStrategy(DiskCacheStrategy.NONE))
-                    .into(mBinding.ivProfileImage);
-            mBinding.tvName.setText(replyItem.getName());
-            mBinding.tvReply.setText(replyItem.getReply());
-            mBinding.tvTimestamp.setText(replyItem.getDate());
+            mBinding.setCookie(AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS));
+            mBinding.setReplyItem(replyItem);
+            mBinding.executePendingBindings();
         }
     }
 }

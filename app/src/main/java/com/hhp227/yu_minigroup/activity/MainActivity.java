@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements OnActivityMainEve
         mViewModel = new ViewModelProvider(this).get(MainViewModel.class);
         mProfileActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
+                // TODO 추후 없어질 코드
                 updateProfileImage();
             }
         });
@@ -144,7 +145,6 @@ public class MainActivity extends AppCompatActivity implements OnActivityMainEve
     private void subscribeUi(NavHeaderMainBinding navHeaderMainBinding) {
         navHeaderMainBinding.setViewModel(mViewModel);
         navHeaderMainBinding.setLifecycleOwner(this);
-        navHeaderMainBinding.setUid("{UID}");
         navHeaderMainBinding.setHandler(this);
     }
 }

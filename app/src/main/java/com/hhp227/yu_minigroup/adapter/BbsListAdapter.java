@@ -63,9 +63,8 @@ public class BbsListAdapter extends RecyclerView.Adapter<BbsListAdapter.BbsListH
         }
 
         public void bind(BbsItem bbsItem) {
-            mBinding.itemTitle.setText(bbsItem.getTitle());
-            mBinding.itemWriter.setText(bbsItem.getWriter());
-            mBinding.itemDate.setText(bbsItem.getDate());
+            mBinding.setBbsItem(bbsItem);
+            mBinding.executePendingBindings();
         }
     }
 }
