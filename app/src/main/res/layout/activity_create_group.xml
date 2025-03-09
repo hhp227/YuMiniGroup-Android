@@ -5,6 +5,18 @@
         xmlns:tools="http://schemas.android.com/tools"
         tools:context=".activity.CreateGroupActivity">
 
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+                name="viewModel"
+                type="com.hhp227.yu_minigroup.viewmodel.CreateGroupViewModel" />
+
+        <variable
+                name="handler"
+                type="com.hhp227.yu_minigroup.handler.OnActivityCreateGroupEventListener" />
+    </data>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -49,7 +61,8 @@
                         android:hint="그룹이름 입력"
                         android:inputType="textNoSuggestions"
                         android:paddingStart="5dp"
-                        android:textAppearance="?android:attr/textAppearanceMedium">
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="@={viewModel.title}">
                     <requestFocus/>
                 </EditText>
 
@@ -59,9 +72,11 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0"
                         android:padding="5dp"
-                        android:src="@drawable/ic_clear_gray_24dp"
+                        android:src="@{viewModel.title.empty ? @drawable/ic_clear_gray_24dp : @drawable/ic_clear_black_24dp}"
                         android:textColor="@android:color/darker_gray"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:onClick="@{() -> viewModel.setTitle(``)}"
+                        tools:src="@drawable/ic_clear_gray_24dp" />
 
             </LinearLayout>
 
@@ -73,6 +88,7 @@
                     android:layout_centerVertical="true"
                     android:src="@drawable/add_photo"
                     android:scaleType="centerCrop"
+                    android:onClick="@{handler::onImageClick}"
                     app:layout_constraintTop_toBottomOf="@id/ll_title" />
 
             <EditText
@@ -87,6 +103,7 @@
                     android:background="@null"
                     android:hint="그룹 설명을 입력하세요."
                     android:divider="@null"
+                    android:text="@={viewModel.description}"
                     app:layout_constraintTop_toBottomOf="@id/iv_group_image" />
 
             <RadioGroup
@@ -110,7 +127,9 @@
                         android:text="자동 승인"
                         android:id="@+id/rb_auto"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:checked="@={viewModel.joinType}"
+                        tools:checked="true" />
 
                 <RadioButton
                         android:layout_weight="2"
@@ -128,7 +147,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="#77000000"
-                android:visibility="gone">
+                android:visibility="@{viewModel.isLoading() ? View.VISIBLE : View.GONE}"
+                tools:visibility="gone">
 
             <RelativeLayout
                     android:layout_width="wrap_content"

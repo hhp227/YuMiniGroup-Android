@@ -73,10 +73,11 @@ public class FindGroupViewModel extends ListViewModel<Map.Entry<String, GroupIte
     }
 
     private List<Map.Entry<String, GroupItem>> mergedList(List<Map.Entry<String, GroupItem>> existingList, List<Map.Entry<String, GroupItem>> newList) {
-        List<Map.Entry<String, GroupItem>> result = new ArrayList<>();
-
-        result.addAll(existingList);
-        result.addAll(newList);
-        return result;
+        return new ArrayList<Map.Entry<String, GroupItem>>() {
+            {
+                addAll(existingList);
+                addAll(newList);
+            }
+        };
     }
 }

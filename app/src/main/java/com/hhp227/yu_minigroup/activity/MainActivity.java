@@ -3,6 +3,7 @@ package com.hhp227.yu_minigroup.activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.util.Log;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -21,6 +22,7 @@ import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.ads.MobileAds;
 import com.hhp227.yu_minigroup.R;
+import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.ActivityMainBinding;
 import com.hhp227.yu_minigroup.databinding.NavHeaderMainBinding;
@@ -123,15 +125,7 @@ public class MainActivity extends AppCompatActivity implements OnActivityMainEve
     }
 
     public void updateProfileImage() {
-        Glide.with(getApplicationContext())
-                .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", mViewModel.getUser().getUid()), new LazyHeaders.Builder()
-                        .addHeader("Cookie", mViewModel.getCookie())
-                        .build()))
-                .apply(new RequestOptions().circleCrop()
-                        .error(R.drawable.user_image_view_circle)
-                        .skipMemoryCache(true)
-                        .diskCacheStrategy(DiskCacheStrategy.NONE))
-                .into(NavHeaderMainBinding.bind(mBinding.navView.getHeaderView(0)).ivProfileImage);
+        mViewModel.setUser(AppController.getInstance().getPreferenceManager().getUser());
     }
 
     public void logout() {

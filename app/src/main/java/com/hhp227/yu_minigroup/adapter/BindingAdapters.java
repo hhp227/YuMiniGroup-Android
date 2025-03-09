@@ -1,6 +1,7 @@
 package com.hhp227.yu_minigroup.adapter;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;

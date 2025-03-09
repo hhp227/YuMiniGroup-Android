@@ -3,6 +3,8 @@ package com.hhp227.yu_minigroup.viewmodel;
 import android.util.Log;
 import android.webkit.CookieManager;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.hhp227.yu_minigroup.app.AppController;
@@ -17,13 +19,19 @@ public class MainViewModel extends ViewModel {
 
     private final PreferenceManager mPreferenceManager = AppController.getInstance().getPreferenceManager();
 
+    private final MutableLiveData<User> mUser = new MutableLiveData<>(mPreferenceManager.getUser());
+
     public void logout() {
         mPreferenceManager.clear();
         mCookieManager.removeAllCookies(value -> Log.d(TAG, "onReceiveValue " + value));
     }
 
-    public User getUser() {
-        return mPreferenceManager.getUser();
+    public void setUser(User user) {
+        mUser.postValue(user);
+    }
+
+    public LiveData<User> getUser() {
+        return mUser;
     }
 
     public String getCookie() {
