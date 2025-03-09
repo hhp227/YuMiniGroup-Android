@@ -4,6 +4,22 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+                name="viewModel"
+                type="com.hhp227.yu_minigroup.viewmodel.ListViewModel" />
+
+        <variable
+                name="handler"
+                type="com.hhp227.yu_minigroup.handler.OnActivityListEventListener" />
+
+        <variable
+                name="emptyMessage"
+                type="String" />
+    </data>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -31,7 +47,9 @@
                     android:id="@+id/sfl_group"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:visibility="@{viewModel.isLoading() &amp;&amp; !viewModel.hasRequestMore() ? View.VISIBLE : View.GONE}"
                     app:shimmer_duration="800"
+                    app:shimmer_auto_start="true"
                     app:layout_constraintTop_toTopOf="parent">
 
                 <LinearLayout
@@ -61,13 +79,15 @@
                     android:id="@+id/srl_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:onRefresh="@{handler::onRefresh}">
 
                 <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recycler_view"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scrollbars="vertical"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                         tools:listitem="@layout/group_list_item" />
 
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
@@ -76,11 +96,12 @@
                     android:id="@+id/pb_group"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
+                    android:visibility="@{viewModel.isLoading() &amp;&amp; !viewModel.hasRequestMore() ? View.VISIBLE : View.GONE}"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent" />
+                    app:layout_constraintRight_toRightOf="parent"
+                    tools:visibility="gone" />
 
             <RelativeLayout
                     android:id="@+id/rl_group"
@@ -93,7 +114,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
-                        android:layout_centerVertical="true" />
+                        android:layout_centerVertical="true"
+                        android:text="@{emptyMessage}" />
 
             </RelativeLayout>
 

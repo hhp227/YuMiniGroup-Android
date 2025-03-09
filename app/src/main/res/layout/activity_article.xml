@@ -5,6 +5,18 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         tools:context=".activity.ArticleActivity">
 
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+                name="viewModel"
+                type="com.hhp227.yu_minigroup.viewmodel.ArticleViewModel" />
+
+        <variable
+                name="handler"
+                type="com.hhp227.yu_minigroup.handler.OnActivityArticleEventListener" />
+    </data>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -38,7 +50,8 @@
                         android:id="@+id/srl_article"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1">
+                        android:layout_weight="1"
+                        app:onRefresh="@{handler::onRefresh}">
 
                     <!-- <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/rv_article"
@@ -50,7 +63,8 @@
                             android:id="@+id/lv_article"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:divider="#d9d9d9" />
+                            android:divider="#d9d9d9"
+                            tools:listheader="@layout/article_detail" />
 
                 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -76,7 +90,9 @@
                             android:hint="댓글을 입력하세요."
                             android:inputType="textNoSuggestions"
                             android:paddingStart="5dp"
-                            android:textAppearance="?android:attr/textAppearanceMedium" />
+                            android:text="@={viewModel.reply}"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            app:onFocusChange="@{(v, hasFocus) -> handler.onReplyFocusChange(hasFocus)}" />
 
                     <androidx.cardview.widget.CardView
                             android:id="@+id/cv_btn_send"
@@ -86,6 +102,8 @@
                             android:clickable="true"
                             android:focusable="true"
                             android:foreground="?android:attr/selectableItemBackground"
+                            android:onClick="@{() -> viewModel.actionSend(viewModel.reply)}"
+                            app:cardBackgroundColor="@{viewModel.reply.empty ? @color/cardview_light_background : @color/colorAccent}"
                             app:cardCornerRadius="2dp"
                             app:cardElevation="3dp">
 
@@ -95,7 +113,7 @@
                                 android:layout_height="wrap_content"
                                 android:padding="10dp"
                                 android:text="전송"
-                                android:textColor="@android:color/darker_gray"
+                                android:textColor="@{viewModel.reply.empty ? @android:color/darker_gray : @android:color/white}"
                                 android:textStyle="bold" />
 
                     </androidx.cardview.widget.CardView>
@@ -108,7 +126,7 @@
                     android:id="@+id/pb_article"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
+                    android:visibility="@{viewModel.isLoading() ? View.VISIBLE : View.GONE}"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"

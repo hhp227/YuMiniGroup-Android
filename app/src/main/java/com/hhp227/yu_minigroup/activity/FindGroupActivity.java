@@ -7,18 +7,21 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.GroupListAdapter;
 import com.hhp227.yu_minigroup.databinding.ActivityListBinding;
 import com.hhp227.yu_minigroup.fragment.GroupInfoFragment;
+import com.hhp227.yu_minigroup.handler.OnActivityListEventListener;
 import com.hhp227.yu_minigroup.viewmodel.FindGroupViewModel;
 
-// TODO
-public class FindGroupActivity extends AppCompatActivity {
+public class FindGroupActivity extends AppCompatActivity implements OnActivityListEventListener {
     private GroupListAdapter mAdapter;
 
     private RecyclerView.OnScrollListener mOnScrollListener;
@@ -30,7 +33,7 @@ public class FindGroupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = ActivityListBinding.inflate(getLayoutInflater());
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_list);
         mViewModel = new ViewModelProvider(this).get(FindGroupViewModel.class);
         mAdapter = new GroupListAdapter(this);
         mOnScrollListener = new RecyclerView.OnScrollListener() {
@@ -47,42 +50,16 @@ public class FindGroupActivity extends AppCompatActivity {
             }
         };
 
-        setContentView(mBinding.getRoot());
-        setSupportActionBar(mBinding.toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+        mBinding.setViewModel(mViewModel);
+        mBinding.setLifecycleOwner(this);
+        mBinding.setHandler(this);
+        setAppBar(mBinding.toolbar);
         mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
         mAdapter.setButtonType(GroupInfoFragment.TYPE_REQUEST);
         mBinding.recyclerView.setHasFixedSize(true);
-        mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         mBinding.recyclerView.setAdapter(mAdapter);
         mBinding.recyclerView.addOnScrollListener(mOnScrollListener);
-        mBinding.srlList.setOnRefreshListener(() -> new Handler(getMainLooper()).postDelayed(() -> {
-            mBinding.srlList.setRefreshing(false);
-            mViewModel.refresh();
-        }, 1000));
-        mViewModel.getState().observe(this, state -> {
-            if (state.isLoading) {
-                if (!state.hasRequestedMore) {
-                    showProgressBar();
-                } else {
-                    mAdapter.setFooterProgressBarVisibility(View.VISIBLE);
-                }
-            } else if (state.hasRequestedMore) {
-                mViewModel.fetchGroupList(state.offset);
-            } else if (!state.groupItemList.isEmpty() || state.isEndReached) {
-                hideProgressBar();
-                mAdapter.submitList(state.groupItemList);
-                mAdapter.setFooterProgressBarVisibility(state.isEndReached ? View.GONE : View.INVISIBLE);
-                mBinding.text.setText("가입신청중인 그룹이 없습니다.");
-                mBinding.rlGroup.setVisibility(mAdapter.getItemCount() > 1 ? View.GONE : View.VISIBLE);
-            } else if (state.message != null && !state.message.isEmpty()) {
-                hideProgressBar();
-                mAdapter.setFooterProgressBarVisibility(View.GONE);
-                Snackbar.make(mBinding.recyclerView, state.message, Snackbar.LENGTH_LONG).show();
-            }
-        });
+        observeViewModelData();
     }
 
     @Override
@@ -103,21 +80,33 @@ public class FindGroupActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void showProgressBar() {
-        if (mBinding.pbGroup.getVisibility() == View.GONE)
-            mBinding.pbGroup.setVisibility(View.VISIBLE);
-        if (!mBinding.sflGroup.isShimmerStarted())
-            mBinding.sflGroup.startShimmer();
-        if (!mBinding.sflGroup.isShimmerVisible())
-            mBinding.sflGroup.setVisibility(View.VISIBLE);
+    @Override
+    public void onRefresh() {
+        new Handler(getMainLooper()).postDelayed(() -> {
+            mBinding.srlList.setRefreshing(false);
+            mViewModel.refresh();
+        }, 1000);
     }
 
-    private void hideProgressBar() {
-        if (mBinding.pbGroup.getVisibility() == View.VISIBLE)
-            mBinding.pbGroup.setVisibility(View.GONE);
-        if (mBinding.sflGroup.isShimmerStarted())
-            mBinding.sflGroup.stopShimmer();
-        if (mBinding.sflGroup.isShimmerVisible())
-            mBinding.sflGroup.setVisibility(View.GONE);
+    private void setAppBar(Toolbar toolbar) {
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    private void observeViewModelData() {
+        mViewModel.getItemList().observe(this, groupItemList -> mAdapter.submitList(groupItemList));
+        mViewModel.hasRequestMore().observe(this, hasRequestMore -> {
+            if (hasRequestMore) {
+                mAdapter.setFooterProgressBarVisibility(View.VISIBLE);
+            }
+        });
+        mViewModel.isEndReached().observe(this, isEndReached -> mAdapter.setFooterProgressBarVisibility(isEndReached ? View.GONE : View.INVISIBLE));
+        mViewModel.getMessage().observe(this, message -> {
+            if (message != null && !message.isEmpty()) {
+                Snackbar.make(mBinding.recyclerView, message, Snackbar.LENGTH_LONG).show();
+            }
+        });
     }
 }

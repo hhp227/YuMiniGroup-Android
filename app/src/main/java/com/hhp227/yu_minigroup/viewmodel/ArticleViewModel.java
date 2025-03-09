@@ -1,10 +1,9 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.webkit.CookieManager;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
@@ -30,7 +29,11 @@ public class ArticleViewModel extends ViewModel {
 
     public final String mGroupId, mArticleId, mGroupName, mGroupImage, mGroupKey, mArticleKey;
 
-    private static final String STATE = "state", REPLY_FORM_STATE = "replyFormState", UPDATE_ARTICLE_STATE = "updateArticleState", ARTICLE = "article";
+    public final MutableLiveData<String> reply = new MutableLiveData<>("");
+
+    private static final String UPDATE_ARTICLE_STATE = "updateArticleState", ARTICLE = "article", LOADING = "loading", SUCCESS = "success", MESSAGE = "message", REPLY_ERROR = "replyError";
+
+    private final MutableLiveData<List<Map.Entry<String, ReplyItem>>> mReplyItemList = new MutableLiveData<>(Collections.emptyList());
 
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
@@ -55,42 +58,63 @@ public class ArticleViewModel extends ViewModel {
         mArticleRepository = new ArticleRepository(mGroupId, mGroupKey);
         mReplyRepository = new ReplyRepository(mGroupId, mArticleId, mArticleKey);
 
-        if (!mSavedStateHandle.contains(STATE)) {
-            mSavedStateHandle.set(STATE, new State(false, null, Collections.emptyList(), false, null));
-            fetchArticleData(mArticleId);
-        }
+        fetchArticleData(mArticleId, false);
+        setArticle(new ArticleItem("", "", "", "", "", Collections.emptyList(), null, "", false, 0));
+    }
+
+    public void setLoading(boolean bool) {
+        mSavedStateHandle.set(LOADING, bool);
+    }
+
+    public LiveData<Boolean> isLoading() {
+        return mSavedStateHandle.getLiveData(LOADING);
+    }
+
+    public LiveData<List<Map.Entry<String, ReplyItem>>> getReplyItemList() {
+        return mReplyItemList;
+    }
+
+    public void setSuccess(boolean bool) {
+        mSavedStateHandle.set(SUCCESS, bool);
+    }
+
+    public LiveData<Boolean> isSuccess() {
+        return mSavedStateHandle.getLiveData(SUCCESS);
+    }
+
+    public void setMessage(String message) {
+        mSavedStateHandle.set(MESSAGE, message);
+    }
+
+    public LiveData<String> getMessage() {
+        return mSavedStateHandle.getLiveData(MESSAGE);
+    }
+
+    public void setReplyError(String text) {
+        mSavedStateHandle.set(REPLY_ERROR, text);
+    }
+
+    public LiveData<String> getReplyError() {
+        return mSavedStateHandle.getLiveData(REPLY_ERROR);
     }
 
     public String getCookie() {
         return mCookieManager.getCookie(EndPoint.LOGIN_LMS);
     }
 
-    public void setState(State state) {
-        mSavedStateHandle.set(STATE, state);
-    }
-
-    public LiveData<State> getState() {
-        return mSavedStateHandle.getLiveData(STATE);
-    }
-
-    public LiveData<ReplyFormState> getReplyFormState() {
-        return mSavedStateHandle.getLiveData(REPLY_FORM_STATE);
-    }
-
-    public void setUpdateArticleState(boolean bool) {
+    public void setArticleUpdated(boolean bool) {
         mSavedStateHandle.set(UPDATE_ARTICLE_STATE, bool);
     }
 
-    // TODO ArticleState가 업데이트되면 변경되는걸로 변경하기
-    public LiveData<Boolean> getUpdateArticleState() {
+    public LiveData<Boolean> isArticleUpdated() {
         return mSavedStateHandle.getLiveData(UPDATE_ARTICLE_STATE);
     }
 
-    public void setArticleState(ArticleItem articleItem) {
+    public void setArticle(ArticleItem articleItem) {
         mSavedStateHandle.set(ARTICLE, articleItem);
     }
 
-    public LiveData<ArticleItem> getArticleState() {
+    public LiveData<ArticleItem> getArticle() {
         return mSavedStateHandle.getLiveData(ARTICLE);
     }
 
@@ -103,7 +127,9 @@ public class ArticleViewModel extends ViewModel {
     }
 
     public void actionSend(String text) {
-        if (text.length() > 0) {
+        if (!text.isEmpty()) {
+            setLoading(true);
+            reply.postValue("");
             mReplyRepository.addReply(getCookie(), mPreferenceManager.getUser(), text, new Callback() {
                 @Override
                 public <T> void onSuccess(T data) {
@@ -115,20 +141,17 @@ public class ArticleViewModel extends ViewModel {
 
                 @Override
                 public void onFailure(Throwable throwable) {
-                    setState(new State(false, null, Collections.emptyList(), false, throwable.getMessage()));
+                    setLoading(false);
+                    setMessage(throwable.getMessage());
                 }
 
                 @Override
                 public void onLoading() {
-                    State state = mSavedStateHandle.get(STATE);
-
-                    if (state != null) {
-                        setState(new State(true, state.articleItem, Collections.emptyList(), false, null));
-                    }
+                    setLoading(true);
                 }
             });
         } else {
-            mSavedStateHandle.set(REPLY_FORM_STATE, new ReplyFormState("댓글을 입력하세요."));
+            setReplyError("댓글을 입력하세요.");
         }
     }
 
@@ -136,17 +159,20 @@ public class ArticleViewModel extends ViewModel {
         mArticleRepository.removeArticle(getCookie(), mArticleId, mArticleKey, new Callback() {
             @Override
             public <T> void onSuccess(T data) {
-                setState(new State(false, null, Collections.emptyList(), true, "삭제완료"));
+                setLoading(false);
+                setSuccess(true);
+                setMessage("삭제완료");
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                setState(new State(false, null, Collections.emptyList(), false, throwable.getMessage()));
+                setLoading(false);
+                setMessage(throwable.getMessage());
             }
 
             @Override
             public void onLoading() {
-                setState(new State(true, null, Collections.emptyList(), false, null));
+                setLoading(true);
             }
         });
     }
@@ -160,42 +186,37 @@ public class ArticleViewModel extends ViewModel {
 
             @Override
             public void onFailure(Throwable throwable) {
-                setState(new State(false, null, Collections.emptyList(), false, throwable.getMessage()));
+                setLoading(false);
+                setMessage(throwable.getMessage());
             }
 
             @Override
             public void onLoading() {
-                State state = mSavedStateHandle.get(STATE);
-
-                if (state != null) {
-                    setState(new State(true, state.articleItem, state.replyItemList, false, null));
-                }
+                setLoading(true);
             }
         });
     }
 
     public void refresh() {
-        fetchArticleData(mArticleId);
+        fetchArticleData(mArticleId, true);
     }
 
     public void refreshReply(List<Element> commentList) {
         fetchReplyData(commentList);
     }
 
-    private void fetchArticleData(String articleId) {
+    private void fetchArticleData(String articleId, boolean isUpdated) {
         String params = "?CLUB_GRP_ID=" + mGroupId + "&startL=" + mPosition + "&displayL=1";
 
         mArticleRepository.getArticleData(getCookie(), articleId, mArticleKey, params, new Callback() {
             @Override
             public <T> void onSuccess(T data) {
-                State state = mSavedStateHandle.get(STATE);
-
                 if (data instanceof ArticleItem) {
                     ArticleItem articleItem = (ArticleItem) data;
 
-                    if (state != null) {
-                        setState(new State(false, articleItem, state.replyItemList, false, null));
-                    }
+                    setLoading(false);
+                    setArticle(articleItem);
+                    if (isUpdated) setArticleUpdated(true);
                 } else {
                     refreshReply((List<Element>) data);
                 }
@@ -203,16 +224,13 @@ public class ArticleViewModel extends ViewModel {
 
             @Override
             public void onFailure(Throwable throwable) {
-                setState(new State(false, null, Collections.emptyList(), false, throwable.getMessage()));
+                setLoading(false);
+                setMessage(throwable.getMessage());
             }
 
             @Override
             public void onLoading() {
-                State state = mSavedStateHandle.get(STATE);
-
-                if (state != null) {
-                    setState(new State(true, null, state.replyItemList, false, null));
-                }
+                setLoading(true);
             }
         });
     }
@@ -221,101 +239,18 @@ public class ArticleViewModel extends ViewModel {
         mReplyRepository.getReplyList(commentList, new Callback() {
             @Override
             public <T> void onSuccess(T data) {
-                setState(new State(false, null, (List<Map.Entry<String, ReplyItem>>) data, false, null));
+                setLoading(false);
+                mReplyItemList.postValue((List<Map.Entry<String, ReplyItem>>) data);
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                setState(new State(false, null, Collections.emptyList(), false, throwable.getMessage()));
+                setLoading(false);
+                setMessage(throwable.getMessage());
             }
 
             @Override
-            public void onLoading() {
-            }
+            public void onLoading() {}
         });
-    }
-
-    public static final class State implements Parcelable {
-        public boolean isLoading;
-
-        public ArticleItem articleItem;
-
-        public List<Map.Entry<String, ReplyItem>> replyItemList;
-
-        public boolean isSetResultOK;
-
-        public String message;
-
-        public State(boolean isLoading, ArticleItem articleItem, List<Map.Entry<String, ReplyItem>> replyItemList, boolean isSetResultOK, String message) {
-            this.isLoading = isLoading;
-            this.articleItem = articleItem;
-            this.replyItemList = replyItemList;
-            this.isSetResultOK = isSetResultOK;
-            this.message = message;
-        }
-
-        private State(Parcel in) {
-            isLoading = in.readByte() != 0;
-            isSetResultOK = in.readByte() != 0;
-            message = in.readString();
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeByte((byte) (isLoading ? 1 : 0));
-            dest.writeByte((byte) (isSetResultOK ? 1 : 0));
-            dest.writeString(message);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        public static final Creator<State> CREATOR = new Creator<State>() {
-            @Override
-            public State createFromParcel(Parcel in) {
-                return new State(in);
-            }
-
-            @Override
-            public State[] newArray(int size) {
-                return new State[size];
-            }
-        };
-    }
-
-    public static final class ReplyFormState implements Parcelable {
-        public String replyError;
-
-        public ReplyFormState(String replyError) {
-            this.replyError = replyError;
-        }
-
-        private ReplyFormState(Parcel in) {
-            replyError = in.readString();
-        }
-
-        public static final Creator<ReplyFormState> CREATOR = new Creator<ReplyFormState>() {
-            @Override
-            public ReplyFormState createFromParcel(Parcel in) {
-                return new ReplyFormState(in);
-            }
-
-            @Override
-            public ReplyFormState[] newArray(int size) {
-                return new ReplyFormState[size];
-            }
-        };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeString(replyError);
-        }
     }
 }

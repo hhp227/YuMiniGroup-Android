@@ -19,9 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 
-public class FindGroupViewModel extends ViewModel {
-    private final MutableLiveData<State> mState = new MutableLiveData<>(new State(false, Collections.emptyList(), 1, false, false, null));
-
+public class FindGroupViewModel extends ListViewModel<Map.Entry<String, GroupItem>> {
     private static final int LIMIT = 15;
 
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
@@ -32,42 +30,46 @@ public class FindGroupViewModel extends ViewModel {
         fetchNextPage();
     }
 
-    public LiveData<State> getState() {
-        return mState;
-    }
-
     public void fetchGroupList(int offset) {
         mGroupRepository.getNotJoinedGroupList(mCookieManager.getCookie(EndPoint.LOGIN_LMS), offset, LIMIT, new Callback() {
             @Override
             public <T> void onSuccess(T data) {
                 List<Map.Entry<String, GroupItem>> groupItemList = (List<Map.Entry<String, GroupItem>>) data;
 
-                if (mState.getValue() != null) {
-                    mState.postValue(new State(false, mergedList(mState.getValue().groupItemList, groupItemList), mState.getValue().offset + LIMIT, false, groupItemList.isEmpty(), null));
-                }
+                setLoading(false);
+                setItemList(mergedList(getItemList().getValue(), groupItemList));
+                setOffset(getOffset() + LIMIT);
+                setEndReached(groupItemList.isEmpty());
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                mState.postValue(new State(false, Collections.emptyList(), offset, false, false, throwable.getMessage()));
+                setLoading(false);
+                setMessage(throwable.getMessage());
             }
 
             @Override
             public void onLoading() {
-                mState.postValue(new State(true, Objects.requireNonNull(mState.getValue()).groupItemList, offset, offset > 1, false, null));
+                setLoading(true);
+                setRequestMore(offset > 1);
             }
         });
     }
 
     public void fetchNextPage() {
-        if (mState.getValue() != null && !mGroupRepository.isStopRequestMore()) {
-            mState.postValue(new State(false, mState.getValue().groupItemList, mState.getValue().offset, true, false, null));
-        }
+        setRequestMore(true);
+        fetchGroupList(getOffset());
     }
 
     public void refresh() {
         mGroupRepository.setMinId(0);
-        Executors.newSingleThreadExecutor().execute(() -> mState.postValue(new State(false, Collections.emptyList(), 1, true, false, null)));
+        Executors.newSingleThreadExecutor().execute(() -> {
+            setOffset(1);
+            setItemList(Collections.emptyList());
+            setRequestMore(true);
+            setEndReached(false);
+            fetchGroupList(getOffset());
+        });
     }
 
     private List<Map.Entry<String, GroupItem>> mergedList(List<Map.Entry<String, GroupItem>> existingList, List<Map.Entry<String, GroupItem>> newList) {
@@ -76,28 +78,5 @@ public class FindGroupViewModel extends ViewModel {
         result.addAll(existingList);
         result.addAll(newList);
         return result;
-    }
-
-    public static final class State {
-        public boolean isLoading;
-
-        public List<Map.Entry<String, GroupItem>> groupItemList;
-
-        public int offset;
-
-        public boolean hasRequestedMore;
-
-        public boolean isEndReached;
-
-        public String message;
-
-        public State(boolean isLoading, List<Map.Entry<String, GroupItem>> groupItemList, int offset, boolean hasRequestedMore, boolean isEndReached, String message) {
-            this.isLoading = isLoading;
-            this.groupItemList = groupItemList;
-            this.offset = offset;
-            this.hasRequestedMore = hasRequestedMore;
-            this.isEndReached = isEndReached;
-            this.message = message;
-        }
     }
 }

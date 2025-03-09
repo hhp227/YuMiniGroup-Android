@@ -2,7 +2,30 @@
 <layout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         tools:context=".activity.ArticleActivity">
+
+    <data>
+        <import type="com.hhp227.yu_minigroup.app.EndPoint" />
+
+        <import type="com.hhp227.yu_minigroup.helper.DateUtil" />
+
+        <import type="android.view.View" />
+
+        <import type="java.util.List" />
+
+        <variable
+                name="articleItem"
+                type="com.hhp227.yu_minigroup.dto.ArticleItem" />
+
+        <variable
+                name="cookie"
+                type="String" />
+
+        <variable
+                name="onImageClickListener"
+                type="java.util.function.Consumer&lt;Integer>" />
+    </data>
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -31,7 +54,9 @@
                         android:layout_width="45dp"
                         android:layout_height="45dp"
                         android:src="@drawable/user_image_view_circle"
-                        android:scaleType="centerCrop" />
+                        android:scaleType="centerCrop"
+                        app:userImageUrl="@{EndPoint.USER_IMAGE.replace(`{UID}`, articleItem.uid != null ? articleItem.uid : `{Null}`)}"
+                        app:cookie="@{cookie}" />
 
                 <LinearLayout
                         android:layout_width="match_parent"
@@ -45,14 +70,18 @@
                             android:layout_height="wrap_content"
                             android:singleLine="true"
                             android:textSize="15dp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:text="@{articleItem.title + ` - ` + articleItem.name}"
+                            tools:text="Title" />
 
                     <TextView
                             android:id="@+id/tv_timestamp"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textColor="#a0a3a7"
-                            android:textSize="13dp" />
+                            android:textSize="13dp"
+                            android:text="@{DateUtil.getDateString(articleItem.timestamp)}"
+                            tools:text="2025.03.08 오후 7:11:54"/>
 
                 </LinearLayout>
 
@@ -67,16 +96,23 @@
                     android:paddingRight="5dp"
                     android:paddingTop="10dp"
                     android:linksClickable="true"
-                    android:autoLink="web" />
+                    android:autoLink="web"
+                    android:text="@{articleItem.content}"
+                    android:visibility="@{articleItem.content.empty ? View.GONE : View.VISIBLE}"
+                    tools:text="Contents" />
 
             <LinearLayout
                     android:id="@+id/ll_image"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:scaleType="fitXY"
-                    android:visibility="gone"
+                    android:visibility="@{(articleItem.images != null &amp;&amp; !articleItem.images.isEmpty()) || articleItem.youtube != null ? View.VISIBLE : View.GONE}"
                     android:paddingTop="10dp"
-                    android:orientation="vertical" />
+                    android:orientation="vertical"
+                    app:imageList="@{articleItem.images}"
+                    app:onImageClick="@{onImageClickListener}"
+                    app:youtube="@{articleItem.youtube}"
+                    tools:visibility="gone"/>
 
         </LinearLayout>
 

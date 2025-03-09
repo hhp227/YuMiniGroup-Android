@@ -33,6 +33,16 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(this, SplashActivity.class));
             finish();
         }
+        observeViewModelData();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBinding = null;
+    }
+
+    private void observeViewModelData() {
         mViewModel.getUser().observe(this, user -> {
             if (user != null) {
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -51,11 +61,5 @@ public class LoginActivity extends AppCompatActivity {
         });
         mViewModel.getEmailError().observe(this, emailError -> mBinding.etId.setError(emailError));
         mViewModel.getPasswordError().observe(this, passwordError -> mBinding.etPassword.setError(passwordError));
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mBinding = null;
     }
 }
