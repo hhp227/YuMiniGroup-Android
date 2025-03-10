@@ -9,39 +9,38 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.text.Editable;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
+import androidx.databinding.DataBindingUtil;
 import androidx.exifinterface.media.ExifInterface;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.WriteListAdapter;
 import com.hhp227.yu_minigroup.databinding.ActivityCreateArticleBinding;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
+import com.hhp227.yu_minigroup.handler.OnActivityCreateArticleEventListener;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
 import com.hhp227.yu_minigroup.viewmodel.CreateArticleViewModel;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-// TODO
-public class CreateArticleActivity extends AppCompatActivity {
+public class CreateArticleActivity extends AppCompatActivity implements OnActivityCreateArticleEventListener {
     private String mCurrentPhotoPath;
 
     private ProgressDialog mProgressDialog;
@@ -59,18 +58,17 @@ public class CreateArticleActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = ActivityCreateArticleBinding.inflate(getLayoutInflater());
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_create_article);
         mViewModel = new ViewModelProvider(this).get(CreateArticleViewModel.class);
-        mAdapter = new WriteListAdapter(mViewModel.mContents);
+        mAdapter = new WriteListAdapter(new ArrayList<>());
         mProgressDialog = new ProgressDialog(this);
-
         mCameraPickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     Uri fileUri = result.getData().getData();
                     Bitmap bitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
 
-                    mViewModel.setBitmap(bitmap);
+                    mViewModel.addItem(bitmap);
                 });
             }
         });
@@ -89,7 +87,7 @@ public class CreateArticleActivity extends AppCompatActivity {
                                     : 0;
                             Bitmap rotatedBitmap = new BitmapUtil(this).rotateImage(bitmap, angle);
 
-                            mViewModel.setBitmap(rotatedBitmap);
+                            mViewModel.addItem(rotatedBitmap);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -101,55 +99,24 @@ public class CreateArticleActivity extends AppCompatActivity {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                 YouTubeItem youTubeItem = result.getData().getParcelableExtra("youtube");
 
-                mViewModel.setYoutube(youTubeItem);
+                if (youTubeItem != null) {
+                    if (youTubeItem.position > -1) {
+                        mViewModel.addItem(youTubeItem.position + 1, youTubeItem);
+                    } else {
+                        mViewModel.addItem(youTubeItem);
+                    }
+                }
             }
         });
-        Map<String, Object> headerMap = new HashMap<>();
 
-        setContentView(mBinding.getRoot());
-        setSupportActionBar(mBinding.toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        headerMap.put("title", getIntent().getStringExtra("sbjt"));
-        headerMap.put("content", getIntent().getStringExtra("txt"));
-        mAdapter.addHeaderView(headerMap);
-        mBinding.rvWrite.setLayoutManager(new LinearLayoutManager(this));
+        mBinding.setViewModel(mViewModel);
+        mBinding.setLifecycleOwner(this);
+        mBinding.setHandler(this);
+        setAppBar(mBinding.toolbar);
         mBinding.rvWrite.setAdapter(mAdapter);
-        mBinding.llImage.setOnClickListener(this::showContextMenu);
-        mBinding.llVideo.setOnClickListener(this::showContextMenu);
         mProgressDialog.setMessage("전송중...");
         mProgressDialog.setCancelable(false);
-        mViewModel.getYoutubeState().observe(this, youTubeItem -> {
-            if (youTubeItem != null) {
-                if (youTubeItem.position > -1) {
-                    mViewModel.addItem(youTubeItem.position + 1, youTubeItem);
-                } else {
-                    mViewModel.addItem(youTubeItem);
-                }
-                mAdapter.notifyDataSetChanged();
-            }
-        });
-        mViewModel.getState().observe(this, state -> {
-            if (state.progress >= 0) {
-                mProgressDialog.setProgressStyle(mViewModel.mContents.size() > 1 ? ProgressDialog.STYLE_HORIZONTAL : ProgressDialog.STYLE_SPINNER);
-                mProgressDialog.setProgress(state.progress);
-                showProgressDialog();
-            } else if (state.articleId != null && !state.articleId.isEmpty()) {
-                setResult(RESULT_OK);
-                finish();
-                Toast.makeText(getApplicationContext(), state.message, Toast.LENGTH_LONG).show();
-                hideProgressDialog();
-            } else if (state.message != null && !state.message.isEmpty()) {
-                Snackbar.make(mBinding.rvWrite, state.message, Snackbar.LENGTH_LONG).show();
-                hideProgressDialog();
-            }
-        });
-        mViewModel.getBitmapState().observe(this, bitmap -> {
-            mViewModel.addItem(bitmap);
-            mAdapter.notifyItemChanged(mAdapter.getItemCount() - 1);
-        });
-        mViewModel.getArticleFormState().observe(this, articleFormState -> Snackbar.make(getCurrentFocus(), articleFormState.message, Snackbar.LENGTH_LONG).setAction("Action", null).show());
+        observeViewModelData();
     }
 
     @Override
@@ -174,10 +141,12 @@ public class CreateArticleActivity extends AppCompatActivity {
                 finish();
                 return true;
             case R.id.action_send:
-                Spannable title = (Editable) mAdapter.getTextMap().get("title");
-                Spannable content = (Editable) mAdapter.getTextMap().get("content");
+                Map<String, MutableLiveData<String>> headerItem = mAdapter.getHeaderItem();
+                Spannable title = new SpannableString(Objects.requireNonNull(headerItem.get("title")).getValue());
+                Spannable content = new SpannableString(Objects.requireNonNull(headerItem.get("content")).getValue());
+                List<Object> contentList = mAdapter.getItemList();
 
-                mViewModel.actionSend(title, content);
+                mViewModel.actionSend(title, content, contentList);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -205,11 +174,7 @@ public class CreateArticleActivity extends AppCompatActivity {
 
         switch (item.getGroupId()) {
             case 0:
-                if (mViewModel.mContents.get(item.getItemId()) instanceof YouTubeItem) {
-                    mViewModel.setYoutube(null);
-                }
                 mViewModel.removeItem(item.getItemId());
-                mAdapter.notifyItemRemoved(item.getItemId());
                 return true;
             case 1:
                 intent = new Intent(Intent.ACTION_PICK);
@@ -238,8 +203,8 @@ public class CreateArticleActivity extends AppCompatActivity {
                 }
                 return true;
             case 3:
-                if (mViewModel.getYoutubeState().getValue() != null)
-                    Snackbar.make(getCurrentFocus(), "동영상은 하나만 첨부 할수 있습니다.", Snackbar.LENGTH_LONG).show();
+                if (mViewModel.hasYoutubeItem())
+                    mViewModel.setMessage("동영상은 하나만 첨부 할수 있습니다.");
                 else {
                     Intent ysIntent = new Intent(getApplicationContext(), YouTubeSearchActivity.class);
 
@@ -248,6 +213,47 @@ public class CreateArticleActivity extends AppCompatActivity {
                 return true;
         }
         return false;
+    }
+
+    @Override
+    public void onImageClick(View view) {
+        showContextMenu(view);
+    }
+
+    @Override
+    public void onVideoClick(View view) {
+        showContextMenu(view);
+    }
+
+    private void setAppBar(Toolbar toolbar) {
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    private void observeViewModelData() {
+        mViewModel.getContentList().observe(this, objects -> mAdapter.submitList(objects));
+        mViewModel.getProgress().observe(this, progress -> {
+            if (progress >= 0) {
+                mProgressDialog.setProgressStyle(mViewModel.getContentList().getValue().size() > 1 ? ProgressDialog.STYLE_HORIZONTAL : ProgressDialog.STYLE_SPINNER);
+                mProgressDialog.setProgress(progress);
+                showProgressDialog();
+            } else {
+                hideProgressDialog();
+            }
+        });
+        mViewModel.getArticleId().observe(this, articleId -> {
+            if (articleId != null && !articleId.isEmpty()) {
+                setResult(RESULT_OK);
+                finish();
+            }
+        });
+        mViewModel.getMessage().observe(this, message -> {
+            if (message != null && !message.isEmpty()) {
+                Snackbar.make(getCurrentFocus(), message, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+            }
+        });
     }
 
     private File createImageFile() throws IOException {

@@ -6,10 +6,12 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.hhp227.yu_minigroup.databinding.WriteContentBinding;
 import com.hhp227.yu_minigroup.databinding.WriteTextBinding;
+import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 
 import java.util.List;
@@ -22,10 +24,6 @@ public class WriteListAdapter extends RecyclerView.Adapter {
 
     private final List<Object> mWriteItemList;
 
-    private Map<String, Object> mTextMap;
-
-    private HeaderHolder mHeaderHolder;
-
     public WriteListAdapter(List<Object> writeItemList) {
         this.mWriteItemList = writeItemList;
     }
@@ -35,8 +33,7 @@ public class WriteListAdapter extends RecyclerView.Adapter {
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
             case TYPE_TEXT:
-                mHeaderHolder = new HeaderHolder(WriteTextBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
-                return mHeaderHolder;
+                return new HeaderHolder(WriteTextBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
             case TYPE_CONTENT:
                 return new ItemHolder(WriteContentBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
         }
@@ -46,7 +43,7 @@ public class WriteListAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof HeaderHolder) {
-            ((HeaderHolder) holder).bind((String) mTextMap.get("title"), (String) mTextMap.get("content"));
+            ((HeaderHolder) holder).bind((Map<String, MutableLiveData<String>>) mWriteItemList.get(position));
         } else if (holder instanceof ItemHolder) {
             ((ItemHolder) holder).bind(mWriteItemList.get(position));
         }
@@ -62,17 +59,18 @@ public class WriteListAdapter extends RecyclerView.Adapter {
         return position < 1 ? TYPE_TEXT : TYPE_CONTENT;
     }
 
-    public void addHeaderView(Map<String, Object> textMap) {
-        this.mTextMap = textMap;
-
-        mWriteItemList.add(0, textMap);
-        notifyItemChanged(0);
+    public Map<String, MutableLiveData<String>> getHeaderItem() {
+        return (Map<String, MutableLiveData<String>>) mWriteItemList.get(0);
     }
 
-    public Map<String, Object> getTextMap() {
-        mTextMap.put("title", mHeaderHolder.mBinding.etTitle.getText());
-        mTextMap.put("content", mHeaderHolder.mBinding.etContent.getText());
-        return mTextMap;
+    public List<Object> getItemList() {
+        return mWriteItemList;
+    }
+
+    public void submitList(List<Object> contentList) {
+        mWriteItemList.clear();
+        mWriteItemList.addAll(contentList);
+        notifyDataSetChanged();
     }
 
     public static class HeaderHolder extends RecyclerView.ViewHolder {
@@ -83,9 +81,9 @@ public class WriteListAdapter extends RecyclerView.Adapter {
             this.mBinding = binding;
         }
 
-        public void bind(String title, String content) {
-            mBinding.etTitle.setText(title);
-            mBinding.etContent.setText(content);
+        public void bind(Map<String, MutableLiveData<String>> headerItem) {
+            mBinding.setItem(headerItem);
+            mBinding.executePendingBindings();
         }
     }
 
