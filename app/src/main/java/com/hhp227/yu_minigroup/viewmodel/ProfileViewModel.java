@@ -23,20 +23,34 @@ import java.util.Map;
 import java.util.UUID;
 
 public class ProfileViewModel extends ViewModel {
-    private final MutableLiveData<State> mState = new MutableLiveData<>();
-
-    private final MutableLiveData<Bitmap> mBitmap = new MutableLiveData<>();
-
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
     private final PreferenceManager mPreferenceManager = AppController.getInstance().getPreferenceManager();
 
-    public ProfileViewModel() {
-        mState.postValue(new State(false, false, mPreferenceManager.getUser(), null));
+    private final MutableLiveData<Boolean> mLoading = new MutableLiveData<>(false);
+
+    private final MutableLiveData<Boolean> mSuccess = new MutableLiveData<>(false);
+
+    private final MutableLiveData<User> mUser = new MutableLiveData<>(mPreferenceManager.getUser());
+
+    private final MutableLiveData<String> mMessage = new MutableLiveData<>();
+
+    private final MutableLiveData<Bitmap> mBitmap = new MutableLiveData<>();
+
+    public LiveData<Boolean> isLoading() {
+        return mLoading;
     }
 
-    public LiveData<State> getState() {
-        return mState;
+    public LiveData<Boolean> isSuccess() {
+        return mSuccess;
+    }
+
+    public LiveData<User> getUser() {
+        return mUser;
+    }
+
+    public LiveData<String> getMessage() {
+        return mMessage;
     }
 
     public void setBitmap(Bitmap bitmap) {
@@ -55,14 +69,22 @@ public class ProfileViewModel extends ViewModel {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, EndPoint.SYNC_PROFILE, null, response -> {
             try {
                 if (!response.getBoolean("isError")) {
-                    mState.postValue(new State(false, true, mPreferenceManager.getUser(), response.getString("message")));
+                    mLoading.postValue(false);
+                    mSuccess.postValue(true);
+                    mUser.postValue(mPreferenceManager.getUser());
+                    mMessage.postValue(response.getString("message"));
                 } else {
-                    mState.postValue(new State(false, false, null, "동기화 실패"));
+                    mLoading.postValue(false);
+                    mMessage.postValue("동기화 실패");
                 }
             } catch (JSONException e) {
-                mState.postValue(new State(false, false, null, e.getMessage()));
+                mLoading.postValue(false);
+                mMessage.postValue(e.getMessage());
             }
-        }, error -> mState.postValue(new State(false, false, null, error.getMessage()))) {
+        }, error -> {
+            mLoading.postValue(false);
+            mMessage.postValue(error.getMessage());
+        }) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
@@ -72,18 +94,24 @@ public class ProfileViewModel extends ViewModel {
             }
         };
 
-        mState.postValue(new State(true, false, null, null));
+        mLoading.postValue(true);
         AppController.getInstance().addToRequestQueue(jsonObjectRequest);
     }
 
     public void uploadImage(boolean isUpdate) {
         MultipartRequest multipartRequest = new MultipartRequest(Request.Method.POST, isUpdate ? EndPoint.PROFILE_IMAGE_UPDATE : EndPoint.PROFILE_IMAGE_PREVIEW, response -> {
             if (isUpdate) {
-                mState.postValue(new State(false, true, mPreferenceManager.getUser(), new String(response.data).contains("성공") ? "수정되었습니다." : "실패했습니다."));
+                mLoading.postValue(false);
+                mSuccess.postValue(true);
+                mUser.postValue(mPreferenceManager.getUser());
+                mMessage.postValue(new String(response.data).contains("성공") ? "수정되었습니다." : "실패했습니다.");
             } else {
                 uploadImage(true);
             }
-        }, error -> mState.postValue(new State(false, false, null, error.getMessage()))) {
+        }, error -> {
+            mLoading.postValue(false);
+            mMessage.postValue(error.getMessage());
+        }) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
@@ -119,24 +147,7 @@ public class ProfileViewModel extends ViewModel {
             }
         };
 
-        mState.postValue(new State(true, false, null, null));
+        mLoading.postValue(true);
         AppController.getInstance().addToRequestQueue(multipartRequest);
-    }
-
-    public static final class State {
-        public boolean isLoading;
-
-        public boolean isSuccess;
-
-        public User user;
-
-        public String message;
-
-        public State(boolean isLoading, boolean isSuccess, User user, String message) {
-            this.isLoading = isLoading;
-            this.isSuccess = isSuccess;
-            this.user = user;
-            this.message = message;
-        }
     }
 }

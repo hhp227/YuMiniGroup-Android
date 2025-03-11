@@ -5,6 +5,18 @@
         xmlns:tools="http://schemas.android.com/tools"
         tools:context=".activity.ProfileActivity">
 
+    <data>
+        <import type="com.hhp227.yu_minigroup.app.EndPoint" />
+
+        <variable
+                name="viewModel"
+                type="com.hhp227.yu_minigroup.viewmodel.ProfileViewModel" />
+
+        <variable
+                name="handler"
+                type="com.hhp227.yu_minigroup.handler.OnActivityProfileEventListener" />
+    </data>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -82,7 +94,8 @@
                                             android:layout_width="0dp"
                                             android:layout_height="match_parent"
                                             android:singleLine="true"
-                                            android:layout_weight="1" />
+                                            android:layout_weight="1"
+                                            android:text="@{viewModel.user.userId}" />
 
                                 </LinearLayout>
 
@@ -135,7 +148,8 @@
                                                 android:id="@+id/tv_name"
                                                 android:layout_width="match_parent"
                                                 android:layout_height="match_parent"
-                                                android:singleLine="true" />
+                                                android:singleLine="true"
+                                                android:text="@{viewModel.user.name}" />
 
                                     </LinearLayout>
 
@@ -164,7 +178,8 @@
                                                 android:id="@+id/tv_dept"
                                                 android:layout_width="match_parent"
                                                 android:layout_height="match_parent"
-                                                android:singleLine="true" />
+                                                android:singleLine="true"
+                                                android:text="@{viewModel.user.department}" />
 
                                     </LinearLayout>
 
@@ -193,7 +208,8 @@
                                                 android:id="@+id/tv_grade"
                                                 android:layout_width="match_parent"
                                                 android:layout_height="match_parent"
-                                                android:singleLine="true" />
+                                                android:singleLine="true"
+                                                android:text="@{viewModel.user.grade}" />
 
                                     </LinearLayout>
 
@@ -250,7 +266,8 @@
                                                 android:layout_height="match_parent"
                                                 android:singleLine="true"
                                                 android:drawablePadding="15dp"
-                                                android:layout_weight="1" />
+                                                android:layout_weight="1"
+                                                android:text="@{viewModel.user.email}" />
 
                                     </LinearLayout>
 
@@ -279,7 +296,7 @@
                                                 android:background="@android:color/transparent"
                                                 android:layout_width="0dp"
                                                 android:layout_height="match_parent"
-                                                android:text=""
+                                                android:text="@{viewModel.user.phoneNumber}"
                                                 android:singleLine="true"
                                                 android:drawablePadding="15dp"
                                                 android:layout_weight="1" />
@@ -311,7 +328,11 @@
                                     android:layout_width="120dp"
                                     android:layout_height="120dp"
                                     android:src="@drawable/user_image_view_circle"
-                                    android:scaleType="centerCrop" />
+                                    android:scaleType="centerCrop"
+                                    android:onClick="@{handler::onProfileImageClick}"
+                                    app:userImageUrl="@{EndPoint.USER_IMAGE.replace(`{UID}`, viewModel.user.uid != null ? viewModel.user.uid : `{Null}`)}"
+                                    app:userImageBitmap="@{viewModel.bitmap}"
+                                    app:cookie="@{viewModel.cookie}" />
 
                             <ImageView
                                     android:layout_gravity="bottom|right|center_vertical|center_horizontal|center|end"
@@ -334,7 +355,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:text="동기화"
-                    app:layout_constraintBottom_toBottomOf="parent" />
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:onClick="@{() -> viewModel.sync()}" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

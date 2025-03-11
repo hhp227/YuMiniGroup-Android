@@ -22,9 +22,9 @@ import com.hhp227.yu_minigroup.helper.PreferenceManager;
 import java.util.*;
 
 public class CreateArticleViewModel extends ViewModel {
-    private final MutableLiveData<List<Object>> mContentList = new MutableLiveData<>();
-
     private static final String PROGRESS = "progress", ARTICLE_ID = "articleId", MESSAGE = "message";
+
+    private final MutableLiveData<List<Object>> mContentList = new MutableLiveData<>();
 
     private List<String> mImageList;
 
@@ -46,16 +46,14 @@ public class CreateArticleViewModel extends ViewModel {
         mArtlKey = savedStateHandle.get("artl_key");
         mImageList = savedStateHandle.get("img");
         articleRepository = new ArticleRepository(savedStateHandle.get("grp_id"), savedStateHandle.get("grp_key"));
+        String title = mSavedStateHandle.get("sbjt");
+        String content = mSavedStateHandle.get("txt");
+        YouTubeItem youTubeItem = mSavedStateHandle.get("vid");
 
         setContentList(new ArrayList<Object>() {
             {
-                YouTubeItem youTubeItem = mSavedStateHandle.get("vid");
-
                 add(new HashMap<String, MutableLiveData<String>>() {
                     {
-                        String title = mSavedStateHandle.get("sbjt");
-                        String content = mSavedStateHandle.get("txt");
-
                         put("title", new MutableLiveData<>(title != null ? title : ""));
                         put("content", new MutableLiveData<>(content != null ? content : ""));
                     }

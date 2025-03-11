@@ -233,7 +233,7 @@ public class CreateArticleActivity extends AppCompatActivity implements OnActivi
     }
 
     private void observeViewModelData() {
-        mViewModel.getContentList().observe(this, objects -> mAdapter.submitList(objects));
+        mViewModel.getContentList().observe(this, contentList -> mAdapter.submitList(contentList));
         mViewModel.getProgress().observe(this, progress -> {
             if (progress >= 0) {
                 mProgressDialog.setProgressStyle(mViewModel.getContentList().getValue().size() > 1 ? ProgressDialog.STYLE_HORIZONTAL : ProgressDialog.STYLE_SPINNER);

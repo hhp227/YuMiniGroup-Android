@@ -50,6 +50,16 @@ public class BindingAdapters {
         }
     }
 
+    @BindingAdapter("userImageBitmap")
+    public static void loadUserImage(ImageView view, Bitmap bitmap) {
+        if (bitmap != null) {
+            Glide.with(view.getContext())
+                    .load(bitmap)
+                    .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle).circleCrop())
+                    .into(view);
+        }
+    }
+
     @BindingAdapter("onFocusChange")
     public static void focusChange(View view, View.OnFocusChangeListener onFocusChangeListener) {
         view.setOnFocusChangeListener(onFocusChangeListener);

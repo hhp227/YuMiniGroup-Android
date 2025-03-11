@@ -15,22 +15,18 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.load.model.LazyHeaders;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.hhp227.yu_minigroup.R;
-import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.ActivityProfileBinding;
+import com.hhp227.yu_minigroup.handler.OnActivityProfileEventListener;
 import com.hhp227.yu_minigroup.helper.BitmapUtil;
 import com.hhp227.yu_minigroup.viewmodel.ProfileViewModel;
 
-// TODO
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends AppCompatActivity implements OnActivityProfileEventListener {
     private ActivityProfileBinding mBinding;
 
     private ActivityResultLauncher<Intent> mCameraPickActivityResultLauncher, mCameraCaptureActivityResultLauncher;
@@ -42,55 +38,17 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = ActivityProfileBinding.inflate(getLayoutInflater());
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_profile);
         mViewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
         mCameraPickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
         mCameraCaptureActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::onCameraActivityResult);
 
-        setContentView(mBinding.getRoot());
-        setSupportActionBar(mBinding.toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        mBinding.ivProfileImage.setOnClickListener(v -> {
-            registerForContextMenu(v);
-            openContextMenu(v);
-            unregisterForContextMenu(v);
-        });
-        mBinding.bSync.setOnClickListener(v -> mViewModel.sync());
-        mViewModel.getBitmap().observe(this, bitmap -> {
-            Glide.with(getApplicationContext())
-                    .load(bitmap)
-                    .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle).circleCrop())
-                    .into(mBinding.ivProfileImage);
-            invalidateOptionsMenu();
-        });
-        mViewModel.getState().observe(this, state -> {
-            if (state.isLoading) {
-                showProgressBar();
-            } else if (state.user != null) {
-                mBinding.tvName.setText(state.user.getName());
-                mBinding.tvYuId.setText(state.user.getUserId());
-                mBinding.tvDept.setText(state.user.getDepartment());
-                mBinding.tvGrade.setText(state.user.getGrade());
-                mBinding.tvEmail.setText(state.user.getEmail());
-                mBinding.tvPhoneNum.setText(state.user.getPhoneNumber());
-                Glide.with(getApplicationContext())
-                        .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", state.user.getUid()), new LazyHeaders.Builder().addHeader("Cookie", mViewModel.getCookie()).build()))
-                        .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle)
-                                .circleCrop()
-                                .skipMemoryCache(true)
-                                .diskCacheStrategy(DiskCacheStrategy.NONE))
-                        .into(mBinding.ivProfileImage);
-                if (state.isSuccess) {
-                    setResult(RESULT_OK);
-                    Snackbar.make(findViewById(android.R.id.content), state.message, Snackbar.LENGTH_LONG).show();
-                }
-            } else if (state.message != null && !state.message.isEmpty()) {
-                hideProgressBar();
-                Snackbar.make(findViewById(android.R.id.content), state.message, Snackbar.LENGTH_LONG).show();
-            }
-        });
+        mBinding.setViewModel(mViewModel);
+        mBinding.setLifecycleOwner(this);
+        mBinding.setHandler(this);
+        setAppBar(mBinding.toolbar);
+        setProgressBar();
+        observeViewModelData();
     }
 
     @Override
@@ -156,6 +114,42 @@ public class ProfileActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onProfileImageClick(View v) {
+        registerForContextMenu(v);
+        openContextMenu(v);
+        unregisterForContextMenu(v);
+    }
+
+    private void setAppBar(Toolbar toolbar) {
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    private void observeViewModelData() {
+        mViewModel.getBitmap().observe(this, bitmap -> {
+            if (bitmap != null) {
+                invalidateOptionsMenu();
+            }
+        });
+        mViewModel.isLoading().observe(this, isLoading -> {
+            if (isLoading) showProgressBar();
+            else hideProgressBar();
+        });
+        mViewModel.isSuccess().observe(this, isSuccess -> {
+            if (isSuccess) {
+                setResult(RESULT_OK);
+            }
+        });
+        mViewModel.getMessage().observe(this, message -> {
+            if (message != null && !message.isEmpty()) {
+                Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG).show();
+            }
+        });
+    }
+
     private void onCameraActivityResult(ActivityResult result) {
         if (result.getResultCode() == RESULT_OK && result.getData() != null) {
             if (result.getData().getExtras().get("data") != null) {
@@ -174,7 +168,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void showProgressBar() {
-        setProgressBar();
         if (!mProgressSnackBar.isShown())
             mProgressSnackBar.show();
     }
