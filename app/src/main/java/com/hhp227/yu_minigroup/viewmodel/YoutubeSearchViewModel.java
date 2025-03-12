@@ -2,7 +2,6 @@ package com.hhp227.yu_minigroup.viewmodel;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -15,23 +14,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
-import java.util.stream.IntStream;
 
-public class YoutubeSearchViewModel extends ViewModel {
+public class YoutubeSearchViewModel extends ListViewModel<YouTubeItem> {
     public static final String API_KEY = "AIzaSyCHF6p97aduruLMxgCuEVfFaKUiGPcMuOQ";
-
-    private final MutableLiveData<State> mState = new MutableLiveData<>();
-
-    private final MutableLiveData<String> mQuery = new MutableLiveData<>();
 
     private static final int LIMIT = 50;
 
-    public YoutubeSearchViewModel() {
-        setQuery("");
-    }
+    private final MutableLiveData<String> mQuery = new MutableLiveData<>("");
 
     public void setQuery(String query) {
         mQuery.postValue(query);
@@ -39,10 +30,6 @@ public class YoutubeSearchViewModel extends ViewModel {
 
     public LiveData<String> getQuery() {
         return mQuery;
-    }
-
-    public LiveData<State> getState() {
-        return mState;
     }
 
     public void refresh() {
@@ -54,7 +41,7 @@ public class YoutubeSearchViewModel extends ViewModel {
     }
 
     private void fetchDataTask(String query) {
-        mState.postValue(new State(true, Collections.emptyList(), null));
+        setLoading(true);
         AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.GET, EndPoint.URL_YOUTUBE_API + "?part=snippet&key=" + API_KEY + "&q=" + query + "&maxResults=" + LIMIT, null, response -> {
             try {
                 List<YouTubeItem> youTubeItems = new ArrayList<>();
@@ -72,24 +59,15 @@ public class YoutubeSearchViewModel extends ViewModel {
 
                     youTubeItems.add(youTubeItem);
                 }
-                mState.postValue(new State(false, youTubeItems, null));
+                setLoading(false);
+                setItemList(youTubeItems);
             } catch (JSONException e) {
-                mState.postValue(new State(false, Collections.emptyList(), e.getMessage()));
+                setLoading(false);
+                setMessage(e.getMessage());
             }
-        }, error -> mState.postValue(new State(false, Collections.emptyList(), error.getMessage()))));
-    }
-
-    public static final class State {
-        public boolean isLoading;
-
-        public List<YouTubeItem> youTubeItems;
-
-        public String message;
-
-        public State(boolean isLoading, List<YouTubeItem> youTubeItems, String message) {
-            this.isLoading = isLoading;
-            this.youTubeItems = youTubeItems;
-            this.message = message;
-        }
+        }, error -> {
+            setLoading(false);
+            setMessage(error.getMessage());
+        }));
     }
 }

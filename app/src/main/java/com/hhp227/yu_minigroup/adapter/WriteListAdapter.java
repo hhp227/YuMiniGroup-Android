@@ -17,6 +17,7 @@ import com.hhp227.yu_minigroup.dto.YouTubeItem;
 import java.util.List;
 import java.util.Map;
 
+// TODO ViewHolder만 개선하면 됨
 public class WriteListAdapter extends RecyclerView.Adapter {
     private static final int TYPE_TEXT = 0;
 

@@ -1,11 +1,10 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.text.TextUtils;
 import android.webkit.CookieManager;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
@@ -15,7 +14,9 @@ import com.hhp227.yu_minigroup.data.ReplyRepository;
 import com.hhp227.yu_minigroup.helper.Callback;
 
 public class UpdateReplyViewModel extends ViewModel {
-    private static final String STATE = "state", REPLY_FORM_STATE = "replyFormState";
+    public final MutableLiveData<String> text = new MutableLiveData<>("");
+
+    private static final String LOADING = "loading", REPLY = "reply", MESSAGE = "message", REPLY_ERROR = "replyError";
 
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
@@ -25,8 +26,6 @@ public class UpdateReplyViewModel extends ViewModel {
 
     private final ReplyRepository mReplyRepository;
 
-    private String mReply;
-
     public UpdateReplyViewModel(SavedStateHandle savedStateHandle) {
         mSavedStateHandle = savedStateHandle;
         mGroupId = savedStateHandle.get("grp_id");
@@ -34,24 +33,44 @@ public class UpdateReplyViewModel extends ViewModel {
         mReplyId = savedStateHandle.get("cmmt_num");
         mArticleKey = savedStateHandle.get("artl_key");
         mReplyKey = savedStateHandle.get("cmmt_key");
-        mReply = savedStateHandle.get("cmt");
         mReplyRepository = new ReplyRepository(mGroupId, mArticleId, mArticleKey);
+        String reply = savedStateHandle.get("cmt");
 
-        if (mReply != null) {
-            mReply = mReply.contains("※") ? mReply.substring(0, mReply.lastIndexOf("※")).trim() : mReply;
+        if (reply != null) {
+            this.text.postValue(reply.contains("※") ? reply.substring(0, reply.lastIndexOf("※")).trim() : reply);
         }
     }
 
-    public String getReply() {
-        return mReply;
+    public void setLoading(boolean bool) {
+        mSavedStateHandle.set(LOADING, bool);
     }
 
-    public LiveData<State> getState() {
-        return mSavedStateHandle.getLiveData(STATE);
+    public LiveData<Boolean> isLoading() {
+        return mSavedStateHandle.getLiveData(LOADING);
     }
 
-    public LiveData<ReplyFormState> getReplyFormState() {
-        return mSavedStateHandle.getLiveData(REPLY_FORM_STATE);
+    public void setReply(String reply) {
+        mSavedStateHandle.set(REPLY, reply);
+    }
+
+    public LiveData<String> getReply() {
+        return mSavedStateHandle.getLiveData(REPLY);
+    }
+
+    public void setMessage(String message) {
+        mSavedStateHandle.set(MESSAGE, message);
+    }
+
+    public LiveData<String> getMessage() {
+        return mSavedStateHandle.getLiveData(MESSAGE);
+    }
+
+    public void setReplyError(String message) {
+        mSavedStateHandle.set(REPLY_ERROR, message);
+    }
+
+    public LiveData<String> getReplyError() {
+        return mSavedStateHandle.getLiveData(REPLY_ERROR);
     }
 
     public void actionSend(String text) {
@@ -59,99 +78,23 @@ public class UpdateReplyViewModel extends ViewModel {
             mReplyRepository.setReply(mCookieManager.getCookie(EndPoint.LOGIN_LMS), mReplyId, mReplyKey, text, new Callback() {
                 @Override
                 public <T> void onSuccess(T data) {
-                    mSavedStateHandle.set(STATE, new State(false, data.toString(), null));
+                    setLoading(false);
+                    setReply((String) data);
                 }
 
                 @Override
                 public void onFailure(Throwable throwable) {
-                    mSavedStateHandle.set(STATE, new State(false, null, throwable.getMessage()));
+                    setLoading(false);
+                    setMessage(throwable.getMessage());
                 }
 
                 @Override
                 public void onLoading() {
-                    mSavedStateHandle.set(STATE, new State(true, null, null));
+                    setLoading(true);
                 }
             });
         } else {
-            mSavedStateHandle.set(REPLY_FORM_STATE, new ReplyFormState("내용을 입력하세요."));
-        }
-    }
-
-    public static final class State implements Parcelable {
-        public boolean isLoading;
-
-        public String text;
-
-        public String message;
-
-        public State(boolean isLoading, String text, String message) {
-            this.isLoading = isLoading;
-            this.text = text;
-            this.message = message;
-        }
-
-        protected State(Parcel in) {
-            isLoading = in.readByte() != 0;
-            text = in.readString();
-            message = in.readString();
-        }
-
-        public static final Creator<State> CREATOR = new Creator<State>() {
-            @Override
-            public State createFromParcel(Parcel in) {
-                return new State(in);
-            }
-
-            @Override
-            public State[] newArray(int size) {
-                return new State[size];
-            }
-        };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeByte((byte) (isLoading ? 1 : 0));
-            parcel.writeString(text);
-            parcel.writeString(message);
-        }
-    }
-
-    public static final class ReplyFormState implements Parcelable {
-        public String replyError;
-
-        public ReplyFormState(String replyError) {
-            this.replyError = replyError;
-        }
-
-        protected ReplyFormState(Parcel in) {
-            replyError = in.readString();
-        }
-
-        public static final Creator<ReplyFormState> CREATOR = new Creator<ReplyFormState>() {
-            @Override
-            public ReplyFormState createFromParcel(Parcel in) {
-                return new ReplyFormState(in);
-            }
-
-            @Override
-            public ReplyFormState[] newArray(int size) {
-                return new ReplyFormState[size];
-            }
-        };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeString(replyError);
+            setReplyError("내용을 입력하세요.");
         }
     }
 }
