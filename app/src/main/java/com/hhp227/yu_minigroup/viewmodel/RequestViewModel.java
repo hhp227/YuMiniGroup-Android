@@ -65,8 +65,10 @@ public class RequestViewModel extends ListViewModel<Map.Entry<String, GroupItem>
     }
 
     public void fetchNextPage() {
-        setRequestMore(true);
-        fetchGroupList(getOffset());
+        setRequestMore(!mGroupRepository.isStopRequestMore());
+        if (!mGroupRepository.isStopRequestMore()) {
+            fetchGroupList(getOffset());
+        }
     }
 
     public void refresh() {

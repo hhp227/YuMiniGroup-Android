@@ -1,7 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+                name="viewModel"
+                type="com.hhp227.yu_minigroup.viewmodel.ListViewModel" />
+
+        <variable
+                name="handler"
+                type="com.hhp227.yu_minigroup.handler.OnFragmentListEventListener" />
+    </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
@@ -30,13 +43,15 @@
                     android:id="@+id/srl"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:onRefresh="@{handler::onRefresh}">
 
                 <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recycler_view"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:scrollbars="vertical" />
+                        android:scrollbars="vertical"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -44,11 +59,12 @@
                     android:id="@+id/progress_circular"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
+                    android:visibility="@{viewModel.isLoading() &amp;&amp; !viewModel.hasRequestMore() ? View.VISIBLE : View.GONE}"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent" />
+                    app:layout_constraintRight_toRightOf="parent"
+                    tools:visibility="gone"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

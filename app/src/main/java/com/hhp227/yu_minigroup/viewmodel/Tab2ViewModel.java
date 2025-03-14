@@ -32,16 +32,24 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class Tab2ViewModel extends ViewModel {
     private static final String TAG = Tab2ViewModel.class.getSimpleName();
 
-    private final MutableLiveData<State> mState = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> mLoading = new MutableLiveData<>(false);
+
+    private final MutableLiveData<List<Map<String, String>>> mItemList = new MutableLiveData<>(Collections.emptyList());
+
+    private final MutableLiveData<String> mMessage = new MutableLiveData<>();
 
     private final MutableLiveData<Calendar> mCalendar = new MutableLiveData<>(Calendar.getInstance());
 
-    public LiveData<State> getState() {
-        return mState;
-    }
-
     public LiveData<Calendar> getCalendar() {
         return mCalendar;
+    }
+
+    public LiveData<List<Map<String, String>>> getItemList() {
+        return mItemList;
+    }
+
+    public LiveData<String> getMessage() {
+        return mMessage;
     }
 
     public void previousMonth() {
@@ -74,7 +82,7 @@ public class Tab2ViewModel extends ViewModel {
         String year = String.valueOf(calendar.get(Calendar.YEAR));
         String month = String.format("%02d", calendar.get(Calendar.MONTH) + 1);
 
-        mState.postValue(new State(true, Collections.emptyList(), null));
+        mLoading.postValue(true);
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, URL_SCHEDULE, response -> {
             List<Map<String, String>> list = new ArrayList<>();
             //Source source = new Source(response);
@@ -118,14 +126,17 @@ public class Tab2ViewModel extends ViewModel {
                             mList.add(map);
                         });
                 }*/
-                mState.postValue(new State(false, list, null));
+                mLoading.postValue(false);
+                mItemList.postValue(list);
             } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
+                mLoading.postValue(false);
+                mMessage.postValue(e.getMessage());
             }
         }, error -> {
             if (error.getMessage() != null) {
                 VolleyLog.e(error.getMessage());
-                mState.postValue(new State(false, Collections.emptyList(), error.getMessage()));
+                mLoading.postValue(false);
+                mMessage.postValue(error.getMessage());
             }
         }));
     }
@@ -139,20 +150,6 @@ public class Tab2ViewModel extends ViewModel {
             }
         } else {
             return "error";
-        }
-    }
-
-    public static final class State {
-        public boolean isLoading;
-
-        public List<Map<String, String>> list;
-
-        public String message;
-
-        public State(boolean isLoading, List<Map<String, String>> list, String message) {
-            this.isLoading = isLoading;
-            this.list = list;
-            this.message = message;
         }
     }
 }

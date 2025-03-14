@@ -57,8 +57,10 @@ public class FindGroupViewModel extends ListViewModel<Map.Entry<String, GroupIte
     }
 
     public void fetchNextPage() {
-        setRequestMore(true);
-        fetchGroupList(getOffset());
+        setRequestMore(!mGroupRepository.isStopRequestMore());
+        if (!mGroupRepository.isStopRequestMore()) {
+            fetchGroupList(getOffset());
+        }
     }
 
     public void refresh() {

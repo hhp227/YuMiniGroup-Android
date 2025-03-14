@@ -106,9 +106,6 @@ public class YouTubeSearchActivity extends AppCompatActivity implements OnActivi
 
     private void setAppBar(Toolbar toolbar) {
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
     }
 
     private void observeViewModelData() {

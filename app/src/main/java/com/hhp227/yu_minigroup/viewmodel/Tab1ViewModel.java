@@ -1,10 +1,9 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.webkit.CookieManager;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
@@ -29,7 +28,9 @@ public class Tab1ViewModel extends ViewModel {
 
     private static final int LIMIT = 10;
 
-    private static final String STATE = "state";
+    private static final String LOADING = "loading", OFFSET = "offset", REQUEST_MORE = "requestMore", END_REACHED = "endReached", MESSAGE = "message";
+
+    private final MutableLiveData<List<Map.Entry<String, ArticleItem>>> mItemList = new MutableLiveData<>(Collections.emptyList());
 
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
@@ -48,18 +49,59 @@ public class Tab1ViewModel extends ViewModel {
         mKey = savedStateHandle.get("key");
         articleRepository = new ArticleRepository(mGroupId, mKey);
 
-        if (!mSavedStateHandle.contains(STATE)) {
-            setState(new State(false, Collections.emptyList(), 1, false, false, null));
-            fetchNextPage();
-        }
+        setLoading(false);
+        setOffset(1);
+        setRequestMore(false);
+        setEndReached(false);
+        fetchNextPage();
     }
 
-    private void setState(State state) {
-        mSavedStateHandle.set(STATE, state);
+    private void setLoading(boolean bool) {
+        mSavedStateHandle.set(LOADING, bool);
     }
 
-    public LiveData<State> getState() {
-        return mSavedStateHandle.getLiveData(STATE);
+    public LiveData<Boolean> isLoading() {
+        return mSavedStateHandle.getLiveData(LOADING);
+    }
+
+    private void setItemList(List<Map.Entry<String, ArticleItem>> itemList) {
+        mItemList.postValue(itemList);
+    }
+
+    public LiveData<List<Map.Entry<String, ArticleItem>>> getItemList() {
+        return mItemList;
+    }
+
+    private void setOffset(int offset) {
+        mSavedStateHandle.set(OFFSET, offset);
+    }
+
+    public int getOffset() {
+        return mSavedStateHandle.get(OFFSET);
+    }
+
+    private void setRequestMore(boolean bool) {
+        mSavedStateHandle.set(REQUEST_MORE, bool);
+    }
+
+    public LiveData<Boolean> hasRequestMore() {
+        return mSavedStateHandle.getLiveData(REQUEST_MORE);
+    }
+
+    private void setEndReached(boolean bool) {
+        mSavedStateHandle.set(END_REACHED, bool);
+    }
+
+    public LiveData<Boolean> isEndReached() {
+        return mSavedStateHandle.getLiveData(END_REACHED);
+    }
+
+    private void setMessage(String message) {
+        mSavedStateHandle.set(MESSAGE, message);
+    }
+
+    public LiveData<String> getMessage() {
+        return mSavedStateHandle.getLiveData(MESSAGE);
     }
 
     public User getUser() {
@@ -72,113 +114,58 @@ public class Tab1ViewModel extends ViewModel {
         articleRepository.getArticleList(mCookieManager.getCookie(EndPoint.LOGIN_LMS), params, new Callback() {
             @Override
             public <T> void onSuccess(T data) {
-                State state = mSavedStateHandle.get(STATE);
                 List<Map.Entry<String, ArticleItem>> articleItemList = (List<Map.Entry<String, ArticleItem>>) data;
 
-                if (state != null) {
-                    setState(new State(false, mergedList(state.articleItemList, articleItemList), state.offset + LIMIT, false, articleItemList.isEmpty(), null));
-                }
+                setLoading(false);
+                setItemList(mergedList(getItemList().getValue(), articleItemList));
+                setOffset(getOffset() + LIMIT);
+                setEndReached(articleItemList.isEmpty());
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                setState(new State(false, Collections.emptyList(), 1, false, false, throwable.getMessage()));
+                setLoading(false);
+                setMessage(throwable.getMessage());
             }
 
             @Override
             public void onLoading() {
-                State state = mSavedStateHandle.get(STATE);
-
-                if (state != null) {
-                    setState(new State(true, state.articleItemList, offset, offset > 1, false, null));
-                }
+                setLoading(true);
+                setRequestMore(offset > 1);
             }
         });
     }
 
     public void fetchNextPage() {
-        State state = mSavedStateHandle.get(STATE);
-
-        if (state != null && !articleRepository.isStopRequestMore()) {
-            setState(new State(false, state.articleItemList, state.offset, true, false, null));
+        setRequestMore(!articleRepository.isStopRequestMore());
+        if (!articleRepository.isStopRequestMore()) {
+            fetchArticleList(getOffset());
         }
     }
 
     public void refresh() {
         articleRepository.setMinId(0);
-        setState(new State(false, Collections.emptyList(), 1, true, false, null));
+        setRequestMore(true);
+        setItemList(Collections.emptyList());
+        setOffset(1);
+        setEndReached(false);
+        fetchArticleList(getOffset());
     }
 
     public void updateArticleItem(int position, AbstractMap.SimpleEntry<String, ArticleItem> kvSimpleEntry) {
-        State state = mSavedStateHandle.get(STATE);
+        List<Map.Entry<String, ArticleItem>> itemList = getItemList().getValue();
 
-        if (state != null) {
-            state.articleItemList.set(position, kvSimpleEntry);
-            setState(state);
+        if (itemList != null && !itemList.isEmpty()) {
+            itemList.set(position, kvSimpleEntry);
+            setItemList(itemList);
         }
     }
 
     private List<Map.Entry<String, ArticleItem>> mergedList(List<Map.Entry<String, ArticleItem>> existingList, List<Map.Entry<String, ArticleItem>> newList) {
-        List<Map.Entry<String, ArticleItem>> result = new ArrayList<>();
-
-        result.addAll(existingList);
-        result.addAll(newList);
-        return result;
-    }
-
-    public static final class State implements Parcelable {
-        public boolean isLoading;
-
-        public List<Map.Entry<String, ArticleItem>> articleItemList;
-
-        public int offset;
-
-        public boolean hasRequestedMore;
-
-        public boolean isEndReached;
-
-        public String message;
-
-        public State(boolean isLoading, List<Map.Entry<String, ArticleItem>> articleItemList, int offset, boolean hasRequestedMore, boolean isEndReached, String message) {
-            this.isLoading = isLoading;
-            this.articleItemList = articleItemList;
-            this.offset = offset;
-            this.hasRequestedMore = hasRequestedMore;
-            this.isEndReached = isEndReached;
-            this.message = message;
-        }
-
-        private State(Parcel in) {
-            isLoading = in.readByte() != 0;
-            offset = in.readInt();
-            hasRequestedMore = in.readByte() != 0;
-            isEndReached = in.readByte() != 0;
-            message = in.readString();
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeByte((byte) (isLoading ? 1 : 0));
-            dest.writeInt(offset);
-            dest.writeByte((byte) (hasRequestedMore ? 1 : 0));
-            dest.writeByte((byte) (isEndReached ? 1 : 0));
-            dest.writeString(message);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        public static final Creator<State> CREATOR = new Creator<State>() {
-            @Override
-            public State createFromParcel(Parcel in) {
-                return new State(in);
-            }
-
-            @Override
-            public State[] newArray(int size) {
-                return new State[size];
+        return new ArrayList<Map.Entry<String, ArticleItem>>() {
+            {
+                addAll(existingList);
+                addAll(newList);
             }
         };
     }

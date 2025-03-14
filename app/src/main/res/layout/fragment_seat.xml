@@ -3,6 +3,18 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+                name="viewModel"
+                type="com.hhp227.yu_minigroup.viewmodel.SeatViewModel" />
+
+        <variable
+                name="handler"
+                type="com.hhp227.yu_minigroup.handler.OnFragmentListEventListener" />
+    </data>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -21,6 +33,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="240dp"
                     android:fitsSystemWindows="false"
+                    app:titleEnabled="false"
                     app:contentScrim="?attr/colorPrimary"
                     app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
@@ -58,12 +71,14 @@
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                     android:id="@+id/srl_seat"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    app:onRefresh="@{handler::onRefresh}">
 
                 <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_seat"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -73,7 +88,8 @@
                 android:id="@+id/pb_seat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:visibility="@{viewModel.isLoading() ? View.VISIBLE : View.GONE}"/>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

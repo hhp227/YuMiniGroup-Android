@@ -81,7 +81,7 @@
                             android:textColor="#a0a3a7"
                             android:textSize="13dp"
                             android:text="@{DateUtil.getDateString(articleItem.timestamp)}"
-                            tools:text="2025.03.08 오후 7:11:54"/>
+                            tools:text="2025.03.08 오후 7:11:54" />
 
                 </LinearLayout>
 
@@ -112,7 +112,7 @@
                     app:imageList="@{articleItem.images}"
                     app:onImageClick="@{onImageClickListener}"
                     app:youtube="@{articleItem.youtube}"
-                    tools:visibility="gone"/>
+                    tools:visibility="gone" />
 
         </LinearLayout>
 

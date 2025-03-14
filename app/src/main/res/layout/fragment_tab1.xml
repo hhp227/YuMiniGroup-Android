@@ -5,6 +5,18 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         tools:context=".fragment.Tab1Fragment">
 
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+                name="viewModel"
+                type="com.hhp227.yu_minigroup.viewmodel.Tab1ViewModel" />
+
+        <variable
+                name="handler"
+                type="com.hhp227.yu_minigroup.handler.OnFragmentTab1EventListener" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -14,12 +26,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent">
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:onRefresh="@{handler::onRefresh}">
 
             <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_article"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/article_item" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
@@ -28,7 +42,9 @@
                 android:id="@+id/rl_write"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone">
+                android:visibility="@{viewModel.isLoading() || !viewModel.itemList.empty ? View.GONE : View.VISIBLE}"
+                android:onClick="@{() -> handler.onEmptyViewClick()}"
+                tools:visibility="gone">
 
             <ImageView
                     android:layout_width="wrap_content"
@@ -53,11 +69,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="200dp"
-                android:visibility="gone"
+                android:visibility="@{viewModel.isLoading() &amp;&amp; !viewModel.hasRequestMore() ? View.VISIBLE : View.GONE}"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
+                app:layout_constraintRight_toRightOf="parent"
+                tools:visibility="gone" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
