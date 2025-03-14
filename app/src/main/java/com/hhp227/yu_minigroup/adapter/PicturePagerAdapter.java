@@ -8,14 +8,11 @@ import androidx.viewpager.widget.PagerAdapter;
 import com.bumptech.glide.Glide;
 import com.hhp227.yu_minigroup.databinding.ImageFullscreenBinding;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PicturePagerAdapter extends PagerAdapter {
-    private final List<String> mImageList;
-
-    public PicturePagerAdapter(List<String> images) {
-        this.mImageList = images;
-    }
+    private final List<String> mImageList = new ArrayList<>();
 
     @NonNull
     @Override
@@ -41,5 +38,11 @@ public class PicturePagerAdapter extends PagerAdapter {
     @Override
     public void destroyItem(ViewGroup container, int position, @NonNull Object object) {
         container.removeView((View) object);
+    }
+
+    public void submitList(List<String> list) {
+        mImageList.clear();
+        mImageList.addAll(list);
+        notifyDataSetChanged();
     }
 }
