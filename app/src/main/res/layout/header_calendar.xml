@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
         <variable
@@ -16,7 +16,10 @@
         <com.hhp227.yu_minigroup.calendar.ExtendedCalendarView
                 android:id="@+id/calendar"
                 android:layout_width="match_parent"
-                android:layout_height="266dp" />
+                android:layout_height="266dp"
+                app:calendar="@{viewModel.calendar}"
+                app:onPrevClick="@{() -> viewModel.previousMonth(viewModel.calendar)}"
+                app:onNextClick="@{() -> viewModel.nextMonth(viewModel.calendar)}" />
 
     </LinearLayout>
 

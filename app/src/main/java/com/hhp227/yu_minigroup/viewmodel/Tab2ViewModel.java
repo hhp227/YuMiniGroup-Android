@@ -30,8 +30,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class Tab2ViewModel extends ViewModel {
-    private static final String TAG = Tab2ViewModel.class.getSimpleName();
-
     private final MutableLiveData<Boolean> mLoading = new MutableLiveData<>(false);
 
     private final MutableLiveData<List<Map<String, String>>> mItemList = new MutableLiveData<>(Collections.emptyList());
@@ -52,9 +50,7 @@ public class Tab2ViewModel extends ViewModel {
         return mMessage;
     }
 
-    public void previousMonth() {
-        Calendar calendar = mCalendar.getValue();
-
+    public void previousMonth(Calendar calendar) {
         if (calendar != null) {
             if (calendar.get(Calendar.MONTH) == calendar.getActualMinimum(Calendar.MONTH)) {
                 calendar.set((calendar.get(Calendar.YEAR) - 1), calendar.getActualMaximum(Calendar.MONTH),1);
@@ -65,9 +61,7 @@ public class Tab2ViewModel extends ViewModel {
         }
     }
 
-    public void nextMonth() {
-        Calendar calendar = mCalendar.getValue();
-
+    public void nextMonth(Calendar calendar) {
         if (calendar != null) {
             if (calendar.get(Calendar.MONTH) == calendar.getActualMaximum(Calendar.MONTH)) {
                 calendar.set((calendar.get(Calendar.YEAR) + 1), calendar.getActualMinimum(Calendar.MONTH),1);
@@ -107,8 +101,8 @@ public class Tab2ViewModel extends ViewModel {
                         String date = getParsing(element2);
 
                         if (date.substring(0, 4).equals(year) && date.substring(date.indexOf("-") + 1).substring(0, 2).equals(month)) {
-                            map.put("날짜", getParsing(element2));
-                            map.put("내용", getParsing(element1));
+                            map.put("date", getParsing(element2));
+                            map.put("content", getParsing(element1));
                             list.add(map);
                             Log.e("TEST", "element1: " + getParsing(element1) + ", element2: " + getParsing(element2) + ", element3: " + getParsing(element3) + ", element4: " + getParsing(element4) + ", element5: " + getParsing(element5));
                         }

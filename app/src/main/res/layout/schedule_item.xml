@@ -4,6 +4,12 @@
         xmlns:tools="http://schemas.android.com/tools"
         tools:context=".activity.MainActivity">
 
+    <data>
+        <variable
+                name="item"
+                type="java.util.Map&lt;String, String>" />
+    </data>
+
     <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -30,8 +36,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="31"
-                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                        android:text="@{item.get(`date`)}"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        tools:text="31" />
 
             </RelativeLayout>
 
@@ -49,8 +56,9 @@
                         android:id="@+id/content"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="@{item.get(`content`)}"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="내용" />
+                        tools:text="내용" />
 
             </RelativeLayout>
 

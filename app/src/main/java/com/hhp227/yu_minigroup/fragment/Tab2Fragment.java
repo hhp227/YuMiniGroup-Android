@@ -1,7 +1,6 @@
 package com.hhp227.yu_minigroup.fragment;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,9 +8,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hhp227.yu_minigroup.databinding.FragmentTab2Binding;
@@ -23,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-// TODO
 public class Tab2Fragment extends Fragment {
     private CalendarAdapter mAdapter;
 
@@ -53,12 +49,7 @@ public class Tab2Fragment extends Fragment {
     }
 
     private void observeViewModelData() {
-        mViewModel.getCalendar().observe(getViewLifecycleOwner(), calendar -> {
-            mViewModel.fetchDataTask(calendar);
-            if (mBinding.rvCal.getChildCount() > 0) {
-                ((HeaderHolder) mBinding.rvCal.getChildViewHolder(mBinding.rvCal.getChildAt(0))).mBinding.calendar.setCalendar(calendar);
-            }
-        });
+        mViewModel.getCalendar().observe(getViewLifecycleOwner(), calendar -> mViewModel.fetchDataTask(calendar));
         mViewModel.getItemList().observe(getViewLifecycleOwner(), itemList -> {
             if (!itemList.isEmpty()) {
                 mAdapter.submitList(itemList);
@@ -72,14 +63,8 @@ public class Tab2Fragment extends Fragment {
     }
 
     public class HeaderHolder extends RecyclerView.ViewHolder {
-        private final HeaderCalendarBinding mBinding;
-
         public HeaderHolder(HeaderCalendarBinding binding) {
             super(binding.getRoot());
-            this.mBinding = binding;
-
-            mBinding.calendar.prev.setOnClickListener(v -> mViewModel.previousMonth());
-            mBinding.calendar.next.setOnClickListener(v -> mViewModel.nextMonth());
         }
     }
 
@@ -92,8 +77,8 @@ public class Tab2Fragment extends Fragment {
         }
 
         public void bind(Map<String, String> map) {
-            mBinding.date.setText(map.get("날짜"));
-            mBinding.content.setText(map.get("내용"));
+            mBinding.setItem(map);
+            mBinding.executePendingBindings();
         }
     }
 

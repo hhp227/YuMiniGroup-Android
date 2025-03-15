@@ -18,8 +18,10 @@ import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.activity.ArticleActivity;
+import com.hhp227.yu_minigroup.calendar.ExtendedCalendarView;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -126,5 +128,16 @@ public class BindingAdapters {
             youtubeContainer.setPadding(0, 0, 0, 30);
             view.addView(youtubeContainer, youTubeItem.position);
         }
+    }
+
+    @BindingAdapter("calendar")
+    public static void bindCalendar(ExtendedCalendarView view, Calendar calendar) {
+        view.setCalendar(calendar);
+    }
+
+    @BindingAdapter(value = {"onPrevClick", "onNextClick"}, requireAll = false)
+    public static void setOnCalendarClickListener(ExtendedCalendarView view, View.OnClickListener onPrevClickListener, View.OnClickListener onNextClickListener) {
+        view.prev.setOnClickListener(onPrevClickListener);
+        view.next.setOnClickListener(onNextClickListener);
     }
 }
