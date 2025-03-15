@@ -1,7 +1,5 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.webkit.CookieManager;
 
 import androidx.lifecycle.LiveData;
@@ -20,7 +18,7 @@ public class Tab4ViewModel extends ViewModel {
 
     public String mGroupId, mGroupImage, mKey;
 
-    private static final String TAG = Tab4ViewModel.class.getSimpleName(), STATE = "state";
+    private static final String TAG = Tab4ViewModel.class.getSimpleName(), LOADING = "loading", SUCCESS = "success", MESSAGE = "message";
 
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
@@ -46,70 +44,49 @@ public class Tab4ViewModel extends ViewModel {
         return mCookieManager.getCookie(EndPoint.LOGIN_LMS);
     }
 
-    public LiveData<State> getState() {
-        return mSavedStateHandle.getLiveData(STATE);
+    public void setLoading(boolean bool) {
+        mSavedStateHandle.set(LOADING, bool);
+    }
+
+    public LiveData<Boolean> isLoading() {
+        return mSavedStateHandle.getLiveData(LOADING);
+    }
+
+    public void setSuccess(boolean bool) {
+        mSavedStateHandle.set(SUCCESS, bool);
+    }
+
+    public LiveData<Boolean> isSuccess() {
+        return mSavedStateHandle.getLiveData(SUCCESS);
+    }
+
+    public void setMessage(String message) {
+        mSavedStateHandle.set(MESSAGE, message);
+    }
+
+    public LiveData<String> getMessage() {
+        return mSavedStateHandle.getLiveData(MESSAGE);
     }
 
     public void deleteGroup() {
         mGroupRepository.removeGroup(getCookie(), getUser(), mIsAdmin, mGroupId, mKey, new Callback() {
             @Override
             public <T> void onSuccess(T data) {
-                mSavedStateHandle.set(STATE, new State(false, (Boolean) data, "소모임 " + (mIsAdmin ? "폐쇄" : "탈퇴") + " 완료"));
+                setLoading(false);
+                setSuccess((Boolean) data);
+                setMessage("소모임 " + (mIsAdmin ? "폐쇄" : "탈퇴") + " 완료");
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                mSavedStateHandle.set(STATE, new State(false, false, throwable.getMessage()));
+                setLoading(false);
+                setMessage(throwable.getMessage());
             }
 
             @Override
             public void onLoading() {
-                mSavedStateHandle.set(STATE, new State(true, false, null));
+                setLoading(true);
             }
         });
-    }
-
-    public static final class State implements Parcelable {
-        public boolean isLoading;
-
-        public boolean isSuccess;
-
-        public String message;
-
-        public State(boolean isLoading, boolean isSuccess, String message) {
-            this.isLoading = isLoading;
-            this.isSuccess = isSuccess;
-            this.message = message;
-        }
-
-        private State(Parcel in) {
-            isLoading = in.readByte() != 0;
-            isSuccess = in.readByte() != 0;
-            message = in.readString();
-        }
-
-        public static final Creator<State> CREATOR = new Creator<State>() {
-            @Override
-            public State createFromParcel(Parcel in) {
-                return new State(in);
-            }
-
-            @Override
-            public State[] newArray(int size) {
-                return new State[size];
-            }
-        };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeByte((byte) (isLoading ? 1 : 0));
-            parcel.writeByte((byte) (isSuccess ? 1 : 0));
-            parcel.writeString(message);
-        }
     }
 }

@@ -62,7 +62,7 @@ public class Tab2Fragment extends Fragment {
         });
     }
 
-    public class HeaderHolder extends RecyclerView.ViewHolder {
+    public static class HeaderHolder extends RecyclerView.ViewHolder {
         public HeaderHolder(HeaderCalendarBinding binding) {
             super(binding.getRoot());
         }

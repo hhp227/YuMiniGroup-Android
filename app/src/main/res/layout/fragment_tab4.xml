@@ -2,6 +2,7 @@
 <layout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         tools:context=".fragment.Tab4Fragment">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -12,6 +13,7 @@
                         android:id="@+id/recycler_view"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                         tools:listitem="@layout/content_tab4" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

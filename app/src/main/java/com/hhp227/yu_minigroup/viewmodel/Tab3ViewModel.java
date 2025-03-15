@@ -1,9 +1,7 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
@@ -25,7 +23,11 @@ import java.util.List;
 public class Tab3ViewModel extends ViewModel {
     private static final int LIMIT = 40;
 
-    private static final String TAG = Tab3ViewModel.class.getSimpleName(), STATE = "state";
+    private static final String TAG = Tab3ViewModel.class.getSimpleName(), LOADING = "loading", OFFSET = "offset", REQUEST_MORE = "requestMore", END_REACHED = "endReached", MESSAGE = "message";
+
+    private final MutableLiveData<List<MemberItem>> mItemList = new MutableLiveData<>(Collections.emptyList());
+
+    private int offset = 1;
 
     private final String mGroupId;
 
@@ -35,20 +37,65 @@ public class Tab3ViewModel extends ViewModel {
         mSavedStateHandle = savedStateHandle;
         mGroupId = savedStateHandle.get("grp_id");
 
-        if (!mSavedStateHandle.contains(STATE)) {
-            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), 1, false, false, null));
-            fetchNextPage();
-        }
+        setLoading(false);
+        setOffset(1);
+        setRequestMore(false);
+        setEndReached(false);
+        fetchNextPage();
     }
 
-    public LiveData<State> getState() {
-        return mSavedStateHandle.getLiveData(STATE);
+    public void setLoading(boolean bool) {
+        mSavedStateHandle.set(LOADING, bool);
+    }
+
+    public LiveData<Boolean> isLoading() {
+        return mSavedStateHandle.getLiveData(LOADING);
+    }
+
+    public void setItemList(List<MemberItem> list) {
+        mItemList.postValue(list);
+    }
+
+    public LiveData<List<MemberItem>> getItemList() {
+        return mItemList;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public void setOffset(int value) {
+        offset = value;
+    }
+
+    public void setRequestMore(boolean bool) {
+        mSavedStateHandle.set(REQUEST_MORE, bool);
+    }
+
+    public LiveData<Boolean> hasRequestMore() {
+        return mSavedStateHandle.getLiveData(REQUEST_MORE);
+    }
+
+    public void setEndReached(boolean bool) {
+        mSavedStateHandle.set(END_REACHED, bool);
+    }
+
+    public LiveData<Boolean> isEndReached() {
+        return mSavedStateHandle.getLiveData(END_REACHED);
+    }
+
+    public void setMessage(String message) {
+        mSavedStateHandle.set(MESSAGE, message);
+    }
+
+    public LiveData<String> getMessage() {
+        return mSavedStateHandle.getLiveData(MESSAGE);
     }
 
     public void fetchMemberList(int offset) {
         String params = "?CLUB_GRP_ID=" + mGroupId + "&startM=" + offset + "&displayM=" + LIMIT;
 
-        mSavedStateHandle.set(STATE, new State(true, requireState().memberItems, offset, offset > 1, false, null));
+        setLoading(true);
         AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.GET, EndPoint.MEMBER_LIST + params, response -> {
             List<MemberItem> memberItemList = new ArrayList<>();
 
@@ -70,98 +117,40 @@ public class Tab3ViewModel extends ViewModel {
 
                     memberItemList.add(new MemberItem(uid, name, value));
                 }
-                mSavedStateHandle.set(STATE, new State(false, mergedList(requireState().memberItems, memberItemList), requireState().offset + LIMIT, false, memberItemList.isEmpty(), null));
+                setLoading(false);
+                setItemList(mergedList(getItemList().getValue(), memberItemList));
+                setOffset(getOffset() + LIMIT);
+                setEndReached(memberItemList.isEmpty());
             } catch (NullPointerException e) {
                 e.printStackTrace();
-                mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), requireState().offset, false, false, null));
+                setLoading(false);
             }
         }, error -> {
             VolleyLog.e(TAG, error.getMessage());
-            mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), requireState().offset, false, false, error.getMessage()));
+            setLoading(false);
+            setMessage(error.getMessage());
         }));
     }
 
     public void fetchNextPage() {
-        mSavedStateHandle.set(STATE, new State(false, requireState().memberItems, requireState().offset, true, false, null));
+        setRequestMore(true);
+        fetchMemberList(getOffset());
     }
 
     public void refresh() {
-        mSavedStateHandle.set(STATE, new State(false, Collections.emptyList(), 1, true, false, null));
+        setRequestMore(true);
+        setItemList(Collections.emptyList());
+        setOffset(1);
+        setEndReached(false);
+        fetchMemberList(getOffset());
     }
 
     private List<MemberItem> mergedList(List<MemberItem> existingList, List<MemberItem> newList) {
-        List<MemberItem> result = new ArrayList<>();
-
-        result.addAll(existingList);
-        result.addAll(newList);
-        return result;
-    }
-
-    private State requireState() {
-        if (mSavedStateHandle.contains(STATE)) {
-            State state = mSavedStateHandle.get(STATE);
-
-            if (state != null) {
-                return state;
-            }
-        }
-        return new State(false, Collections.emptyList(), 0, false, false, null);
-    }
-
-    public static final class State implements Parcelable {
-        public boolean isLoading;
-
-        public List<MemberItem> memberItems;
-
-        public int offset;
-
-        public boolean hasRequestedMore;
-
-        public boolean isEndReached;
-
-        public String message;
-
-        public State(boolean isLoading, List<MemberItem> memberItems, int offset, boolean hasRequestedMore, boolean isEndReached, String message) {
-            this.isLoading = isLoading;
-            this.memberItems = memberItems;
-            this.offset = offset;
-            this.hasRequestedMore = hasRequestedMore;
-            this.isEndReached = isEndReached;
-            this.message = message;
-        }
-
-        protected State(Parcel in) {
-            isLoading = in.readByte() != 0;
-            offset = in.readInt();
-            hasRequestedMore = in.readByte() != 0;
-            isEndReached = in.readByte() != 0;
-            message = in.readString();
-        }
-
-        public static final Creator<State> CREATOR = new Creator<State>() {
-            @Override
-            public State createFromParcel(Parcel in) {
-                return new State(in);
-            }
-
-            @Override
-            public State[] newArray(int size) {
-                return new State[size];
+        return new ArrayList<MemberItem>() {
+            {
+                addAll(existingList);
+                addAll(newList);
             }
         };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeByte((byte) (isLoading ? 1 : 0));
-            parcel.writeInt(offset);
-            parcel.writeByte((byte) (hasRequestedMore ? 1 : 0));
-            parcel.writeByte((byte) (isEndReached ? 1 : 0));
-            parcel.writeString(message);
-        }
     }
 }

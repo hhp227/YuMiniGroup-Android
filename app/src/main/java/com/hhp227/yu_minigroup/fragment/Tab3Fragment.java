@@ -3,6 +3,7 @@ package com.hhp227.yu_minigroup.fragment;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,16 +13,15 @@ import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hhp227.yu_minigroup.adapter.MemberGridAdapter;
 import com.hhp227.yu_minigroup.databinding.FragmentTab3Binding;
 import com.hhp227.yu_minigroup.dto.MemberItem;
+import com.hhp227.yu_minigroup.handler.OnFragmentTab3EventListener;
 import com.hhp227.yu_minigroup.viewmodel.Tab3ViewModel;
 
-// TODO
-public class Tab3Fragment extends Fragment {
+public class Tab3Fragment extends Fragment implements OnFragmentTab3EventListener {
     private MemberGridAdapter mAdapter;
 
     private FragmentTab3Binding mBinding;
@@ -40,16 +40,17 @@ public class Tab3Fragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mBinding = FragmentTab3Binding.inflate(inflater, container, false);
+        mViewModel = new ViewModelProvider(this).get(Tab3ViewModel.class);
+        mAdapter = new MemberGridAdapter();
         return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(Tab3ViewModel.class);
-        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
-        mAdapter = new MemberGridAdapter();
-
+        mBinding.setViewModel(mViewModel);
+        mBinding.setLifecycleOwner(getViewLifecycleOwner());
+        mBinding.setHandler(this);
         mAdapter.setHasStableIds(true);
         mAdapter.setOnItemClickListener((v, position) -> {
             MemberItem memberItem = mAdapter.getCurrentList().get(position);
@@ -65,36 +66,21 @@ public class Tab3Fragment extends Fragment {
             newFragment.setArguments(args);
             newFragment.show(getChildFragmentManager(), "dialog");
         });
-        mBinding.rvMember.setLayoutManager(layoutManager);
         mBinding.rvMember.setAdapter(mAdapter);
         mBinding.rvMember.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+                Handler handler = new Handler(Looper.getMainLooper());
+
                 if (!recyclerView.canScrollVertically(1)) {
+                    recyclerView.removeOnScrollListener(this);
                     mViewModel.fetchNextPage();
+                    handler.postDelayed(() -> recyclerView.addOnScrollListener(this), 1000);
                 }
             }
         });
-        mBinding.srlMember.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
-            mViewModel.refresh();
-            mBinding.srlMember.setRefreshing(false);
-        }, 1000));
-        mViewModel.getState().observe(getViewLifecycleOwner(), state -> {
-            if (state.isLoading) {
-                if (!state.hasRequestedMore) {
-                    showProgressBar();
-                }
-            } else if (state.hasRequestedMore) {
-                mViewModel.fetchMemberList(state.offset);
-            } else if (!state.memberItems.isEmpty()) {
-                hideProgressBar();
-                mAdapter.submitList(state.memberItems);
-            } else if (state.message != null && !state.message.isEmpty()) {
-                hideProgressBar();
-                Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show();
-            }
-        });
+        observeViewModelData();
     }
 
     @Override
@@ -103,19 +89,32 @@ public class Tab3Fragment extends Fragment {
         mBinding = null;
     }
 
+    @Override
+    public void onRefresh() {
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            mViewModel.refresh();
+            mBinding.srlMember.setRefreshing(false);
+        }, 1000);
+    }
+
+    private void observeViewModelData() {
+        mViewModel.getItemList().observe(getViewLifecycleOwner(), articleItemList -> mAdapter.submitList(articleItemList));
+        mViewModel.hasRequestMore().observe(getViewLifecycleOwner(), hasRequestMore -> {
+            if (hasRequestMore) {
+                mAdapter.setFooterProgressBarVisibility(View.VISIBLE);
+            }
+        });
+        mViewModel.isEndReached().observe(getViewLifecycleOwner(), isEndReached -> mAdapter.setFooterProgressBarVisibility(isEndReached ? View.GONE : View.INVISIBLE));
+        mViewModel.getMessage().observe(getViewLifecycleOwner(), message -> {
+            if (message != null && !message.isEmpty()) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     public void onProfileActivityResult(ActivityResult result) {
         if (result.getResultCode() == Activity.RESULT_OK) {
             mAdapter.notifyDataSetChanged();
         }
-    }
-
-    private void showProgressBar() {
-        if (mBinding.pbMember.getVisibility() == View.INVISIBLE)
-            mBinding.pbMember.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressBar() {
-        if (mBinding.pbMember.getVisibility() == View.VISIBLE)
-            mBinding.pbMember.setVisibility(View.INVISIBLE);
     }
 }
