@@ -14,7 +14,6 @@ import com.hhp227.yu_minigroup.activity.MainActivity;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.FragmentBusBinding;
 
-// TODO
 public class BusFragment extends Fragment {
     private FragmentBusBinding mBinding;
 

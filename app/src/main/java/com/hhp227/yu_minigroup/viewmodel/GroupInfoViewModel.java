@@ -1,7 +1,5 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 import android.webkit.CookieManager;
 
@@ -38,7 +36,7 @@ public class GroupInfoViewModel extends ViewModel {
 
     public final String mGroupId, mGroupName, mGroupImage, mGroupInfo, mGroupDesc, mJoinType, mKey;
 
-    private static final String TAG = GroupInfoViewModel.class.getSimpleName(), STATE = "state";
+    private static final String TAG = GroupInfoViewModel.class.getSimpleName(), LOADING = "loading", JOIN_TYPE = "joinType", MESSAGE = "message";
 
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
@@ -58,8 +56,28 @@ public class GroupInfoViewModel extends ViewModel {
         mKey = savedStateHandle.get("key");
     }
 
-    public LiveData<State> getState() {
-        return mSavedStateHandle.getLiveData(STATE);
+    public void setLoading(boolean bool) {
+        mSavedStateHandle.set(LOADING, bool);
+    }
+
+    public LiveData<Boolean> isLoading() {
+        return mSavedStateHandle.getLiveData(LOADING);
+    }
+
+    public void setType(int type) {
+        mSavedStateHandle.set(JOIN_TYPE, type);
+    }
+
+    public LiveData<Integer> getType() {
+        return mSavedStateHandle.getLiveData(JOIN_TYPE);
+    }
+
+    public void setMessage(String message) {
+        mSavedStateHandle.set(MESSAGE, message);
+    }
+
+    public LiveData<String> getMessage() {
+        return mSavedStateHandle.getLiveData(MESSAGE);
     }
 
     public void sendRequest() {
@@ -73,11 +91,13 @@ public class GroupInfoViewModel extends ViewModel {
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
-                mSavedStateHandle.set(STATE, new State(false, -1, e.getMessage()));
+                setLoading(false);
+                setMessage(e.getMessage());
             }
         }, error -> {
             Log.e(TAG, error.getMessage());
-            mSavedStateHandle.set(STATE, new State(false, -1, error.getMessage()));
+            setLoading(false);
+            setMessage(error.getMessage());
         }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -120,7 +140,7 @@ public class GroupInfoViewModel extends ViewModel {
             }
         };
 
-        mSavedStateHandle.set(STATE, new State(true, -1, null));
+        setLoading(true);
         AppController.getInstance().addToRequestQueue(jsonObjectRequest, tag_json_req);
     }
 
@@ -142,13 +162,16 @@ public class GroupInfoViewModel extends ViewModel {
                     groupItem.setMemberCount(members.size());
                     groupsReference.child(mKey).setValue(groupItem);
                 }
-                mSavedStateHandle.set(STATE, new State(false, TYPE_REQUEST, "신청완료"));
+                setLoading(false);
+                setType(TYPE_REQUEST);
+                setMessage("신청완료");
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
-                mSavedStateHandle.set(STATE, new State(false, -1, databaseError.getMessage()));
+                setLoading(false);
+                setMessage(databaseError.getMessage());
             }
         });
         childUpdates.put("/" + mPreferenceManager.getUser().getUid() + "/" + mKey, mJoinType.equals("0"));
@@ -174,59 +197,18 @@ public class GroupInfoViewModel extends ViewModel {
                     }
                 }
                 groupsReference.child(mKey).setValue(groupItem);
-                mSavedStateHandle.set(STATE, new State(false, TYPE_CANCEL, "신청취소"));
+                setLoading(false);
+                setType(TYPE_CANCEL);
+                setMessage("신청취소");
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e(TAG, "파이어베이스 데이터 불러오기 실패", databaseError.toException());
-                mSavedStateHandle.set(STATE, new State(false, -1, databaseError.getMessage()));
+                setLoading(false);
+                setMessage(databaseError.getMessage());
             }
         });
         userGroupListReference.child(mPreferenceManager.getUser().getUid()).child(mKey).removeValue();
-    }
-
-    public static final class State implements Parcelable {
-        public boolean isLoading;
-
-        public int type;
-
-        public String message;
-
-        public State(boolean isLoading, int type, String message) {
-            this.isLoading = isLoading;
-            this.type = type;
-            this.message = message;
-        }
-
-        protected State(Parcel in) {
-            isLoading = in.readByte() != 0;
-            type = in.readInt();
-            message = in.readString();
-        }
-
-        public static final Creator<State> CREATOR = new Creator<State>() {
-            @Override
-            public State createFromParcel(Parcel in) {
-                return new State(in);
-            }
-
-            @Override
-            public State[] newArray(int size) {
-                return new State[size];
-            }
-        };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeByte((byte) (isLoading ? 1 : 0));
-            parcel.writeInt(type);
-            parcel.writeString(message);
-        }
     }
 }

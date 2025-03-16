@@ -16,7 +16,6 @@ import com.hhp227.yu_minigroup.databinding.FragmentTabsBinding;
 
 import java.util.Arrays;
 
-// TODO
 public class TimetableFragment extends Fragment {
     public static final String TAG = "시간표";
 
