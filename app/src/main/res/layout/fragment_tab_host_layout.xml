@@ -22,7 +22,8 @@
                     android:layout_height="200dp"
                     android:fitsSystemWindows="false"
                     app:contentScrim="?attr/colorPrimary"
-                    app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
+                    app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                    app:titleEnabled="false">
 
                 <ImageView
                         android:id="@+id/iv_header"

@@ -19,6 +19,7 @@ import com.hhp227.yu_minigroup.adapter.GroupListAdapter;
 import com.hhp227.yu_minigroup.databinding.ActivityListBinding;
 import com.hhp227.yu_minigroup.fragment.GroupInfoFragment;
 import com.hhp227.yu_minigroup.handler.OnActivityListEventListener;
+import com.hhp227.yu_minigroup.viewmodel.GroupInfoViewModel;
 import com.hhp227.yu_minigroup.viewmodel.RequestViewModel;
 
 public class RequestActivity extends AppCompatActivity implements OnActivityListEventListener {
@@ -41,7 +42,7 @@ public class RequestActivity extends AppCompatActivity implements OnActivityList
         mBinding.setEmptyMessage("가입신청중인 그룹이 없습니다.");
         setAppBar(mBinding.toolbar);
         mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
-        mAdapter.setButtonType(GroupInfoFragment.TYPE_CANCEL);
+        mAdapter.setButtonType(GroupInfoViewModel.TYPE_CANCEL);
         mBinding.recyclerView.setHasFixedSize(true);
         mBinding.recyclerView.setAdapter(mAdapter);
         mBinding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

@@ -20,6 +20,7 @@ import com.hhp227.yu_minigroup.databinding.ActivityListBinding;
 import com.hhp227.yu_minigroup.fragment.GroupInfoFragment;
 import com.hhp227.yu_minigroup.handler.OnActivityListEventListener;
 import com.hhp227.yu_minigroup.viewmodel.FindGroupViewModel;
+import com.hhp227.yu_minigroup.viewmodel.GroupInfoViewModel;
 
 public class FindGroupActivity extends AppCompatActivity implements OnActivityListEventListener {
     private GroupListAdapter mAdapter;
@@ -55,7 +56,7 @@ public class FindGroupActivity extends AppCompatActivity implements OnActivityLi
         mBinding.setHandler(this);
         setAppBar(mBinding.toolbar);
         mAdapter.setFooterProgressBarVisibility(View.INVISIBLE);
-        mAdapter.setButtonType(GroupInfoFragment.TYPE_REQUEST);
+        mAdapter.setButtonType(GroupInfoViewModel.TYPE_REQUEST);
         mBinding.recyclerView.setHasFixedSize(true);
         mBinding.recyclerView.setAdapter(mAdapter);
         mBinding.recyclerView.addOnScrollListener(mOnScrollListener);

@@ -11,7 +11,6 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -31,14 +30,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// TODO
 public class TabHostLayoutFragment extends Fragment {
     private static final String IS_ADMIN = "admin";
     private static final String GROUP_ID = "grp_id";
     private static final String GROUP_NAME = "grp_nm";
     private static final String GROUP_IMAGE = "grp_img";
     private static final String KEY = "key";
-    private static final String[] TAB_NAMES = {"소식", "일정", "맴버", "설정"};
 
     public ActivityResultLauncher<Intent> mCreateArticleResultLauncher;
 
@@ -112,8 +109,7 @@ public class TabHostLayoutFragment extends Fragment {
                 activity.getSupportActionBar().setTitle(mGroupName);
             }
         }
-        mBinding.collapsingToolbar.setTitleEnabled(false);
-        Arrays.stream(TAB_NAMES).forEach(s -> mBinding.tabLayout.addTab(mBinding.tabLayout.newTab().setText(s)));
+        Arrays.stream(getResources().getStringArray(R.array.tab_names)).forEach(s -> mBinding.tabLayout.addTab(mBinding.tabLayout.newTab().setText(s)));
         mBinding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -132,7 +128,7 @@ public class TabHostLayoutFragment extends Fragment {
             }
         });
         mBinding.viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mBinding.tabLayout));
-        mBinding.viewPager.setOffscreenPageLimit(TAB_NAMES.length);
+        mBinding.viewPager.setOffscreenPageLimit(getResources().getStringArray(R.array.tab_names).length);
         mBinding.viewPager.setAdapter(adapter);
         mBinding.fab.setOnClickListener(v -> {
             if (mBinding.tabLayout.getSelectedTabPosition() == 0) {
