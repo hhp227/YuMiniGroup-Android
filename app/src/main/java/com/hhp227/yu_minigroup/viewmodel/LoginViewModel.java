@@ -109,7 +109,6 @@ public class LoginViewModel extends ViewModel {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
                 if (response.allHeaders != null) {
-                    Log.e("TEST", "parseNetworkResponse: " + response.allHeaders);
                     response.allHeaders.stream()
                             .filter(header -> header.getName().equals("Set-Cookie") && header.getValue().contains("SESSION_IMAX"))
                             .forEach(header -> loginSSOyuPortal(id, password, header.getValue()));
@@ -131,11 +130,9 @@ public class LoginViewModel extends ViewModel {
     }
 
     private void loginSSOyuPortal(String id, String password, String cookie) {
-        Log.e("TEST", "loginSSOyuPortal, cookie: " + cookie);
         String tagStringReq = "req_login_SSO";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, EndPoint.YU_PORTAL_LOGIN_URL, response -> {
             // TODO 로그인 성공/실패에 대한 처리 분기 필요
-            Log.e("TEST", "loginSSOyuPortal, success: " + response);
             VolleyLog.d(TAG, "로그인 응답 : " + response);
             mCookieManager.setCookie(EndPoint.LOGIN_LMS, cookie);
         }, error -> {
@@ -145,7 +142,6 @@ public class LoginViewModel extends ViewModel {
         }) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                Log.e("TEST", "loginSSOyuPortal, parseNetworkResponse: " + response.allHeaders);
                 response.allHeaders.stream()
                         .filter(header -> header.getName().equals("Set-Cookie") && header.getValue().contains("ssotoken"))
                         .forEach(header -> loginLMS(id, password, header.getValue(), cookie));
@@ -156,7 +152,7 @@ public class LoginViewModel extends ViewModel {
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
 
-                headers.put("Referer", "https://portal.yu.ac.kr/sso/login.jsp"); // 필수
+                headers.put("Referer", "http://portal.yu.ac.kr/sso/login.jsp"); // 필수
                 return headers;
             }
 
@@ -166,7 +162,7 @@ public class LoginViewModel extends ViewModel {
 
                 params.put("cReturn_Url", EndPoint.LOGIN_LMS);
                 params.put("type", "lms"); // 필수
-                params.put("p", "00115030E5500590653020803540256534E070F40070C4556045E18020750100"); // 필수
+                params.put("p", "20112030550005B055003090F570256534A010F47070C4556045E18020750110"); // 필수
                 params.put("login_gb", "0"); // 필수
                 params.put("userId", id);
                 params.put("password", password);
