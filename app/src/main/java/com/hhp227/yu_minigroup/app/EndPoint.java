@@ -2,7 +2,7 @@ package com.hhp227.yu_minigroup.app;
 
 public interface EndPoint {
     String YU_PORTAL_LOGIN_URL = "https://portal.yu.ac.kr/sso/login_process.jsp";
-    String BASE_URL = "http://lms.yu.ac.kr";
+    String BASE_URL = "https://lms.yu.ac.kr";
     String LOGIN_LMS = BASE_URL + "/ilos/lo/login_sso.acl";
     String GROUP_LIST = BASE_URL + "/ilos/m/community/share_group_list.acl";
     String CREATE_GROUP = BASE_URL + "/ilos/community/share_group_insert.acl";

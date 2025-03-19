@@ -14,14 +14,17 @@ import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.helper.Callback;
 import com.hhp227.yu_minigroup.helper.PreferenceManager;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class GroupMainViewModel extends ViewModel {
-    private final MutableLiveData<Long> mTick = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> mLoading = new MutableLiveData<>(false);
 
-    private final MutableLiveData<State> mState = new MutableLiveData<>();
+    private final MutableLiveData<List<Map.Entry<String, Object>>> mGroupItemList = new MutableLiveData<>();
+
+    private final MutableLiveData<String> mMessage = new MutableLiveData<>();
+
+    private final MutableLiveData<Long> mTick = new MutableLiveData<>();
 
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
@@ -45,6 +48,18 @@ public class GroupMainViewModel extends ViewModel {
         fetchDataTask();
     }
 
+    public LiveData<Boolean> isLoading() {
+        return mLoading;
+    }
+
+    public LiveData<List<Map.Entry<String, Object>>> getItemList() {
+        return mGroupItemList;
+    }
+
+    public LiveData<String> getMessage() {
+        return mMessage;
+    }
+
     public User getUser() {
         return mPreferenceManager.getUser();
     }
@@ -61,10 +76,6 @@ public class GroupMainViewModel extends ViewModel {
         return mTick;
     }
 
-    public LiveData<State> getState() {
-        return mState;
-    }
-
     public void refresh() {
         fetchDataTask();
     }
@@ -73,32 +84,20 @@ public class GroupMainViewModel extends ViewModel {
         mGroupRepository.getJoinedGroupList(mCookieManager.getCookie(EndPoint.LOGIN_LMS), getUser(), new Callback() {
             @Override
             public <T> void onSuccess(T data) {
-                mState.postValue(new State(false, (List<Map.Entry<String, Object>>) data, null));
+                mLoading.postValue(false);
+                mGroupItemList.postValue((List<Map.Entry<String, Object>>) data);
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                mState.postValue(new State(false, Collections.emptyList(), throwable.getMessage()));
+                mLoading.postValue(false);
+                mMessage.postValue(throwable.getMessage());
             }
 
             @Override
             public void onLoading() {
-                mState.postValue(new State(true, Collections.emptyList(), null));
+                mLoading.postValue(true);
             }
         });
-    }
-
-    public static final class State {
-        public boolean isLoading;
-
-        public List<Map.Entry<String, Object>> groupItemList;
-
-        public String message;
-
-        public State(boolean isLoading, List<Map.Entry<String, Object>> groupItemList, String message) {
-            this.isLoading = isLoading;
-            this.groupItemList = groupItemList;
-            this.message = message;
-        }
     }
 }

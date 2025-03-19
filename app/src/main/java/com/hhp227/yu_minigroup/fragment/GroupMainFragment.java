@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,6 +33,9 @@ import com.hhp227.yu_minigroup.adapter.GroupGridAdapter;
 import com.hhp227.yu_minigroup.databinding.FragmentGroupMainBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.viewmodel.GroupMainViewModel;
+
+import java.util.List;
+import java.util.Map;
 
 import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_AD;
 import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_GROUP;
@@ -61,16 +65,10 @@ public class GroupMainFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mBinding = FragmentGroupMainBinding.inflate(inflater, container, false);
-        return mBinding.getRoot();
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(GroupMainViewModel.class);
         mSpanCount = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? PORTAIT_SPAN_COUNT :
-                     getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? LANDSCAPE_SPAN_COUNT :
-                     0;
+                getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? LANDSCAPE_SPAN_COUNT :
+                        0;
         mSpanSizeLookup = new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
@@ -107,7 +105,14 @@ public class GroupMainFragment extends Fragment {
                 ((MainActivity) requireActivity()).updateProfileImage();
             }
         });
+        return mBinding.getRoot();
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mBinding.setViewModel(mViewModel);
+        mBinding.setLifecycleOwner(getViewLifecycleOwner());
         ((MainActivity) requireActivity()).setAppBar(mBinding.toolbar, getString(R.string.main));
         mAdapter.setHasStableIds(true);
         mAdapter.setOnItemClickListener((v, position) -> {
@@ -160,25 +165,7 @@ public class GroupMainFragment extends Fragment {
         if (mViewModel.getUser() == null) {
             ((MainActivity) requireActivity()).logout();
         }
-        mViewModel.getState().observe(getViewLifecycleOwner(), state -> {
-            if (state.isLoading) {
-                requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                showProgressBar();
-            } else if (!state.groupItemList.isEmpty()) {
-                hideProgressBar();
-                mAdapter.submitList(state.groupItemList);
-                if (getActivity() != null) {
-                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                }
-            } else if (!state.message.isEmpty()) {
-                hideProgressBar();
-                Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG).show();
-                if (getActivity() != null) {
-                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                }
-            }
-        });
-        mViewModel.getTick().observe(getViewLifecycleOwner(), aLong -> mAdapter.moveSliderPager());
+        observeViewModelData();
     }
 
     @Override
@@ -217,13 +204,13 @@ public class GroupMainFragment extends Fragment {
         mBinding.rvGroup.invalidateItemDecorations();
     }
 
-    private void showProgressBar() {
-        if (mBinding.pbGroup.getVisibility() == View.GONE)
-            mBinding.pbGroup.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressBar() {
-        if (mBinding.pbGroup.getVisibility() == View.VISIBLE)
-            mBinding.pbGroup.setVisibility(View.GONE);
+    private void observeViewModelData() {
+        mViewModel.getItemList().observe(getViewLifecycleOwner(), groupItemList -> mAdapter.submitList(groupItemList));
+        mViewModel.getMessage().observe(getViewLifecycleOwner(), message -> {
+            if (message != null && !message.isEmpty()) {
+                Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG).show();
+            }
+        });
+        mViewModel.getTick().observe(getViewLifecycleOwner(), aLong -> mAdapter.moveSliderPager());
     }
 }
