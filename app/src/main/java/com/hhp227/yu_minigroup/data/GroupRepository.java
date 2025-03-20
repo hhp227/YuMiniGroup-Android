@@ -86,7 +86,7 @@ public class GroupRepository {
             } catch (Exception e) {
                 callback.onFailure(e);
             } finally {
-                initFirebaseData(user.getUid(), insertAdvertisement(groupItemList), true, callback);
+                initFirebaseData(user.getUid(), groupItemList, true, callback);
             }
         }, error -> {
             VolleyLog.e(error.getMessage());
@@ -416,24 +416,6 @@ public class GroupRepository {
                 return byteArrayOutputStream.toByteArray();
             }
         });
-    }
-
-    private List<Map.Entry<String, Object>> insertAdvertisement(List<Map.Entry<String, Object>> groupItemList) {
-        Map<String, String> headerMap = new HashMap<>();
-
-        if (!groupItemList.isEmpty()) {
-            headerMap.put("text", "가입중인 그룹");
-            groupItemList.add(0, new AbstractMap.SimpleEntry<>("가입중인 그룹", headerMap));
-            if (groupItemList.size() % 2 == 0) {
-                groupItemList.add(new AbstractMap.SimpleEntry<>("광고", "광고"));
-            }
-        } else {
-            groupItemList.add(new AbstractMap.SimpleEntry<>("없음", "없음"));
-            headerMap.put("text", "인기 모임");
-            groupItemList.add(new AbstractMap.SimpleEntry<>("인기 모임", headerMap));
-            groupItemList.add(new AbstractMap.SimpleEntry<>("뷰페이져", "뷰페이져"));
-        }
-        return groupItemList;
     }
 
     private void initFirebaseData(String uid, List<Map.Entry<String, Object>> groupItemList, boolean isTrue, Callback callback) {

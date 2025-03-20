@@ -28,10 +28,7 @@ import net.htmlparser.jericho.Source;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -124,6 +121,7 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
     public void submitList(List<Map.Entry<String, Object>> groupItemList) {
         mCurrentList.clear();
         mCurrentList.addAll(groupItemList);
+        insertAdvertisement();
         notifyDataSetChanged();
     }
 
@@ -137,6 +135,23 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
         adText.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         adText.setGravity(Gravity.CENTER_VERTICAL);
         return adText;
+    }
+
+    private void insertAdvertisement() {
+        Map<String, String> headerMap = new HashMap<>();
+
+        if (!mCurrentList.isEmpty()) {
+            headerMap.put("text", "가입중인 그룹");
+            mCurrentList.add(0, new AbstractMap.SimpleEntry<>("가입중인 그룹", headerMap));
+            if (mCurrentList.size() % 2 == 0) {
+                mCurrentList.add(new AbstractMap.SimpleEntry<>("광고", "광고"));
+            }
+        } else {
+            mCurrentList.add(new AbstractMap.SimpleEntry<>("없음", "없음"));
+            headerMap.put("text", "인기 모임");
+            mCurrentList.add(new AbstractMap.SimpleEntry<>("인기 모임", headerMap));
+            mCurrentList.add(new AbstractMap.SimpleEntry<>("뷰페이져", "뷰페이져"));
+        }
     }
 
     public void setOnItemClickListener(BiConsumer<View, Integer> onItemClickListener) {
