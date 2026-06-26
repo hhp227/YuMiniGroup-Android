@@ -1,61 +1,31 @@
 package com.hhp227.yu_minigroup.activity;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.Request;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.adapter.MessageListAdapter;
-import com.hhp227.yu_minigroup.app.AppController;
-import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.ActivityChatBinding;
 import com.hhp227.yu_minigroup.dto.MessageItem;
-import com.hhp227.yu_minigroup.dto.User;
 import com.hhp227.yu_minigroup.viewmodel.ChatViewModel;
 
-import org.json.JSONException;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-// TODO
 public class ChatActivity extends AppCompatActivity {
-    private static final int LIMIT = 15;
-
-    private boolean mHasSelection, mIsGroupChat;
-
-    private DatabaseReference mDatabaseReference;
+    private boolean mHasSelection;
 
     private MessageListAdapter mAdapter;
-
-    private String mReceiver, mValue;
-
-    private TextWatcher mTextWatcher;
 
     private View.OnLayoutChangeListener mOnLayoutChangeListener;
 
@@ -64,100 +34,30 @@ public class ChatActivity extends AppCompatActivity {
     private ChatViewModel mViewModel;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityChatBinding.inflate(getLayoutInflater());
         mViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        mDatabaseReference = FirebaseDatabase.getInstance().getReference("Messages");
-        mReceiver = getIntent().getStringExtra("uid");
-        mValue = getIntent().getStringExtra("value");
-        mIsGroupChat = getIntent().getBooleanExtra("grp_chat", false);
-        mAdapter = new MessageListAdapter(mViewModel.mMessageItemList, mViewModel.getUser().getUid());
-        mOnLayoutChangeListener = (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-            if (bottom < oldBottom && mHasSelection)
-                mBinding.rvMessage.post(() -> mBinding.rvMessage.scrollToPosition(mViewModel.mMessageItemList.size() - 1));
-        };
-        mTextWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mBinding.cvBtnSend.setCardBackgroundColor(getResources().getColor(s.length() > 0 ? R.color.colorAccent : androidx.cardview.R.color.cardview_light_background, null));
-                mBinding.tvBtnSend.setTextColor(getResources().getColor(s.length() > 0 ? android.R.color.white : android.R.color.darker_gray, null));
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        };
+        mAdapter = new MessageListAdapter(new ArrayList<MessageItem>(), mViewModel.getUser().getUid());
 
         setContentView(mBinding.getRoot());
         setSupportActionBar(mBinding.toolbar);
         if (getSupportActionBar() != null) {
+            boolean isGroupChat = getIntent().getBooleanExtra("grp_chat", false);
+
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(getIntent().getStringExtra("chat_nm") + (mIsGroupChat ? " 그룹채팅방" : ""));
+            getSupportActionBar().setTitle(getIntent().getStringExtra("chat_nm") + (isGroupChat ? " 그룹채팅방" : ""));
         }
-        mBinding.cvBtnSend.setOnClickListener(v -> {
-            String message = mBinding.etInputMsg.getText().toString().trim();
-
-            mViewModel.actionSend(message);
-            mBinding.etInputMsg.setText("");
-        });
-        mBinding.etInputMsg.addTextChangedListener(mTextWatcher);
-        mAdapter.setHasStableIds(true);
-        layoutManager.setStackFromEnd(true);
-        mBinding.rvMessage.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (!mBinding.rvMessage.canScrollVertically(-1) && !mViewModel.mHasRequestedMore && mViewModel.mCursor != null) {
-                    Log.e("TEST", "onScrollStateChanged");
-                    mViewModel.mHasRequestedMore = true;
-
-                    fetchMessageList(mIsGroupChat ? mDatabaseReference.child(mReceiver).orderByKey().endAt(mViewModel.mCursor).limitToLast(LIMIT) : mDatabaseReference.child(mViewModel.getUser().getUid()).child(mReceiver).orderByKey().endAt(mViewModel.mCursor).limitToLast(LIMIT), mViewModel.mMessageItemList.size(), mViewModel.mCursor);
-                    mViewModel.mCursor = null;
-                }
-            }
-
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                mHasSelection = layoutManager.findFirstCompletelyVisibleItemPosition() + layoutManager.getChildCount() > layoutManager.getItemCount() - 2;
-            }
-        });
-        mBinding.rvMessage.addOnLayoutChangeListener(mOnLayoutChangeListener);
-        mBinding.rvMessage.setLayoutManager(layoutManager);
-        mBinding.rvMessage.setAdapter(mAdapter);
-        fetchMessageList(mIsGroupChat ? mDatabaseReference.child(mReceiver).orderByKey().limitToLast(LIMIT) : mDatabaseReference.child(mViewModel.getUser().getUid()).child(mReceiver).orderByKey().limitToLast(LIMIT), 0, "");
-        mViewModel.getMessageFormState().observe(this, inputMessageFormState -> Toast.makeText(getBaseContext(), inputMessageFormState.messageError, Toast.LENGTH_LONG).show());
-        /*mViewModel.mState.observe(this, state -> {
-            if (state.isLoading) {
-                Log.e("TEST", "isLoading");
-            } else if (state.hasRequestedMore) {
-                mAdapter.notifyDataSetChanged();
-                Log.e("TEST", "prevCnt: " + state.offset);
-                if (mHasSelection || mViewModel.mHasRequestedMore)
-                    if (Integer.parseInt(state.offset) == 0) // 임시로 prevCnt를 state.offset에다 대입
-                        mBinding.rvMessage.scrollToPosition(mViewModel.mMessageItemList.size() - 1);
-                    else
-                        ((LinearLayoutManager) mBinding.rvMessage.getLayoutManager()).scrollToPositionWithOffset(mViewModel.mMessageItemList.size() - Integer.parseInt(state.offset), 10);
-            }
-        });*/
+        subscribeUi();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mTextWatcher != null)
-            mBinding.etInputMsg.removeTextChangedListener(mTextWatcher);
-        if (mOnLayoutChangeListener != null)
+        if (mOnLayoutChangeListener != null) {
             mBinding.rvMessage.removeOnLayoutChangeListener(mOnLayoutChangeListener);
+        }
         mBinding.rvMessage.clearOnScrollListeners();
-        mViewModel.mMessageItemList.clear();
-        mTextWatcher = null;
         mOnLayoutChangeListener = null;
         mBinding = null;
     }
@@ -171,103 +71,68 @@ public class ChatActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void fetchMessageList(Query query, int prevCnt, String prevCursor) {
-        query.addChildEventListener(new ChildEventListener() {
+    private void subscribeUi() {
+        mBinding.setViewModel(mViewModel);
+        mBinding.setLifecycleOwner(this);
+        mBinding.rvMessage.setAdapter(mAdapter);
+        mOnLayoutChangeListener = (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (bottom < oldBottom && mHasSelection && mAdapter.getItemCount() > 0) {
+                mBinding.rvMessage.post(() -> mBinding.rvMessage.scrollToPosition(mAdapter.getItemCount() - 1));
+            }
+        };
+        mBinding.rvMessage.addOnLayoutChangeListener(mOnLayoutChangeListener);
+        mBinding.rvMessage.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
-                if (mViewModel.mFirstMessageKey != null && mViewModel.mFirstMessageKey.equals(dataSnapshot.getKey()))
-                    return;
-                else if (s == null)
-                    mViewModel.mFirstMessageKey = dataSnapshot.getKey();
-                if (mViewModel.mCursor == null)
-                    mViewModel.mCursor = s;
-                else if (prevCursor.equals(dataSnapshot.getKey())) {
-                    mViewModel.mHasRequestedMore = false;
-                    return;
-                }
-                MessageItem messageItem = dataSnapshot.getValue(MessageItem.class);
-
-                mViewModel.mMessageItemList.add(mViewModel.mMessageItemList.size() - prevCnt, messageItem); // 새로 추가하면 prevCnt는 0으로 됨
-                mAdapter.notifyDataSetChanged();
-                try {
-                    if (mHasSelection || mViewModel.mHasRequestedMore)
-                        if (prevCnt == 0)
-                            mBinding.rvMessage.scrollToPosition(mViewModel.mMessageItemList.size() - 1);
-                        else
-                            ((LinearLayoutManager) mBinding.rvMessage.getLayoutManager()).scrollToPositionWithOffset(mViewModel.mMessageItemList.size() - prevCnt, 10);
-                } catch (Exception e) {
-                    Log.e("TEST", e.getMessage());
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (!mBinding.rvMessage.canScrollVertically(-1) && !mViewModel.hasRequestedMore()) {
+                    mViewModel.fetchPreviousPage();
                 }
             }
 
             @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, String s) {
-            }
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
 
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                if (layoutManager != null) {
+                    mHasSelection = layoutManager.findFirstCompletelyVisibleItemPosition() + layoutManager.getChildCount() > layoutManager.getItemCount() - 2;
+                }
             }
         });
-    }
-
-    private void sendLMSMessage() {
-        AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.POST, EndPoint.SEND_MESSAGE, null, response -> {
-            try {
-                if (!response.getBoolean("isError"))
-                    Log.d("채팅", response.getString("message"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }, error -> VolleyLog.e(error.getMessage())) {
+        mViewModel.getMessageItemList().observe(this, new Observer<List<MessageItem>>() {
             @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-
-                headers.put("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS));
-                return headers;
+            public void onChanged(List<MessageItem> messageItems) {
+                mAdapter.submitList(messageItems);
             }
-
+        });
+        mViewModel.getScrollEvent().observe(this, new Observer<ChatViewModel.ScrollEvent>() {
             @Override
-            public String getBodyContentType() {
-                return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
-            }
-
-            @Override
-            public byte[] getBody() {
-                Map<String, String> params = new HashMap<>();
-
-                params.put("TXT", mBinding.etInputMsg.getText().toString());
-                params.put("send_msg", "Y");
-                params.put("USERS", mValue);
-                if (params.size() > 0) {
-                    StringBuilder encodedParams = new StringBuilder();
-
-                    try {
-                        params.forEach((k, v) -> {
-                            try {
-                                encodedParams.append(URLEncoder.encode(k, getParamsEncoding()));
-                                encodedParams.append('=');
-                                encodedParams.append(URLEncoder.encode(v, getParamsEncoding()));
-                                encodedParams.append('&');
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
-                        });
-                        return encodedParams.toString().getBytes(getParamsEncoding());
-                    } catch (UnsupportedEncodingException uee) {
-                        throw new RuntimeException("Encoding not supported: " + getParamsEncoding(), uee);
-                    }
+            public void onChanged(ChatViewModel.ScrollEvent scrollEvent) {
+                if (scrollEvent == null || (!scrollEvent.initialLoad && !mHasSelection && !scrollEvent.requestedMore)) {
+                    return;
                 }
-                return null;
+                try {
+                    if (scrollEvent.initialLoad) {
+                        mBinding.rvMessage.scrollToPosition(scrollEvent.itemCount - 1);
+                    } else {
+                        LinearLayoutManager layoutManager = (LinearLayoutManager) mBinding.rvMessage.getLayoutManager();
+
+                        if (layoutManager != null) {
+                            layoutManager.scrollToPositionWithOffset(scrollEvent.addedCount, 10);
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
             }
-        }, "req_send_msg");
+        });
+        mViewModel.getMessageFormState().observe(this, new Observer<ChatViewModel.InputMessageFormState>() {
+            @Override
+            public void onChanged(ChatViewModel.InputMessageFormState inputMessageFormState) {
+                if (inputMessageFormState != null && inputMessageFormState.messageError != null) {
+                    Toast.makeText(ChatActivity.this, inputMessageFormState.messageError, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 }

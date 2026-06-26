@@ -37,6 +37,14 @@ public class MessageListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         this.mUid = uid;
     }
 
+    public void submitList(List<MessageItem> messageItems) {
+        mMessageItems.clear();
+        if (messageItems != null) {
+            mMessageItems.addAll(messageItems);
+        }
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

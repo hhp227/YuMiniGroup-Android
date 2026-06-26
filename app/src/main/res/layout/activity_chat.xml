@@ -5,6 +5,14 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         tools:context=".activity.ChatActivity">
 
+    <data>
+        <import type="android.text.TextUtils" />
+
+        <variable
+                name="viewModel"
+                type="com.hhp227.yu_minigroup.viewmodel.ChatViewModel" />
+    </data>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -53,7 +61,9 @@
                                 android:divider="@null"
                                 android:overScrollMode="ifContentScrolls"
                                 android:scrollbarStyle="outsideOverlay"
-                                android:scrollbars="vertical" />
+                                android:scrollbars="vertical"
+                                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                                app:stackFromEnd="true"/>
 
                     </FrameLayout>
 
@@ -84,6 +94,7 @@
                             android:hint="메시지를 입력하세요."
                             android:inputType="textNoSuggestions"
                             android:paddingStart="5dp"
+                            android:text="@={viewModel.inputMessage}"
                             android:textAppearance="?android:attr/textAppearanceMedium" />
 
                     <androidx.cardview.widget.CardView
@@ -94,6 +105,8 @@
                             android:clickable="true"
                             android:focusable="true"
                             android:foreground="?android:attr/selectableItemBackground"
+                            android:onClick="@{() -> viewModel.actionSend()}"
+                            app:cardBackgroundColor="@{TextUtils.isEmpty(viewModel.inputMessage) ? @color/cardview_light_background : @color/colorAccent}"
                             app:cardCornerRadius="2dp"
                             app:cardElevation="3dp">
 
@@ -103,7 +116,7 @@
                                 android:layout_height="wrap_content"
                                 android:padding="10dp"
                                 android:text="전송"
-                                android:textColor="@android:color/darker_gray"
+                                android:textColor="@{TextUtils.isEmpty(viewModel.inputMessage) ? @android:color/darker_gray : @android:color/white}"
                                 android:textStyle="bold" />
 
                     </androidx.cardview.widget.CardView>
