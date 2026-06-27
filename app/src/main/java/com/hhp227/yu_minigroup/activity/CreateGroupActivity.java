@@ -96,8 +96,7 @@ public class CreateGroupActivity extends AppCompatActivity implements OnActivity
             case "갤러리":
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK);
 
-                galleryIntent.setType(MediaStore.Images.Media.CONTENT_TYPE);
-                galleryIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                galleryIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Images.Media.CONTENT_TYPE);
                 mCameraPickActivityResultLauncher.launch(galleryIntent);
                 break;
             case "이미지 없음":

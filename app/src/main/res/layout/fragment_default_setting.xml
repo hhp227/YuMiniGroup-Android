@@ -4,6 +4,18 @@
         xmlns:tools="http://schemas.android.com/tools"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         tools:context=".fragment.DefaultSettingFragment">
+    
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+                name="viewModel"
+                type="com.hhp227.yu_minigroup.viewmodel.DefaultSettingViewModel" />
+
+        <variable
+                name="handler"
+                type="com.hhp227.yu_minigroup.handler.OnFragmentDefaultSettingEventListener" />
+    </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -31,6 +43,7 @@
                     android:hint="그룹이름 입력"
                     android:inputType="textNoSuggestions"
                     android:paddingStart="5dp"
+                    android:text="@={viewModel.title}"
                     android:textAppearance="?android:attr/textAppearanceMedium">
                 <requestFocus/>
             </EditText>
@@ -41,9 +54,11 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
                     android:padding="5dp"
-                    android:src="@drawable/ic_clear_gray_24dp"
+                    android:onClick="@{() -> viewModel.setTitle(``)}"
+                    android:src="@{viewModel.title.empty ? @drawable/ic_clear_gray_24dp : @drawable/ic_clear_black_24dp}"
                     android:textColor="@android:color/darker_gray"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:src="@drawable/ic_clear_gray_24dp" />
 
         </LinearLayout>
 
@@ -54,7 +69,9 @@
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
                 android:src="@drawable/add_photo"
+                android:onClick="@{handler::onImageClick}"
                 android:scaleType="centerCrop"
+                app:imageUrl="@{viewModel.groupImage}"
                 app:layout_constraintTop_toBottomOf="@id/ll_title" />
 
         <EditText
@@ -69,6 +86,7 @@
                 android:background="@null"
                 android:hint="그룹 설명을 입력하세요."
                 android:divider="@null"
+                android:text="@={viewModel.description}"
                 app:layout_constraintTop_toBottomOf="@id/iv_group_image" />
 
         <RadioGroup
@@ -92,7 +110,8 @@
                     android:text="자동 승인"
                     android:id="@+id/rb_auto"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:checked="@={viewModel.joinType}" />
 
             <RadioButton
                     android:layout_weight="2"
@@ -102,6 +121,15 @@
                     android:layout_height="wrap_content" />
 
         </RadioGroup>
+
+        <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="@{viewModel.isLoading() ? View.VISIBLE : View.GONE}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

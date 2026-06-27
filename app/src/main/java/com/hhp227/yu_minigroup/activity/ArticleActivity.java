@@ -61,10 +61,7 @@ public class ArticleActivity extends MyYouTubeBaseActivity implements OnActivity
         mActivityArticleBinding.setViewModel(mViewModel);
         mActivityArticleBinding.setHandler(this);
         setAppBar(mActivityArticleBinding.toolbar);
-        mArticleDetailBinding.getRoot().setOnLongClickListener(v -> {
-            v.showContextMenu();
-            return true;
-        });
+        mArticleDetailBinding.setHandler(this);
         mActivityArticleBinding.lvArticle.addHeaderView(mArticleDetailBinding.getRoot());
         mActivityArticleBinding.lvArticle.setAdapter(mAdapter);
         registerForContextMenu(mActivityArticleBinding.lvArticle);
@@ -197,6 +194,12 @@ public class ArticleActivity extends MyYouTubeBaseActivity implements OnActivity
             mViewModel.refresh();
             mActivityArticleBinding.srlArticle.setRefreshing(false);
         }, 1000);
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        v.showContextMenu();
+        return true;
     }
 
     private void setAppBar(Toolbar toolbar) {

@@ -1,10 +1,13 @@
 package com.hhp227.yu_minigroup.data;
 
+import static android.app.Activity.RESULT_OK;
 import static com.hhp227.yu_minigroup.app.EndPoint.GROUP_IMAGE;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.android.volley.Request;
@@ -17,10 +20,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 import com.hhp227.yu_minigroup.dto.User;
+import com.hhp227.yu_minigroup.fragment.Tab4Fragment;
 import com.hhp227.yu_minigroup.helper.Callback;
 import com.hhp227.yu_minigroup.viewmodel.FindGroupViewModel;
 import com.hhp227.yu_minigroup.volley.util.MultipartRequest;
@@ -33,6 +38,7 @@ import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -276,6 +282,34 @@ public class GroupRepository {
         });
     }
 
+    public void getGroup(String cookie, String groupId, String groupImage, Callback callback) {
+        String params = "?CLUB_GRP_ID=" + groupId;
+
+        AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.GET, EndPoint.MODIFY_GROUP + params, response -> {
+            Source source = new Source(response);
+            GroupItem groupItem = new GroupItem();
+            String joinType = "0";
+
+            for (Element rbElement : source.getFirstElementByClass("radiobox").getAllElementsByClass("chktype"))
+                if (rbElement.toString().contains("checked"))
+                    joinType = rbElement.getAttributeValue("value");
+            groupItem.setId(groupId);
+            groupItem.setImage(groupImage);
+            groupItem.setName(source.getElementById("wrtGroup").getAttributeValue("value"));
+            groupItem.setDescription(source.getElementById("wrtExplain").getContent().toString());
+            groupItem.setJoinType(joinType);
+            callback.onSuccess(groupItem);
+        }, callback::onFailure) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+
+                headers.put("Cookie", cookie);
+                return headers;
+            }
+        });
+    }
+
     public void addGroup(String cookie, User user, Bitmap bitmap, String title, String description, String type, Callback callback) {
         callback.onLoading();
         AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.POST, EndPoint.CREATE_GROUP, null, response -> {
@@ -314,20 +348,70 @@ public class GroupRepository {
                 params.put("GRP_NM", title);
                 params.put("TXT", description);
                 params.put("JOIN_DIV", type);
-                if (params.size() > 0) {
-                    try {
-                        return params.entrySet().stream().map(String::valueOf).collect(Collectors.joining("&")).getBytes(getParamsEncoding());
-                    } catch (UnsupportedEncodingException uee) {
-                        throw new RuntimeException("Encoding not supported: " + getParamsEncoding(), uee);
-                    }
+                try {
+                    return params.entrySet().stream().map(String::valueOf).collect(Collectors.joining("&")).getBytes(getParamsEncoding());
+                } catch (UnsupportedEncodingException uee) {
+                    throw new RuntimeException("Encoding not supported: " + getParamsEncoding(), uee);
                 }
-                return super.getBody();
             }
         });
     }
 
-    public void setGroup() {
+    public void setGroup(String cookie, String groupKey, String groupId, String groupName, String description, String joinType, Callback callback) {
+        callback.onLoading();
+        String tagJsonReq = "req_send";
 
+        AppController.getInstance().addToRequestQueue(new JsonObjectRequest(Request.Method.POST, EndPoint.UPDATE_GROUP, null, response -> {
+            try {
+                if (!response.getBoolean("isError")) {
+                    GroupItem groupItem = new GroupItem();
+
+                    groupItem.setId(groupId);
+                    groupItem.setName(response.getString("GRP_NM"));
+                    groupItem.setDescription(description);
+                    groupItem.setJoinType(joinType);
+                    updateGroupDataToFirebase(groupKey, groupItem, callback);
+                }
+            } catch (JSONException e) {
+                callback.onFailure(e);
+            }
+        }, callback::onFailure) {
+            @Override
+            public String getBodyContentType() {
+                return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
+            }
+
+            @Override
+            public byte[] getBody() {
+                Map<String, String> params = new HashMap<>();
+
+                params.put("CLUB_GRP_ID", groupId);
+                params.put("GRP_NM", groupName);
+                params.put("TXT", description);
+                params.put("JOIN_DIV", joinType);
+                StringBuilder encodedParams = new StringBuilder();
+
+                try {
+                    for (Map.Entry<String, String> entry : params.entrySet()) {
+                        encodedParams.append(URLEncoder.encode(entry.getKey(), getParamsEncoding()));
+                        encodedParams.append('=');
+                        encodedParams.append(URLEncoder.encode(entry.getValue(), getParamsEncoding()));
+                        encodedParams.append('&');
+                    }
+                    return encodedParams.toString().getBytes(getParamsEncoding());
+                } catch (UnsupportedEncodingException uee) {
+                    throw new RuntimeException("Encoding not supported: " + getParamsEncoding(), uee);
+                }
+            }
+
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+
+                headers.put("Cookie", cookie);
+                return headers;
+            }
+        }, tagJsonReq);
     }
 
     public void removeGroup(String cookie, User user, boolean isAdmin, String groupId, String key, Callback callback) {
@@ -526,6 +610,33 @@ public class GroupRepository {
         childUpdates.put("UserGroupList/" + user.getUid() + "/" + key, true);
         databaseReference.updateChildren(childUpdates);
         callback.onSuccess(new AbstractMap.SimpleEntry<>(key, groupItem));
+    }
+
+    private void updateGroupDataToFirebase(String groupKey, GroupItem newGroupItem, Callback callback) {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Groups");
+        Query query = databaseReference.child(groupKey);
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    GroupItem groupItem = dataSnapshot.getValue(GroupItem.class);
+
+                    if (groupItem != null) {
+                        groupItem.setName(newGroupItem.getName());
+                        groupItem.setDescription(newGroupItem.getDescription());
+                        groupItem.setJoinType(newGroupItem.getJoinType());
+                        query.getRef().setValue(groupItem);
+                    }
+                    callback.onSuccess(newGroupItem);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("파이어베이스", "파이어베이스 데이터 불러오기 실패", databaseError.toException());
+            }
+        });
     }
 
     private void deleteGroupFromFirebase(User user, boolean isAdmin, String key, Callback callback) {

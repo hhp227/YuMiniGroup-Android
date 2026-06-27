@@ -25,13 +25,18 @@
         <variable
                 name="onImageClickListener"
                 type="java.util.function.Consumer&lt;Integer>" />
+
+        <variable
+                name="handler"
+                type="com.hhp227.yu_minigroup.handler.OnActivityArticleEventListener" />
     </data>
 
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#ffffff">
+            android:background="#ffffff"
+            android:onLongClick="@{handler::onLongClick}">
 
         <LinearLayout
                 android:layout_width="match_parent"

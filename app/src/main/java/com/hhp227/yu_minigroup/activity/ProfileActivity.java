@@ -74,8 +74,7 @@ public class ProfileActivity extends AppCompatActivity implements OnActivityProf
             case 0:
                 intent = new Intent(Intent.ACTION_PICK);
 
-                intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
-                intent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Images.Media.CONTENT_TYPE);
                 mCameraPickActivityResultLauncher.launch(intent);
                 return true;
             case 1:
