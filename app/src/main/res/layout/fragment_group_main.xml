@@ -10,6 +10,18 @@
         <variable
                 name="viewModel"
                 type="com.hhp227.yu_minigroup.viewmodel.GroupMainViewModel" />
+
+        <variable
+                name="handler"
+                type="com.hhp227.yu_minigroup.handler.OnFragmentGroupMainEventListener" />
+
+        <variable
+                name="spanCount"
+                type="Integer" />
+
+        <variable
+                name="onSpanSizeListener"
+                type="androidx.arch.core.util.Function&lt;Integer, Integer>" />
     </data>
 
     <RelativeLayout
@@ -38,7 +50,8 @@
                 android:layout_below="@id/app_bar_layout"
                 android:background="?android:attr/windowBackground"
                 app:itemIconSize="36dp"
-                app:menu="@menu/bottom_nav_menu" />
+                app:menu="@menu/bottom_nav_menu"
+                app:onNavigationItemSelected="@{handler::onNavigationItemSelected}" />
 
         <RelativeLayout
                 android:layout_width="match_parent"
@@ -48,12 +61,16 @@
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                     android:id="@+id/srl_group"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    app:onRefresh="@{handler::onRefresh}">
 
                 <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_group"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent"
+                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                        app:spanCount="@{spanCount}"
+                        app:spanSize="@{onSpanSizeListener}" />
 
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

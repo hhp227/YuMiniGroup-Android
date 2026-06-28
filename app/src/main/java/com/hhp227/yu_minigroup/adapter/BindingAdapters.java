@@ -6,7 +6,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import androidx.arch.core.util.Function;
 import androidx.databinding.BindingAdapter;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -14,6 +17,7 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
@@ -73,6 +77,29 @@ public class BindingAdapters {
     @BindingAdapter("onRefresh")
     public static void refresh(SwipeRefreshLayout swipeRefreshLayout, SwipeRefreshLayout.OnRefreshListener onRefreshListener) {
         swipeRefreshLayout.setOnRefreshListener(onRefreshListener);
+    }
+
+    @BindingAdapter("onNavigationItemSelected")
+    public static void setOnNavigationItemSelectedListener(NavigationBarView view, NavigationBarView.OnItemSelectedListener listener) {
+        view.setOnItemSelectedListener(listener);
+    }
+
+    @BindingAdapter(value = {"spanCount", "spanSize"}, requireAll = true)
+    public static void bindSpanCount(RecyclerView view, int spanCount, Function<Integer, Integer> spanSizeListener) {
+        GridLayoutManager layoutManager = (GridLayoutManager) view.getLayoutManager();
+
+        if (layoutManager != null) {
+            layoutManager.setSpanCount(spanCount);
+            layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    return (view.getAdapter() != null && position == view.getAdapter().getItemCount())
+                            ? spanCount
+                            : spanSizeListener.apply(position);
+                }
+            });
+        }
+        view.invalidateItemDecorations();
     }
 
     @BindingAdapter(value = {"imageList", "onImageClick", "youtube"}, requireAll = false)
