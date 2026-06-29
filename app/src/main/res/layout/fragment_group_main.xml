@@ -69,6 +69,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                        app:verticalArrangement="@{10}"
+                        app:horizontalArrangement="@{14}"
                         app:spanCount="@{spanCount}"
                         app:spanSize="@{onSpanSizeListener}" />
 

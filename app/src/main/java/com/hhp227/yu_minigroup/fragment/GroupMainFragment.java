@@ -38,8 +38,6 @@ import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_GROUP;
 public class GroupMainFragment extends Fragment implements OnFragmentGroupMainEventListener {
     private GroupGridAdapter mAdapter;
 
-    private RecyclerView.ItemDecoration mItemDecoration;
-
     private FragmentGroupMainBinding mBinding;
 
     private GroupMainViewModel mViewModel;
@@ -50,30 +48,6 @@ public class GroupMainFragment extends Fragment implements OnFragmentGroupMainEv
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mBinding = FragmentGroupMainBinding.inflate(inflater, container, false);
         mViewModel = new ViewModelProvider(this).get(GroupMainViewModel.class);
-        mItemDecoration = new RecyclerView.ItemDecoration() {
-            @Override
-            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                super.getItemOffsets(outRect, view, parent, state);
-                int position = parent.getChildAdapterPosition(view);
-
-                if (parent.getAdapter() != null && parent.getLayoutManager() instanceof GridLayoutManager && position != RecyclerView.NO_POSITION && (parent.getAdapter().getItemViewType(position) == TYPE_GROUP || parent.getAdapter().getItemViewType(position) == TYPE_AD)) {
-                    int spanCount = ((GridLayoutManager) parent.getLayoutManager()).getSpanCount();
-                    outRect.top = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
-                    outRect.bottom = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
-
-                    if (position % spanCount == 0) {
-                        outRect.left = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7, getResources().getDisplayMetrics());
-                        outRect.right = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, getResources().getDisplayMetrics());
-                    } else if (position % spanCount == 1) {
-                        outRect.left = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, getResources().getDisplayMetrics());
-                        outRect.right = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7, getResources().getDisplayMetrics());
-                    } else {
-                        outRect.left = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7, getResources().getDisplayMetrics());
-                        outRect.right = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7, getResources().getDisplayMetrics());
-                    }
-                }
-            }
-        };
         mAdapter = new GroupGridAdapter();
         mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == Activity.RESULT_OK) {
@@ -117,7 +91,6 @@ public class GroupMainFragment extends Fragment implements OnFragmentGroupMainEv
             }
         });
         mBinding.rvGroup.setAdapter(mAdapter);
-        mBinding.rvGroup.addItemDecoration(mItemDecoration);
         mBinding.srlGroup.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light, android.R.color.holo_orange_light, android.R.color.holo_red_light);
         mBinding.bnvGroupButton.getMenu().getItem(0).setCheckable(false);
         if (mViewModel.getUser() == null) {
@@ -129,7 +102,6 @@ public class GroupMainFragment extends Fragment implements OnFragmentGroupMainEv
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mBinding.rvGroup.removeItemDecoration(mItemDecoration);
         mBinding = null;
         mActivityResultLauncher = null;
     }

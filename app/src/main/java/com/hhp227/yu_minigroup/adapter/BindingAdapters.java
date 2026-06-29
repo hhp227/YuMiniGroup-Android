@@ -2,10 +2,13 @@ package com.hhp227.yu_minigroup.adapter;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
 import androidx.databinding.BindingAdapter;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -30,6 +33,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_AD;
+import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_GROUP;
 import static com.hhp227.yu_minigroup.viewmodel.YoutubeSearchViewModel.API_KEY;
 
 public class BindingAdapters {
@@ -100,6 +105,54 @@ public class BindingAdapters {
             });
         }
         view.invalidateItemDecorations();
+    }
+
+
+    @BindingAdapter(value = {"verticalArrangement", "horizontalArrangement"}, requireAll = false)
+    public static void setItemOffsets(RecyclerView view, float verticalArrangement, float horizontalArrangement) {
+        RecyclerView.ItemDecoration oldDecoration = (RecyclerView.ItemDecoration) view.getTag(-1);
+
+        if (oldDecoration != null) {
+            view.removeItemDecoration(oldDecoration);
+        }
+
+        RecyclerView.ItemDecoration decoration = new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View itemView, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                super.getItemOffsets(outRect, itemView, parent, state);
+                int position = parent.getChildAdapterPosition(itemView);
+
+                if (parent.getAdapter() != null && parent.getLayoutManager() instanceof GridLayoutManager && position != RecyclerView.NO_POSITION) {
+                    int itemViewType = parent.getAdapter().getItemViewType(position);
+
+                    if (itemViewType == TYPE_GROUP || itemViewType == TYPE_AD) {
+                        int spanCount = ((GridLayoutManager) parent.getLayoutManager()).getSpanCount();
+                        int vertical = dpToPx(parent, verticalArrangement);
+                        int horizontal = dpToPx(parent, horizontalArrangement);
+                        outRect.top = vertical;
+                        outRect.bottom = vertical / 2;
+
+                        if (position % spanCount == 0) {
+                            outRect.left = horizontal / 2;
+                            outRect.right = horizontal;
+                        } else if (position % spanCount == 1) {
+                            outRect.left = horizontal;
+                            outRect.right = horizontal / 2;
+                        } else {
+                            outRect.left = horizontal / 2;
+                            outRect.right = horizontal / 2;
+                        }
+                    }
+                }
+            }
+        };
+
+        view.addItemDecoration(decoration);
+        view.setTag(-1, decoration);
+    }
+
+    private static int dpToPx(View view, float dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, view.getResources().getDisplayMetrics());
     }
 
     @BindingAdapter(value = {"imageList", "onImageClick", "youtube"}, requireAll = false)
