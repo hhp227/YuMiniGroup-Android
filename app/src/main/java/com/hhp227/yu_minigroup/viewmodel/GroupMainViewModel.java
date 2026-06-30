@@ -1,6 +1,5 @@
 package com.hhp227.yu_minigroup.viewmodel;
 
-import android.os.CountDownTimer;
 import android.webkit.CookieManager;
 
 import androidx.lifecycle.LiveData;
@@ -28,23 +27,9 @@ public class GroupMainViewModel extends ViewModel {
 
     private final MutableLiveData<String> mMessage = new MutableLiveData<>();
 
-    private final MutableLiveData<Long> mTick = new MutableLiveData<>();
-
     private final CookieManager mCookieManager = AppController.getInstance().getCookieManager();
 
     private final PreferenceManager mPreferenceManager = AppController.getInstance().getPreferenceManager();
-
-    private final CountDownTimer mCountDownTimer = new CountDownTimer(80000, 8000) {
-        @Override
-        public void onTick(long millisUntilFinished) {
-            mTick.postValue(millisUntilFinished);
-        }
-
-        @Override
-        public void onFinish() {
-            start();
-        }
-    };
 
     private final GroupRepository mGroupRepository = new GroupRepository();
 
@@ -70,18 +55,6 @@ public class GroupMainViewModel extends ViewModel {
 
     public User getUser() {
         return mPreferenceManager.getUser();
-    }
-
-    public void startCountDownTimer() {
-        mCountDownTimer.start();
-    }
-
-    public void cancelCountDownTimer() {
-        mCountDownTimer.cancel();
-    }
-
-    public LiveData<Long> getTick() {
-        return mTick;
     }
 
     public void refresh() {
@@ -115,7 +88,7 @@ public class GroupMainViewModel extends ViewModel {
     }
 
     private void fetchPopularGroupList() {
-        mGroupRepository.getPopularGroupList(AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS), new Callback() {
+        mGroupRepository.getPopularGroupList(mCookieManager.getCookie(EndPoint.LOGIN_LMS), new Callback() {
             @Override
             public <T> void onSuccess(T data) {
                 mLoading.postValue(false);

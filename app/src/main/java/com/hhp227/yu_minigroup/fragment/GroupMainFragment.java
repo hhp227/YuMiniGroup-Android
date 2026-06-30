@@ -3,11 +3,9 @@ package com.hhp227.yu_minigroup.fragment;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.TypedValue;
 import android.view.*;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -16,8 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.hhp227.yu_minigroup.R;
@@ -36,6 +32,8 @@ import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_AD;
 import static com.hhp227.yu_minigroup.adapter.GroupGridAdapter.TYPE_GROUP;
 
 public class GroupMainFragment extends Fragment implements OnFragmentGroupMainEventListener {
+    private static final long SLIDER_DELAY_MILLIS = 8000L;
+
     private GroupGridAdapter mAdapter;
 
     private FragmentGroupMainBinding mBinding;
@@ -44,11 +42,25 @@ public class GroupMainFragment extends Fragment implements OnFragmentGroupMainEv
 
     private ActivityResultLauncher<Intent> mActivityResultLauncher;
 
+    private Handler mSliderHandler;
+
+    private Runnable mSliderRunnable;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mBinding = FragmentGroupMainBinding.inflate(inflater, container, false);
         mViewModel = new ViewModelProvider(this).get(GroupMainViewModel.class);
         mAdapter = new GroupGridAdapter();
+        mSliderHandler = new Handler(Looper.getMainLooper());
+        mSliderRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (mBinding != null && mAdapter != null) {
+                    mAdapter.moveSliderPager();
+                    mSliderHandler.postDelayed(this, SLIDER_DELAY_MILLIS);
+                }
+            }
+        };
         mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == Activity.RESULT_OK) {
                 mViewModel.refresh();
@@ -102,20 +114,24 @@ public class GroupMainFragment extends Fragment implements OnFragmentGroupMainEv
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        stopSlider();
         mBinding = null;
+        mAdapter = null;
+        mSliderHandler = null;
+        mSliderRunnable = null;
         mActivityResultLauncher = null;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mViewModel.startCountDownTimer();
+        startSlider();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mViewModel.cancelCountDownTimer();
+        stopSlider();
     }
 
     @Override
@@ -157,6 +173,18 @@ public class GroupMainFragment extends Fragment implements OnFragmentGroupMainEv
                 Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG).show();
             }
         });
-        mViewModel.getTick().observe(getViewLifecycleOwner(), aLong -> mAdapter.moveSliderPager());
+    }
+
+    private void startSlider() {
+        stopSlider();
+        if (mSliderHandler != null && mSliderRunnable != null) {
+            mSliderHandler.postDelayed(mSliderRunnable, SLIDER_DELAY_MILLIS);
+        }
+    }
+
+    private void stopSlider() {
+        if (mSliderHandler != null && mSliderRunnable != null) {
+            mSliderHandler.removeCallbacks(mSliderRunnable);
+        }
     }
 }
