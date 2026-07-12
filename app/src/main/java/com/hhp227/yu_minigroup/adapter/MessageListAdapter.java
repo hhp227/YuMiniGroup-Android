@@ -1,18 +1,11 @@
 package com.hhp227.yu_minigroup.adapter;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.load.model.LazyHeaders;
-import com.bumptech.glide.request.RequestOptions;
-import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.MessageItemLeftBinding;
@@ -84,6 +77,20 @@ public class MessageListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         return new SimpleDateFormat("a h:mm", Locale.getDefault()).format(time);
     }
 
+    /*이전 메시지와 같은 시간, 같은 사람의 메시지로 묶이지 않으면 true(이름, 프로필 이미지 표시)*/
+    private boolean isSeparated(int position, MessageItem messageItem) {
+        return !(position > 0
+                && getTimeStamp(mMessageItems.get(position - 1).getTimestamp()).equals(getTimeStamp(messageItem.getTimestamp()))
+                && mMessageItems.get(position - 1).getFrom().equals(messageItem.getFrom()));
+    }
+
+    /*다음 메시지와 같은 시간, 같은 사람의 메시지면 마지막 메시지에만 시간을 표시*/
+    private boolean isTimestampVisible(int position, MessageItem messageItem) {
+        return position + 1 == mMessageItems.size()
+                || !getTimeStamp(messageItem.getTimestamp()).equals(getTimeStamp(mMessageItems.get(position + 1).getTimestamp()))
+                || !messageItem.getFrom().equals(mMessageItems.get(position + 1).getFrom());
+    }
+
     public class MessageListLeftHolder extends RecyclerView.ViewHolder {
         private final MessageItemLeftBinding mBinding;
 
@@ -93,32 +100,12 @@ public class MessageListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         public void bind(MessageItem messageItem) {
-            mBinding.tvName.setText(messageItem.getName());
-            mBinding.tvMessage.setText(messageItem.getMessage());
-            mBinding.tvTimestamp.setText(getTimeStamp(messageItem.getTimestamp()));
-            if (getAdapterPosition() > 0 && getTimeStamp(mMessageItems.get(getAdapterPosition() - 1).getTimestamp()).equals(getTimeStamp(messageItem.getTimestamp())) && mMessageItems.get(getAdapterPosition() - 1).getFrom().equals(messageItem.getFrom())) {
-                mBinding.tvName.setVisibility(View.GONE);
-                mBinding.llMessage.setPadding(mBinding.llMessage.getPaddingLeft(), 0, mBinding.llMessage.getPaddingRight(), mBinding.llMessage.getPaddingBottom());
-                mBinding.ivProfileImage.setVisibility(View.INVISIBLE);
-            } else {
-                //name.setVisibility(!mMessageItems.get(getAdapterPosition()).getFrom().equals(mUid) ? MSG_TYPE_LEFT : View.GONE); 기존코드인데 이상하게 적용되어있다. 확인해볼것
-                mBinding.tvName.setVisibility(getItemViewType() == MSG_TYPE_RIGHT ? View.GONE : View.VISIBLE);
-                mBinding.ivProfileImage.setVisibility(View.VISIBLE);
-                mBinding.llMessage.setPadding(mBinding.llMessage.getPaddingLeft(), 10, mBinding.llMessage.getPaddingRight(), 10); // 수정완료 경북대 소모임에도 반영할것
-                Glide.with(itemView.getContext())
-                        .load(messageItem.getFrom() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", messageItem.getFrom()), new LazyHeaders.Builder()
-                                .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
-                                .build()) : null)
-                        .apply(RequestOptions
-                                .errorOf(R.drawable.user_image_view_circle)
-                                .circleCrop()
-                                .skipMemoryCache(true)
-                                .diskCacheStrategy(DiskCacheStrategy.NONE))
-                        .into(mBinding.ivProfileImage);
-            }
-
-            // 경북대 소모임에도 반영할것
-            mBinding.tvTimestamp.setVisibility(getAdapterPosition() + 1 != mMessageItems.size() && getTimeStamp(messageItem.getTimestamp()).equals(getTimeStamp(mMessageItems.get(getAdapterPosition() + 1).getTimestamp())) && messageItem.getFrom().equals(mMessageItems.get(getAdapterPosition() + 1).getFrom()) ? View.INVISIBLE : View.VISIBLE);
+            mBinding.setMessageItem(messageItem);
+            mBinding.setTimeStamp(getTimeStamp(messageItem.getTimestamp()));
+            mBinding.setSeparated(isSeparated(getAdapterPosition(), messageItem));
+            mBinding.setTimestampVisible(isTimestampVisible(getAdapterPosition(), messageItem));
+            mBinding.setCookie(AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS));
+            mBinding.executePendingBindings();
         }
     }
 
@@ -131,32 +118,12 @@ public class MessageListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         public void bind(MessageItem messageItem) {
-            mBinding.tvName.setText(messageItem.getName());
-            mBinding.tvMessage.setText(messageItem.getMessage());
-            mBinding.tvTimestamp.setText(getTimeStamp(messageItem.getTimestamp()));
-            if (getAdapterPosition() > 0 && getTimeStamp(mMessageItems.get(getAdapterPosition() - 1).getTimestamp()).equals(getTimeStamp(messageItem.getTimestamp())) && mMessageItems.get(getAdapterPosition() - 1).getFrom().equals(messageItem.getFrom())) {
-                mBinding.tvName.setVisibility(View.GONE);
-                mBinding.llMessage.setPadding(mBinding.llMessage.getPaddingLeft(), 0, mBinding.llMessage.getPaddingRight(), mBinding.llMessage.getPaddingBottom());
-                mBinding.ivProfileImage.setVisibility(View.INVISIBLE);
-            } else {
-                //name.setVisibility(!mMessageItems.get(getAdapterPosition()).getFrom().equals(mUid) ? MSG_TYPE_LEFT : View.GONE); 기존코드인데 이상하게 적용되어있다. 확인해볼것
-                mBinding.tvName.setVisibility(getItemViewType() == MSG_TYPE_RIGHT ? View.GONE : View.VISIBLE);
-                mBinding.ivProfileImage.setVisibility(View.VISIBLE);
-                mBinding.llMessage.setPadding(mBinding.llMessage.getPaddingLeft(), 10, mBinding.llMessage.getPaddingRight(), 10); // 수정완료 경북대 소모임에도 반영할것
-                Glide.with(itemView.getContext())
-                        .load(messageItem.getFrom() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", messageItem.getFrom()), new LazyHeaders.Builder()
-                                .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
-                                .build()) : null)
-                        .apply(RequestOptions
-                                .errorOf(R.drawable.user_image_view_circle)
-                                .circleCrop()
-                                .skipMemoryCache(true)
-                                .diskCacheStrategy(DiskCacheStrategy.NONE))
-                        .into(mBinding.ivProfileImage);
-            }
-
-            // 경북대 소모임에도 반영할것
-            mBinding.tvTimestamp.setVisibility(getAdapterPosition() + 1 != mMessageItems.size() && getTimeStamp(messageItem.getTimestamp()).equals(getTimeStamp(mMessageItems.get(getAdapterPosition() + 1).getTimestamp())) && messageItem.getFrom().equals(mMessageItems.get(getAdapterPosition() + 1).getFrom()) ? View.INVISIBLE : View.VISIBLE);
+            mBinding.setMessageItem(messageItem);
+            mBinding.setTimeStamp(getTimeStamp(messageItem.getTimestamp()));
+            mBinding.setSeparated(isSeparated(getAdapterPosition(), messageItem));
+            mBinding.setTimestampVisible(isTimestampVisible(getAdapterPosition(), messageItem));
+            mBinding.setCookie(AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS));
+            mBinding.executePendingBindings();
         }
     }
 }

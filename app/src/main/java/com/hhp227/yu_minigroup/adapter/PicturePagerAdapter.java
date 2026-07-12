@@ -18,9 +18,9 @@ public class PicturePagerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         ImageFullscreenBinding binding = ImageFullscreenBinding.inflate(LayoutInflater.from(container.getContext()), container, false);
-        String image = mImageList.get(position);
 
-        Glide.with(container.getContext()).load(image).into(binding.zivImage);
+        binding.setImage(mImageList.get(position));
+        binding.executePendingBindings();
         container.addView(binding.getRoot());
         return binding.getRoot();
     }

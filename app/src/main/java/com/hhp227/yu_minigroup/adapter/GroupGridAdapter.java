@@ -186,7 +186,8 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
         }
 
         public void bind(Map<String, String> map) {
-            mBinding.tvTitle.setText(map.get("text"));
+            mBinding.setText(map.get("text"));
+            mBinding.executePendingBindings();
         }
     }
 
@@ -222,12 +223,8 @@ public class GroupGridAdapter extends RecyclerView.Adapter {
         }
 
         public void bind(GroupItem groupItem) {
-            Glide.with(itemView.getContext())
-                    .load(groupItem.getImage())
-                    .transition(new DrawableTransitionOptions().crossFade(150))
-                    .into(mBinding.ivGroupImage);
-            mBinding.tvTitle.setText(groupItem.getName());
-            mBinding.rlGroup.setVisibility(View.VISIBLE);
+            mBinding.setGroupItem(groupItem);
+            mBinding.executePendingBindings();
         }
     }
 

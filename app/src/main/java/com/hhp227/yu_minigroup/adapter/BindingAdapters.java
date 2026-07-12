@@ -8,6 +8,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
 import androidx.databinding.BindingAdapter;
@@ -27,7 +28,10 @@ import com.google.android.youtube.player.YouTubePlayerView;
 import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.activity.ArticleActivity;
 import com.hhp227.yu_minigroup.calendar.ExtendedCalendarView;
+import com.hhp227.yu_minigroup.dto.TimetableItem;
 import com.hhp227.yu_minigroup.dto.YouTubeItem;
+import com.hhp227.yu_minigroup.helper.ui.SemesterTimetableView;
+import com.hhp227.yu_minigroup.helper.ui.TimetableView;
 
 import java.util.Calendar;
 import java.util.List;
@@ -47,6 +51,29 @@ public class BindingAdapters {
                     .transition(DrawableTransitionOptions.withCrossFade(150))
                     .into(view);
         }
+    }
+
+    @BindingAdapter(value = {"memberImageUrl", "cookie"}, requireAll = false)
+    public static void loadMemberImage(ImageView view, String url, String cookie) {
+        if (url != null && !url.isEmpty()) {
+            Glide.with(view.getContext())
+                    .load(new GlideUrl(url, new LazyHeaders.Builder()
+                            .addHeader("Cookie", cookie)
+                            .build()))
+                    .apply(new RequestOptions().centerCrop()
+                            .error(R.drawable.user_image_view)
+                            .skipMemoryCache(true)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE))
+                    .into(view);
+        }
+    }
+
+    /*Bitmap, 이미지 URL, YouTubeItem(썸네일)을 별도의 옵션없이 로드한다*/
+    @BindingAdapter("image")
+    public static void bindImage(ImageView view, Object image) {
+        Glide.with(view.getContext())
+                .load(image instanceof YouTubeItem ? ((YouTubeItem) image).thumbnail : image)
+                .into(view);
     }
 
     @BindingAdapter(value = {"userImageUrl", "cookie"}, requireAll = false)
@@ -72,6 +99,18 @@ public class BindingAdapters {
                     .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle).circleCrop())
                     .into(view);
         }
+    }
+
+    @BindingAdapter("messageHeaderVisible")
+    public static void setMessageHeaderVisible(ImageView view, boolean visible) {
+        view.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @BindingAdapter("messageSeparated")
+    public static void setMessageSeparated(View view, boolean separated) {
+        int verticalPadding = separated ? 10 : 0;
+
+        view.setPadding(view.getPaddingLeft(), verticalPadding, view.getPaddingRight(), verticalPadding);
     }
 
     @BindingAdapter("onFocusChange")
@@ -222,5 +261,37 @@ public class BindingAdapters {
     public static void setOnCalendarClickListener(ExtendedCalendarView view, View.OnClickListener onPrevClickListener, View.OnClickListener onNextClickListener) {
         view.prev.setOnClickListener(onPrevClickListener);
         view.next.setOnClickListener(onNextClickListener);
+    }
+
+    @BindingAdapter(value = {"dayLine", "timeLine"})
+    public static void setTimetable(TimetableView view, String[] dayLine, String[] timeLine) {
+        if (dayLine != null && timeLine != null) {
+            view.setTimetable(dayLine, timeLine);
+        }
+    }
+
+    @BindingAdapter("timetableItems")
+    public static void bindTimetableItems(TimetableView view, List<TimetableItem> timetableItems) {
+        if (timetableItems != null) {
+            view.submitList(timetableItems);
+        }
+    }
+
+    @BindingAdapter("semesterTimetable")
+    public static void bindSemesterTimetable(SemesterTimetableView view, List<List<String>> table) {
+        if (table != null) {
+            view.submitTable(table);
+        }
+    }
+
+    /*본문 텍스트가 최대 줄수를 넘어가면 더보기 뷰를 보여준다*/
+    @BindingAdapter("showWhenTruncated")
+    public static void bindShowWhenTruncated(TextView view, TextView contentView) {
+        contentView.post(new Runnable() {
+            @Override
+            public void run() {
+                view.setVisibility(contentView.getVisibility() == View.VISIBLE && contentView.getLineCount() > contentView.getMaxLines() ? View.VISIBLE : View.GONE);
+            }
+        });
     }
 }

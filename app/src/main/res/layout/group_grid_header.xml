@@ -3,6 +3,12 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+        <variable
+                name="text"
+                type="String" />
+    </data>
+
     <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="35dp"
@@ -21,6 +27,7 @@
                 android:textSize="16dp"
                 android:textColor="@color/colorPrimary"
                 android:textStyle="bold"
+                android:text="@{text}"
                 tools:text="Title test text" />
 
     </RelativeLayout>

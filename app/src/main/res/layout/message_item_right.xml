@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="android.view.View" />
+
+        <import type="com.hhp227.yu_minigroup.app.EndPoint" />
+
+        <variable
+                name="messageItem"
+                type="com.hhp227.yu_minigroup.dto.MessageItem" />
+
+        <variable
+                name="timeStamp"
+                type="String" />
+
+        <variable
+                name="separated"
+                type="boolean" />
+
+        <variable
+                name="timestampVisible"
+                type="boolean" />
+
+        <variable
+                name="cookie"
+                type="String" />
+    </data>
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -10,7 +37,8 @@
             android:orientation="vertical"
             android:paddingTop="5dp"
             android:paddingRight="5dp"
-            android:paddingBottom="5dp">
+            android:paddingBottom="5dp"
+            app:messageSeparated="@{separated}">
 
         <LinearLayout
                 android:layout_width="wrap_content"
@@ -31,6 +59,7 @@
                         android:textColor="#777777"
                         android:textSize="12dp"
                         android:textStyle="bold"
+                        android:text="@{messageItem.name}"
                         android:visibility="gone" />
 
                 <LinearLayout
@@ -44,8 +73,9 @@
                             android:layout_gravity="bottom"
                             android:layout_marginStart="50dp"
                             android:paddingBottom="2dp"
-                            android:text="시간"
-                            android:textSize="10dp" />
+                            android:text="@{timeStamp}"
+                            android:textSize="10dp"
+                            android:visibility="@{timestampVisible ? View.VISIBLE : View.INVISIBLE}" />
 
                     <TextView
                             android:id="@+id/tv_message"
@@ -55,7 +85,7 @@
                             android:background="@drawable/bg_my_msg"
                             android:padding="9dp"
                             android:textColor="#0a2332"
-                            android:text="메시지"
+                            android:text="@{messageItem.message}"
                             android:textSize="16dp" />
 
                 </LinearLayout>
@@ -68,7 +98,9 @@
                     android:layout_height="41dp"
                     android:src="@null"
                     android:scaleType="fitCenter"
-                    android:visibility="gone" />
+                    app:messageHeaderVisible="@{separated}"
+                    app:userImageUrl="@{separated ? EndPoint.USER_IMAGE.replace(`{UID}`, messageItem.from != null ? messageItem.from : `{Null}`) : null}"
+                    app:cookie="@{cookie}" />
 
         </LinearLayout>
 

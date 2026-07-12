@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+                name="groupItem"
+                type="com.hhp227.yu_minigroup.dto.GroupItem" />
+    </data>
 
     <LinearLayout
             android:orientation="vertical"
@@ -29,7 +36,8 @@
                         android:layout_centerHorizontal="true"
                         android:layout_centerVertical="true"
                         android:src="@drawable/ic_launcher_background"
-                        android:scaleType="fitXY" />
+                        android:scaleType="fitXY"
+                        app:imageUrl="@{groupItem.image}" />
 
             </RelativeLayout>
 
@@ -46,15 +54,17 @@
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
                         android:layout_marginTop="10dp"
-                        android:text="제목" />
+                        android:maxLines="2"
+                        android:text="@{groupItem.name}" />
 
                 <TextView
                         android:id="@+id/tv_info"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_alignLeft="@+id/tv_group_name"
                         android:layout_alignStart="@+id/tv_group_name"
                         android:layout_below="@+id/tv_group_name"
-                        android:text="가입방식"
+                        android:text="@{groupItem.joinType.equals(`0`) ? `가입방식: 자동 승인` : `가입방식: 운영자 승인 확인`}"
                         android:textSize="13dp" />
 
             </RelativeLayout>

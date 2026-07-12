@@ -4,11 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.load.model.LazyHeaders;
-import com.bumptech.glide.request.RequestOptions;
-import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.MemberListItemBinding;
@@ -67,17 +62,9 @@ public class MemberListAdapter extends BaseAdapter {
         }
 
         public void bind(MemberItem memberItem) {
-            Glide.with(mBinding.getRoot().getContext())
-                    .load(new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", memberItem.uid), new LazyHeaders.Builder()
-                            .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
-                            .build()))
-                    .apply(RequestOptions.circleCropTransform()
-                            .error(R.drawable.user_image_view_circle))
-                    .into(mBinding.ivProfileImage);
-            mBinding.column1.setText(memberItem.name);
-            mBinding.column2.setText(memberItem.dept);
-            mBinding.column3.setText(memberItem.div);
-            mBinding.column4.setText(memberItem.regDate);
+            mBinding.setMemberItem(memberItem);
+            mBinding.setCookie(AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS));
+            mBinding.executePendingBindings();
         }
     }
 }

@@ -1,23 +1,17 @@
 package com.hhp227.yu_minigroup.adapter;
 
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide;
 import com.hhp227.yu_minigroup.databinding.WriteContentBinding;
 import com.hhp227.yu_minigroup.databinding.WriteTextBinding;
-import com.hhp227.yu_minigroup.dto.GroupItem;
-import com.hhp227.yu_minigroup.dto.YouTubeItem;
 
 import java.util.List;
 import java.util.Map;
 
-// TODO ViewHolder만 개선하면 됨
 public class WriteListAdapter extends RecyclerView.Adapter {
     private static final int TYPE_TEXT = 0;
 
@@ -105,29 +99,8 @@ public class WriteListAdapter extends RecyclerView.Adapter {
         }
 
         public void bind(Object object) {
-            if (object instanceof Bitmap) {
-                Bitmap bitmap = (Bitmap) mWriteItemList.get(getAdapterPosition());
-
-                mBinding.ivImagePreview.setVisibility(bitmap != null ? View.VISIBLE : View.GONE);
-                Glide.with(itemView.getContext())
-                        .load(bitmap)
-                        .into(mBinding.ivImagePreview);
-                mBinding.ivVideoPreview.setVisibility(View.GONE);
-            } else if (object instanceof String) {
-                String imageUrl = (String) mWriteItemList.get(getAdapterPosition());
-
-                mBinding.ivImagePreview.setVisibility(imageUrl != null ? View.VISIBLE : View.GONE);
-                Glide.with(itemView.getContext()).load(imageUrl).into(mBinding.ivImagePreview);
-                mBinding.ivVideoPreview.setVisibility(View.GONE);
-            } else if (object instanceof YouTubeItem) { // 수정
-                YouTubeItem youTubeItem = (YouTubeItem) mWriteItemList.get(getAdapterPosition());
-
-                //리팩토링 요망
-                mBinding.ivVideoPreview.setVisibility(View.VISIBLE);
-                Glide.with(itemView.getContext())
-                        .load(youTubeItem.thumbnail)
-                        .into(mBinding.ivImagePreview);
-            }
+            mBinding.setContent(object);
+            mBinding.executePendingBindings();
         }
     }
 }

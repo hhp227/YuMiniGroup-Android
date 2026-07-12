@@ -9,9 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
-import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.databinding.GroupListItemBinding;
 import com.hhp227.yu_minigroup.databinding.LoadMoreBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
@@ -26,8 +23,6 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private static final int TYPE_GROUP = 0;
 
     private static final int TYPE_LOADER = 1;
-
-    private static final int NAME_MAX_LINE = 2;
 
     private final Activity mActivity;
 
@@ -100,13 +95,8 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         public void bind(GroupItem groupItem) {
-            mBinding.tvGroupName.setText(groupItem.getName());
-            mBinding.tvGroupName.setMaxLines(NAME_MAX_LINE);
-            mBinding.tvInfo.setText(groupItem.getJoinType().equals("0") ? "가입방식: 자동 승인" : "가입방식: 운영자 승인 확인");
-            Glide.with(itemView.getContext())
-                    .load(groupItem.getImage())
-                    .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
-                    .into(mBinding.ivGroupImage);
+            mBinding.setGroupItem(groupItem);
+            mBinding.executePendingBindings();
             itemView.setOnClickListener(v -> {
                 Bundle args = new Bundle();
                 args.putString("grp_id", groupItem.getId());

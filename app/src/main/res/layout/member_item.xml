@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="com.hhp227.yu_minigroup.app.EndPoint" />
+
+        <variable
+                name="memberItem"
+                type="com.hhp227.yu_minigroup.dto.MemberItem" />
+
+        <variable
+                name="cookie"
+                type="String" />
+    </data>
 
     <RelativeLayout
             android:layout_width="match_parent"
@@ -21,7 +34,9 @@
                     android:layout_centerHorizontal="true"
                     android:layout_centerVertical="true"
                     android:src="@drawable/user_image_view"
-                    android:scaleType="fitCenter" />
+                    android:scaleType="fitCenter"
+                    app:memberImageUrl="@{EndPoint.USER_IMAGE.replace(`{UID}`, memberItem.uid)}"
+                    app:cookie="@{cookie}" />
 
         </RelativeLayout>
 
@@ -31,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/rl_profile"
                 android:layout_centerHorizontal="true"
-                android:text="이름"
+                android:text="@{memberItem.name}"
                 android:textSize="8dp" />
 
         <LinearLayout

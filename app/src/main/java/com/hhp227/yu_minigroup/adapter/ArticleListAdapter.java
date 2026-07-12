@@ -1,26 +1,16 @@
 package com.hhp227.yu_minigroup.adapter;
 
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.load.model.LazyHeaders;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.request.RequestOptions;
-import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.app.AppController;
 import com.hhp227.yu_minigroup.app.EndPoint;
 import com.hhp227.yu_minigroup.databinding.ArticleItemBinding;
 import com.hhp227.yu_minigroup.databinding.LoadMoreBinding;
 import com.hhp227.yu_minigroup.dto.ArticleItem;
-import com.hhp227.yu_minigroup.helper.DateUtil;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,8 +21,6 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private static final int TYPE_ARTICLE = 0;
 
     private static final int TYPE_LOADER = 1;
-
-    private static final int CONTENT_MAX_LINE = 4;
 
     private final List<Map.Entry<String, ArticleItem>> mArticleItemList = new ArrayList<>(Collections.singletonList(null));
 
@@ -113,44 +101,9 @@ public class ArticleListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         private void bind(ArticleItem articleItem) {
-            Glide.with(itemView.getContext())
-                    .load(articleItem.getUid() != null ? new GlideUrl(EndPoint.USER_IMAGE.replace("{UID}", articleItem.getUid()), new LazyHeaders.Builder()
-                            .addHeader("Cookie", AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS))
-                            .build()) : null)
-                    .apply(RequestOptions.errorOf(R.drawable.user_image_view_circle)
-                            .circleCrop()
-                            .skipMemoryCache(true)
-                            .diskCacheStrategy(DiskCacheStrategy.NONE))
-                    .into(mBinding.ivProfileImage);
-            mBinding.tvTitle.setText(articleItem.getName() != null ? articleItem.getTitle() + " - " + articleItem.getName() : articleItem.getTitle());
-            mBinding.tvTimestamp.setText(DateUtil.getDateString(articleItem.getTimestamp()));
-            if (!TextUtils.isEmpty(articleItem.getContent())) {
-                mBinding.tvContent.setText(articleItem.getContent());
-                mBinding.tvContent.setMaxLines(CONTENT_MAX_LINE);
-                mBinding.tvContent.setVisibility(View.VISIBLE);
-            } else
-                mBinding.tvContent.setVisibility(View.GONE);
-            mBinding.tvContentMore.setVisibility(!TextUtils.isEmpty(articleItem.getContent()) && mBinding.tvContent.getLineCount() > CONTENT_MAX_LINE ? View.VISIBLE : View.GONE);
-            if (articleItem.getYoutube() != null) {
-                mBinding.rlArticleImage.setVisibility(View.VISIBLE);
-                mBinding.ivVideoPreview.setVisibility(View.VISIBLE);
-                Glide.with(itemView.getContext())
-                        .load(articleItem.getYoutube().thumbnail)
-                        .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
-                        .transition(DrawableTransitionOptions.withCrossFade(150))
-                        .into(mBinding.ivArticleImage);
-            } else if (articleItem.getImages() != null && articleItem.getImages().size() > 0) {
-                mBinding.rlArticleImage.setVisibility(View.VISIBLE);
-                mBinding.ivVideoPreview.setVisibility(View.INVISIBLE);
-                Glide.with(itemView.getContext())
-                        .load(articleItem.getImages().get(0))
-                        .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
-                        .transition(DrawableTransitionOptions.withCrossFade(150))
-                        .into(mBinding.ivArticleImage);
-            } else
-                mBinding.rlArticleImage.setVisibility(View.GONE);
-            mBinding.tvReplycount.setText(articleItem.getReplyCount());
-            mBinding.llReply.setTag(getAdapterPosition());
+            mBinding.setArticleItem(articleItem);
+            mBinding.setCookie(AppController.getInstance().getCookieManager().getCookie(EndPoint.LOGIN_LMS));
+            mBinding.executePendingBindings();
         }
     }
 

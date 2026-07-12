@@ -45,21 +45,18 @@ public class SeatListAdapter extends RecyclerView.Adapter<SeatListAdapter.SeatLi
         SeatListHolder(SeatItemBinding binding) {
             super(binding.getRoot());
             this.mBinding = binding;
-
-            mBinding.cardView.setOnClickListener(v -> {
-                Intent intent = new Intent(itemView.getContext(), WebViewActivity.class);
-
-                intent.putExtra("url", EndPoint.URL_YU_LIBRARY_SEAT_DETAIL.replace("{ID}", mSearItemList.get(getAdapterPosition()).id));
-                intent.putExtra("title", itemView.getContext().getString(R.string.library_seat));
-                itemView.getContext().startActivity(intent);
-            });
         }
 
         private void bind(SeatItem seatItem) {
-            mBinding.name.setText(seatItem.name);
-            mBinding.seat.setText("[" + Integer.parseInt(seatItem.occupied) + "/" + seatItem.count + "]");
-            mBinding.pbSeat.setProgress(Integer.parseInt(seatItem.percentageInteger));
-            mBinding.status.setText(seatItem.status);
+            mBinding.setItem(seatItem);
+            mBinding.setClickListener(v -> {
+                Intent intent = new Intent(itemView.getContext(), WebViewActivity.class);
+
+                intent.putExtra("url", EndPoint.URL_YU_LIBRARY_SEAT_DETAIL.replace("{ID}", seatItem.id));
+                intent.putExtra("title", itemView.getContext().getString(R.string.library_seat));
+                itemView.getContext().startActivity(intent);
+            });
+            mBinding.executePendingBindings();
         }
     }
 }

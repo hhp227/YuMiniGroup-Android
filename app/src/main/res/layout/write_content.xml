@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="android.view.View" />
+
+        <import type="com.hhp227.yu_minigroup.dto.YouTubeItem" />
+
+        <variable
+                name="content"
+                type="Object" />
+    </data>
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -21,14 +32,15 @@
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY"
-                    android:visibility="visible" />
+                    android:visibility="@{content != null ? View.VISIBLE : View.GONE}"
+                    app:image="@{content}" />
 
             <ImageView
                     android:id="@+id/iv_video_preview"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:layout_centerInParent="true"
-                    android:visibility="visible"
+                    android:visibility="@{content instanceof YouTubeItem ? View.VISIBLE : View.GONE}"
                     android:layout_marginTop="10dp"
                     android:src="@drawable/video_mark" />
 

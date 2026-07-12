@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+                name="youTubeItem"
+                type="com.hhp227.yu_minigroup.dto.YouTubeItem" />
+    </data>
 
     <LinearLayout
             android:padding="10dp"
@@ -17,7 +24,8 @@
                     android:id="@+id/iv_youtube"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scaleType="centerCrop" />
+                    android:scaleType="centerCrop"
+                    app:imageUrl="@{youTubeItem.thumbnail}" />
 
             <TextView
                     android:textSize="12sp"
@@ -43,7 +51,8 @@
                     android:id="@+id/tv_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:maxLines="4" />
+                    android:maxLines="4"
+                    android:text="@{youTubeItem.title}" />
 
             <TextView
                     android:textSize="12sp"
@@ -51,7 +60,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:maxLines="1" />
+                    android:maxLines="1"
+                    android:text="@{youTubeItem.channelTitle}" />
 
             <TextView
                     android:textSize="12sp"

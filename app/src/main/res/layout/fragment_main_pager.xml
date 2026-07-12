@@ -2,6 +2,18 @@
 <layout
         xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+                name="type"
+                type="String" />
+
+        <variable
+                name="onClickListener"
+                type="android.view.View.OnClickListener" />
+    </data>
+
     <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -11,7 +23,7 @@
                 android:id="@+id/rl_type_main"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone">
+                android:visibility="@{`메인`.equals(type) ? View.VISIBLE : View.GONE}">
 
             <ImageView
                     android:layout_width="186dp"
@@ -50,14 +62,16 @@
                     android:layout_below="@id/tv_notice"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="그룹 찾기" />
+                    android:text="그룹 찾기"
+                    android:onClick="@{onClickListener}" />
 
             <Button
                     android:id="@+id/b_create"
                     android:layout_below="@id/b_find"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="그룹 생성" />
+                    android:text="그룹 생성"
+                    android:onClick="@{onClickListener}" />
 
         </RelativeLayout>
 
@@ -65,17 +79,18 @@
                 android:id="@+id/rl_type_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="visible">
+                android:visibility="@{`메인`.equals(type) ? View.GONE : View.VISIBLE}">
 
             <ImageView
                     android:id="@+id/iv_banner"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/yu_minigroup"
+                    android:src="@{`이미지1`.equals(type) ? @drawable/banner01 : @drawable/banner02}"
                     android:scaleType="centerCrop" />
 
             <TextView
                     android:id="@+id/tv_type1"
+                    android:visibility="@{`이미지1`.equals(type) ? View.VISIBLE : View.GONE}"
                     android:text="같은 취향을 가진 사람들과 \n취미생활을 공유하세요."
                     android:textSize="16dp"
                     android:textStyle="bold"
@@ -89,10 +104,11 @@
 
             <TextView
                     android:id="@+id/tv_type2"
+                    android:visibility="@{`이미지2`.equals(type) ? View.VISIBLE : View.GONE}"
                     android:text="동아리, 조별과제 모임을 만들어보세요"
                     android:textSize="16dp"
                     android:textStyle="bold"
-                    android:textColor="#f1d51a"
+                    android:textColor="@color/bg_ad_attribution"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"

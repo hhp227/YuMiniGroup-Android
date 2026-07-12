@@ -5,9 +5,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
-import com.hhp227.yu_minigroup.R;
 import com.hhp227.yu_minigroup.databinding.GroupPagerItemBinding;
 import com.hhp227.yu_minigroup.dto.GroupItem;
 
@@ -24,13 +21,9 @@ public class GroupPagerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         GroupPagerItemBinding binding = GroupPagerItemBinding.inflate(LayoutInflater.from(container.getContext()), container, false);
-        GroupItem groupItem = mGroupItemList.get(position);
 
-        Glide.with(container.getContext())
-                .load(groupItem.getImage())
-                .apply(RequestOptions.errorOf(R.drawable.ic_launcher_background))
-                .into(binding.ivGroupImage);
-        binding.tvGroupName.setText(groupItem.getName());
+        binding.setGroupItem(mGroupItemList.get(position));
+        binding.executePendingBindings();
         container.addView(binding.getRoot());
         return binding.getRoot();
     }
