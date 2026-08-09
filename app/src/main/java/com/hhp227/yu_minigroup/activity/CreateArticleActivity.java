@@ -1,6 +1,7 @@
 package com.hhp227.yu_minigroup.activity;
 
 import android.app.ProgressDialog;
+import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -65,10 +66,16 @@ public class CreateArticleActivity extends AppCompatActivity implements OnActivi
         mCameraPickActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    Uri fileUri = result.getData().getData();
-                    Bitmap bitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
+                    ClipData clipData = result.getData().getClipData();
 
-                    mViewModel.addItem(bitmap);
+                    if (clipData != null) {
+                        for (int i = 0; i < clipData.getItemCount(); i++) {
+                            addPickedImage(clipData.getItemAt(i).getUri());
+                        }
+                    } else {
+                        // 갤러리에서 한 장만 고르면 ClipData 없이 data URI로만 돌아온다
+                        addPickedImage(result.getData().getData());
+                    }
                 });
             }
         });
@@ -156,12 +163,12 @@ public class CreateArticleActivity extends AppCompatActivity implements OnActivi
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         switch (v.getId()) {
-            case R.id.ll_image:
+            case R.id.ib_image:
                 menu.setHeaderTitle("이미지 선택");
                 menu.add(1, Menu.NONE, Menu.NONE, "갤러리");
                 menu.add(2, Menu.NONE, Menu.NONE, "카메라");
                 break;
-            case R.id.ll_video:
+            case R.id.ib_video:
                 menu.setHeaderTitle("동영상 선택");
                 menu.add(3, Menu.NONE, Menu.NONE, "유튜브");
                 break;
@@ -177,9 +184,11 @@ public class CreateArticleActivity extends AppCompatActivity implements OnActivi
                 mViewModel.removeItem(item.getItemId());
                 return true;
             case 1:
-                intent = new Intent(Intent.ACTION_PICK);
+                intent = new Intent(Intent.ACTION_OPEN_DOCUMENT)
+                        .addCategory(Intent.CATEGORY_OPENABLE)
+                        .setType("image/*")
+                        .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
 
-                intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Images.Media.CONTENT_TYPE);
                 mCameraPickActivityResultLauncher.launch(intent);
                 return true;
             case 2:
@@ -253,6 +262,16 @@ public class CreateArticleActivity extends AppCompatActivity implements OnActivi
                 Snackbar.make(getCurrentFocus(), message, Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
+    }
+
+    private void addPickedImage(Uri fileUri) {
+        if (fileUri != null) {
+            Bitmap bitmap = new BitmapUtil(this).bitmapResize(fileUri, 200);
+
+            if (bitmap != null) {
+                mViewModel.addItem(bitmap);
+            }
+        }
     }
 
     private File createImageFile() throws IOException {
