@@ -28,3 +28,5 @@
 -keepclassmembers class com.hhp227.yu_minigroup.dto.** {
 *;
 }
+-dontwarn org.apache.logging.log4j.**
+-dontwarn org.slf4j.**

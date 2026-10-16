@@ -29,6 +29,7 @@ import com.hhp227.yu_minigroup.dto.ReplyItem;
 import com.hhp227.yu_minigroup.fragment.Tab1Fragment;
 import com.hhp227.yu_minigroup.handler.OnActivityArticleEventListener;
 import com.hhp227.yu_minigroup.helper.MyYouTubeBaseActivity;
+import com.hhp227.yu_minigroup.helper.ReportHelper;
 import com.hhp227.yu_minigroup.viewmodel.ArticleViewModel;
 
 import net.htmlparser.jericho.Element;
@@ -81,6 +82,8 @@ public class ArticleActivity extends MyYouTubeBaseActivity implements OnActivity
         if (mViewModel.mIsAuthorized) {
             menu.add(Menu.NONE, 1, Menu.NONE, "수정하기");
             menu.add(Menu.NONE, 2, Menu.NONE, "삭제하기");
+        } else {
+            menu.add(Menu.NONE, 3, Menu.NONE, "신고하기");
         }
         return true;
     }
@@ -113,6 +116,13 @@ public class ArticleActivity extends MyYouTubeBaseActivity implements OnActivity
             case 2:
                 showDeleteConfirmDialog("게시글을 삭제하시겠습니까?", () -> mViewModel.deleteArticle());
                 return true;
+            case 3:
+                ArticleItem reportedArticle = mViewModel.getArticle().getValue();
+
+                ReportHelper.report(this, "게시글", "그룹: " + mViewModel.mGroupName + " (" + mViewModel.mGroupKey + ")\n"
+                        + "게시글: " + mViewModel.mArticleKey + "\n"
+                        + (reportedArticle != null ? "제목: " + reportedArticle.getTitle() + "\n작성자: " + reportedArticle.getName() + " (" + reportedArticle.getUid() + ")\n" : ""));
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -144,6 +154,8 @@ public class ArticleActivity extends MyYouTubeBaseActivity implements OnActivity
         if (position != 0 && auth) {
             menu.add(Menu.NONE, 2, Menu.NONE, "댓글 수정");
             menu.add(Menu.NONE, 3, Menu.NONE, "댓글 삭제");
+        } else if (position != 0) {
+            menu.add(Menu.NONE, 4, Menu.NONE, "댓글 신고");
         }
     }
 
@@ -177,6 +189,13 @@ public class ArticleActivity extends MyYouTubeBaseActivity implements OnActivity
                     return true;
                 case 3:
                     showDeleteConfirmDialog("댓글을 삭제하시겠습니까?", () -> mViewModel.deleteReply(replyId, replyKey));
+                    return true;
+                case 4:
+                    ReportHelper.report(this, "댓글", "그룹: " + mViewModel.mGroupName + " (" + mViewModel.mGroupKey + ")\n"
+                            + "게시글: " + mViewModel.mArticleKey + "\n"
+                            + "댓글: " + replyKey + "\n"
+                            + "작성자: " + replyItem.getName() + " (" + replyItem.getUid() + ")\n"
+                            + "내용: " + replyItem.getReply() + "\n");
                     return true;
             }
         }

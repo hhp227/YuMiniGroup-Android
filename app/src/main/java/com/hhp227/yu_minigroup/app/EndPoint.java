@@ -32,9 +32,6 @@ public interface EndPoint {
     String PROFILE_IMAGE_PREVIEW = BASE_URL + "/ilos/mp/myinfo_file_update.acl";
     String PROFILE_IMAGE_UPDATE = BASE_URL + "/ilos/mp/myinfo_insert.acl";
 
-    // 로그기록
-    String CREATE_LOG = "http://knu.dothome.co.kr/knu/v1/register";
-
     // 학교 URL
     String URL_YU = "https://www.yu.ac.kr";
     String URL_YU_MOBILE = "http://m.yu.ac.kr";

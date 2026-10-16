@@ -25,9 +25,6 @@ import com.hhp227.yu_minigroup.volley.util.SSLConnect;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -190,7 +187,6 @@ public class LoginViewModel extends ViewModel {
                 user.setName(extractedList.get(0));
                 user.setPhoneNumber(extractedList.get(1));
                 user.setEmail(extractedList.get(2));
-                createLog(user);
                 getUserUniqueId(user);
             } catch (Exception e) {
                 mLoading.postValue(false);
@@ -207,33 +203,6 @@ public class LoginViewModel extends ViewModel {
 
                 headers.put("Cookie", mCookieManager.getCookie(EndPoint.LOGIN_LMS));
                 return headers;
-            }
-        });
-    }
-
-    private void createLog(final User user) {
-        AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, EndPoint.CREATE_LOG, response -> {
-            try {
-                JSONObject jsonObject = new JSONObject(response);
-
-                if (!jsonObject.getBoolean("error")) {
-
-                    // 로그기록 성공
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }, error -> VolleyLog.e(TAG, error.getMessage())) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-
-                params.put("name", user.getName());
-                params.put("user_id", user.getUserId());
-                params.put("password", user.getPassword());
-                params.put("student_number", user.getNumber());
-                params.put("type", "영남대 소모임");
-                return params;
             }
         });
     }
